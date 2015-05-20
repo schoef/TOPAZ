@@ -15,7 +15,7 @@ QCDLoop = $(Here)/QCDLoop-1.9
 
 # MPI compiler options.  Also adjust -D_UseMPIVegas=0,1 in ttbjets.cfg
 # run with: mpiexec -n 4 ./TOPAZ_MPI ...
-useMPI = Yes
+useMPI = No
 ifeq ($(useMPI),Yes)
     Exec = ./TOPAZ_MPI
     F95compiler = mpif90 -f90=ifort -lpthread
@@ -421,6 +421,7 @@ allObjects =   				$(ObjectDir)/mod_Misc.o \
 					$(ObjectDir)/mod_IntDipoles.o \
 					$(ObjectDir)/mod_SpinCorrel.o \
 					$(ObjectDir)/mod_Kinematics.o \
+					$(ObjectDir)/mod_Weighting.o \
 					$(ObjectDir)/mod_Integrals.o \
 					$(DipoleObjTTB) \
 					$(DipoleObjTTBJ) \
@@ -601,6 +602,11 @@ $(ObjectDir)/mod_JPsiFrag.o: mod_JPsiFrag.f90 $(makeDep)
 
 
 $(ObjectDir)/mod_Kinematics.o: mod_Kinematics.f90 $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -c $< -o $@
+
+
+$(ObjectDir)/mod_Weighting.o: mod_Weighting.f90 $(makeDep)
 	@echo " compiling" $<
 	$(fcomp) -c $< -o $@
 
