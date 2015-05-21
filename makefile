@@ -1,4 +1,3 @@
-# ! TODO: at the end add dependencies for all .o targets according to use statements in modules
 Here = $(PWD)
 ConfigFile = $(Here)/ttbarjets.cfg
 ModuleDir = $(Here)/modules
@@ -7,7 +6,6 @@ DipoleDir = $(Here)/dipoles
 OD = $(ObjectDir)
 PDFDir = $(Here)/PDFS
 VegasDir = $(Here)/Vegas
-CubaDir = $(Here)/Cuba
 OptReport = $(Here)/OptRep.txt
 PSDir = $(Here)/PhaseSpace
 QCDLoop = $(Here)/QCDLoop-1.9
@@ -24,8 +22,7 @@ ifeq ($(useMPI),Yes)
 else
     Exec = ./TOPAZ
     F95compiler = ifort
-    ccomp = gcc -O0
-# never use gcc with other than O0, optimization seems to be buggy
+    ccomp = gcc -O1
 endif
 
 
@@ -41,27 +38,26 @@ fcomp = $(F95compiler) $(IfortOpts) @$(ConfigFile)
 
 
 
-makeDep = 
-#$(ConfigFile) \
+makeDep = $(ConfigFile) \
 #          makefile
 
 
 # fastjet stuff
 #FASTJET_CONFIG=/home/schulze/usr/local/bin/fastjet-config
-
-FASTJET_CONFIG=/home/raoul/Work/fastjet-install/bin/fastjet-config
-CXXFLAGS += $(shell $(FASTJET_CONFIG) --cxxflags)
-FJLIBS += $(shell $(FASTJET_CONFIG) --libs --plugins )
+# CXXFLAGS += $(shell $(FASTJET_CONFIG) --cxxflags)
+# FJLIBS += $(shell $(FASTJET_CONFIG) --libs --plugins )
 
 
-PDFObj = $(PDFDir)/mstwpdf.o \
-         $(PDFDir)/cteq2mrst.o \
-	 $(PDFDir)/mrst2001lo.o \
-         $(PDFDir)/Cteq66Pdf.o \
-         $(PDFDir)/CT10Pdf.o
-RockyObj = $(PSDir)/genps.o \
-           $(PSDir)/boost.o
-YetiObj  = $(PSDir)/yeti.o
+PDFObj = $(ObjectDir)/mstwpdf.o \
+         $(ObjectDir)/cteq2mrst.o \
+         $(ObjectDir)/mrst2001lo.o \
+         $(ObjectDir)/Cteq66Pdf.o \
+         $(ObjectDir)/CT10Pdf.o
+         
+RockyObj = $(ObjectDir)/genps.o \
+           $(ObjectDir)/boost.o
+           
+YetiObj  = $(ObjectDir)/yeti.o
 
 ifeq ($(useMPI),Yes)
    VegasObj = $(VegasDir)/pvegas_mpi.o
@@ -69,8 +65,6 @@ else
    VegasObj = $(VegasDir)/vegas.o 
 endif
 
-
-CubaLib = $(CubaDir)/libcuba.a
 
 
 IntegralObj = $(QCDLoop)/ql/libqcdloop.a\
@@ -449,7 +443,6 @@ allObjects =   				$(ObjectDir)/mod_Misc.o \
 # they are not being removed by "make clean"
 # their compilation takes long so it should be done only once
 #
-# external libraries for PDFs, PS Generators and Integrals are not compiled with this makefile
 #--------------------------------------------------------------------------------------------------
 
 
@@ -757,9 +750,6 @@ $(ObjectDir)/CT10Pdf.o: $(PDFDir)/CT10Pdf.f $(makeDep)
 	@echo " compiling" $<
 	$(fcomp) -c $< -o $@
 
-
-	
-	
 
 
 
