@@ -454,7 +454,7 @@ allObjects =   				$(ObjectDir)/mod_Misc.o \
 
 
 
-all: $(allObjects)
+all: $(VegasObj) $(RockyObj) $(YetiObj) $(PDFObj) $(allObjects)
 	@echo " linking"
 	@echo " executable file is " $(Exec)
 	@echo " "
@@ -721,68 +721,48 @@ $(ObjectDir)/mod_IntDipoles%.o: $(DipoleDir)/mod_IntDipoles%.f90 $(makeDep)
 
 
 
+$(VegasObj): $(VegasDir)/vegas.f $(VegasDir)/vegas_common.f $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -D_WriteTmpHisto=1 -c $(VegasDir)/vegas.f -o $(VegasObj)
+	
+$(ObjectDir)/genps.o: $(PSDir)/genps.c $(makeDep)
+	@echo " compiling" $<
+	$(ccomp) -c $< -o $@
+
+$(ObjectDir)/boost.o: $(PSDir)/boost.c $(makeDep)
+	@echo " compiling" $<
+	$(ccomp) -c $< -o $@
+
+$(YetiObj): $(PSDir)/yeti.f $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -c $< -o $(YetiObj)
+	
+$(ObjectDir)/mstwpdf.o: $(PDFDir)/mstwpdf.f $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -c $< -o $@
+	
+$(ObjectDir)/mrst2001lo.o: $(PDFDir)/mrst2001lo.f $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -c $< -o $@
+
+$(ObjectDir)/cteq2mrst.o: $(PDFDir)/cteq2mrst.f $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -c $< -o $@
+
+$(ObjectDir)/Cteq66Pdf.o: $(PDFDir)/Cteq66Pdf.f $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -c $< -o $@
+
+$(ObjectDir)/CT10Pdf.o: $(PDFDir)/CT10Pdf.f $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -c $< -o $@
+
+
+	
+	
 
 
 
-
-
-# $(RockyObj): $(RockyDep) $(makeDep)
-# 	@echo " compiling" $< $@
-# 	cd $(RockyDir)
-# 	$(ccomp) -c $(RockyDep)
-# 	cd $(Here)
-#
-#
-# $(YetiObj): $(YetiDep) $(makeDep)
-# 	@echo " compiling" $< $@
-# 	cd $(YetiDir)
-# 	$(fcomp) -c $(YetiDep)
-# 	cd $(Here)
-#
-#
-# $(VegasObj): $(VegasDep) $(makeDep)
-# 	@echo " compiling" $< $@
-# 	cd $(VegasDir)
-# 	$(fcomp) -c $(VegasDep)
-# 	cd $(Here)
-#
-#
-#
-# # pdfs
-# $(PDFObj): $(PDFDep)
-# 	@echo " compiling pdfs"
-# 	cd $(PDFDir)
-# 	$(fcomp) -c $(PDFDep)
-# 	cd $(Here)
-
-
-
-# $(ObjectDir)/genps.o: $(RockyDir)/genps.c $(makeDep)
-# 	@echo " compiling" $< $@
-# 	$(ccomp) -c $< -o $@
-#
-#
-# $(ObjectDir)/boost.o: $(RockyDir)/boost.c $(makeDep)
-# 	@echo " compiling" $< $@
-# 	$(ccomp) -c $< -o $@
-#
-#
-# $(ObjectDir)/yeti.o: $(YetiDir)/yeti.f $(makeDep)
-# 	@echo " compiling" $<
-# 	$(fcomp) -c $< -o $@
-#
-#
-# $(ObjectDir)/vegas.o: $(VegasDep)
-# 	@echo " compiling" $<
-# 	$(fcomp) -c $< -o $@
-#
-#
-# # pdfs
-# $(PDFObj): $(PDFDep)
-# 	@echo " compiling pdfs"
-# 	$(fcomp) -c $(PDFDep)
-#
-#
 
 # supresses command calls
 .SILENT:
