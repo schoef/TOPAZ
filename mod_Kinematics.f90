@@ -9206,12 +9206,12 @@ integer :: NumHadr,NPlus1PS,MomOrder(1:14)
 real(8) :: Mom(1:4,1:14),zeros(1:14)
 real(8) :: MomJet(1:4,1:7) !,MomJet_CHECK(1:4,1:7)
 real(8) :: MomHadr(1:4,0:8)
-real(8) :: MomBoost(1:4),MomObs(1:4)
+real(8) :: MomBoost(1:4),MomObs(1:4),MomMiss(1:4)
 logical :: applyPSCut
 integer :: NBin(:),PartList(1:7),JetList(1:7),NJet,NObsJet,k,NObsJet_Tree,i,j
 real(8),optional :: PObs(:)
 real(8) :: pT_lep(4),ET_miss,PT_miss,pT_ATop,pT_Top,pT_Higgs,HT,ET_bjet,eta_Higgs
-real(8) :: eta_ATop,eta_Top,eta_lep(1:4),m_ttbar
+real(8) :: eta_ATop,eta_Top,eta_lep(1:4),m_ttbar,delta_eta_T,delta_eta_B,cos_thetaLL
 real(8) :: pT_jet(1:7),eta_jet(1:7)
 integer :: tbar,t,Hig,inLeft,inRight,realp,bbar,lepM,nubar,b,lepP,nu,qdn,qbup,qbdn,qup,L,N,Zl,Za,ferm_Z,Aferm_Z,jlabel
 real(8) :: pT_ll,HT_jet,WithinCone(1:3),RLept,Minv_Z
@@ -9484,7 +9484,7 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
     delta_eta_T = abs( eta_top - eta_Atop )
     delta_eta_B = abs( eta_jet(1) - eta_jet(2) )
     
-    cos_thetaLL = get_CosTheta(  )
+    cos_thetaLL = get_CosTheta( Mom(1:4,Hig) )
 
 
 
@@ -9525,6 +9525,30 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
     endif
 
 
+     
+#if _UseJHUGenMELA==1
+   
+    if( FirstTime ) then
+!       call NNPDFDriver("./pdfs/NNPDF30_lo_as_0130.LHgrid",33)
+!       call NNinitPDF(0)
+      call InitProcess_TTBH(m_H,m_top)
+      FirstTime = .false.
+    endif
+    MomMELA(1:4,1) = -(/         65d0,           0.0000000000000000d0, 0.0000000000000000d0,      65d0           /)
+    MomMELA(1:4,2) = -(/         65d0,           0.0000000000000000d0, 0.0000000000000000d0,     -65d0           /)  
+    MomMELA(1:4,3:11) = Mom(1:4,3:11)
+    MomMELA(1:4,12:13) = 0d0
+    
+    call EvalXSec_PP_TTBH(MomMELA(1:4,1:13),(/(1d0,0d0),(0d0,0d0)/),TopDecays,2,MatElSq_H0)
+!     print *, 'ppttbh SM',MatElSq_H0
+
+    call EvalXSec_PP_TTBH(MomMELA(1:4,1:13),(/(0d0,0d0),(1d0,0d0)/),TopDecays,2,MatElSq_H1)
+!     print *, 'ppttbh PS',MatElSq_H1
+    
+    D_0minus = MatElSq_H0/(MatElSq_H0 + 2d0*MatElSq_H1 )
+
+#endif    
+    
 
 ! binning
     NBin(1) = WhichBin(1,pT_Top)
