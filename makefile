@@ -3,34 +3,65 @@ ConfigFile = $(Here)/ttbarjets.cfg
 ModuleDir = $(Here)/modules
 ObjectDir = $(Here)/objects
 DipoleDir = $(Here)/dipoles
-OD = $(ObjectDir)
 PDFDir = $(Here)/PDFS
 VegasDir = $(Here)/Vegas
+JHUGenMELADir = $(Here)/JHUGenMELA
 OptReport = $(Here)/OptRep.txt
 PSDir = $(Here)/PhaseSpace
 QCDLoop = $(Here)/QCDLoop-1.9
+Flags = 
 
+# ifort optimization, Yes/No
+Opt = Yes
 
-# MPI compiler options.  Also adjust -D_UseMPIVegas=0,1 in ttbjets.cfg
-# run with: mpiexec -n 4 ./TOPAZ_MPI ...
+# MPI features, Yes/No. run with: mpiexec -n 4 ./TOPAZ_MPI ...
 useMPI = No
+
+# link pdfs via LHA library ('Yes' or 'No')
+UseLHAPDF=No
+LHAPDFDir=/home/schulze/lib/LHAPDF-6.1.5/lib/
+# LHAPDFDir=directory which contains libLHAPDF.a, libLHAPDF.la, libLHAPDF.so
+# remember to export 
+#          LD_LIBRARY_PATH=/.../LHAPDF-x.y.z/lib/:${LD_LIBRARY_PATH}
+#          LHAPDF_DATA_PATH=/.../LHAPDF-x.y.z/share/LHAPDF/:${LHAPDF_DATA_PATH}
+
+
+# interface to JHUGenMELA
+useJHUGenMELA = No
+
+
 ifeq ($(useMPI),Yes)
     Exec = ./TOPAZ_MPI
-    F95compiler = mpif90 -f90=ifort -lpthread
-# there also used to be a -lm for F95compiler
+    F95compiler = mpif90 -f90=ifort -lpthread -D_UseMPIVegas=1
     ccomp = mpicc -lpthread  -lm 
 else
     Exec = ./TOPAZ
-    F95compiler = ifort
-    ccomp = gcc -O1
+    F95compiler = ifort -D_UseMPIVegas=0
+    ccomp = gcc -O2
 endif
 
 
-Opt = Yes
-ifeq ($(Opt),Yes)
-   IfortOpts   = -O2 -fpp -vec-report0 -opt-report -opt-report-file$(OptReport) -I$(Here)/colors -I$(VegasDir) -module $(ModuleDir)
+
+
+
+ifeq ($(UseLHAPDF),Yes)
+    LHAPDFflags = -L$(LHAPDFDir) -lLHAPDF -D_UseLHAPDF=1
 else
-   IfortOpts   = -O0 -fpp -implicitnone -zero -check bounds -check pointer -warn interfaces -ftrapuv -I$(Here)/colors -I$(VegasDir) -module $(ModuleDir)
+    LHAPDFflags = -D_UseLHAPDF=0
+endif 
+ 
+ 
+ifeq ($(useJHUGenMELA),Yes)
+    Flags += -D_UseJHUGenMELA=1
+else
+    Flags += -D_UseJHUGenMELA=0
+endif
+ 
+
+ifeq ($(Opt),Yes)
+   IfortOpts   = -O2 -fpp -vec-report0 -opt-report -opt-report-file$(OptReport) -I$(Here)/colors -I$(VegasDir) -module $(ModuleDir) $(LHAPDFflags) $(Flags)
+else
+   IfortOpts   = -O0 -fpp -implicitnone -zero -check bounds -check pointer -warn interfaces -ftrapuv -I$(Here)/colors -I$(VegasDir) -module $(ModuleDir) $(LHAPDFflags) $(Flags)
 endif
 fcomp = $(F95compiler) $(IfortOpts) @$(ConfigFile)
 
@@ -38,8 +69,8 @@ fcomp = $(F95compiler) $(IfortOpts) @$(ConfigFile)
 
 
 
-makeDep = $(ConfigFile) \
-#          makefile
+
+makeDep = $(ConfigFile) makefile
 
 
 # fastjet stuff
@@ -52,7 +83,8 @@ PDFObj = $(ObjectDir)/mstwpdf.o \
          $(ObjectDir)/cteq2mrst.o \
          $(ObjectDir)/mrst2001lo.o \
          $(ObjectDir)/Cteq66Pdf.o \
-         $(ObjectDir)/CT10Pdf.o
+         $(ObjectDir)/CT10Pdf.o \
+         $(ObjectDir)/NNPDFDriver.o
          
 RockyObj = $(ObjectDir)/genps.o \
            $(ObjectDir)/boost.o
@@ -66,6 +98,14 @@ else
 endif
 
 
+# JHUGenMELA modules 
+ifeq ($(useJHUGenMELA),Yes)
+   JHUGenMELADep = $(JHUGenMELADir)/mod_TTBH_MatEl.F90
+   JHUGenMELAObj = $(ObjectDir)/mod_TTBH_MatEl.o           
+else
+   JHUGenMELADep = 
+   JHUGenMELAObj = 
+endif
 
 IntegralObj = $(QCDLoop)/ql/libqcdloop.a\
               $(QCDLoop)/ff/libff.a
@@ -447,12 +487,17 @@ allObjects =   				$(ObjectDir)/mod_Misc.o \
 
 
 
-all: $(VegasObj) $(RockyObj) $(YetiObj) $(PDFObj) $(allObjects)
+all:  $(JHUGenMELAObj) $(VegasObj) $(RockyObj) $(YetiObj) $(PDFObj) $(allObjects)
 	@echo " linking"
+ifeq ($(UseLHAPDF),Yes)
+	echo " interfaced with LHAPDF"
+else
+	echo " using internal PDF sets" 
+endif	
 	@echo " executable file is " $(Exec)
 	@echo " "
 # 	$(fcomp) -o $(Exec) $(allObjects) $(RockyObj) $(YetiObj) $(IntegralObj) $(VegasObj) $(PDFObj) $(MadGraphObj)
-	$(fcomp) -o $(Exec) $(allObjects) $(RockyObj) $(YetiObj) $(IntegralObj) $(VegasObj) $(PDFObj)
+	$(fcomp) -o $(Exec) $(allObjects) $(RockyObj) $(YetiObj) $(IntegralObj) $(VegasObj) $(PDFObj) $(JHUGenMELAObj)
 # $(ObjectDir)/fastjetfortran.o $(FJLIBS) -lstdc++    add this to above line when fastjet routines are used
 
 
@@ -524,7 +569,6 @@ $(ObjectDir)/mod_Amplitudes_eeTTB.o: mod_Amplitudes_eeTTB.f90 $(makeDep)
 $(ObjectDir)/main.o: main.f90 $(makeDep)
 	@echo " compiling" $<
 	$(fcomp) -c $< -o $@
-
 
 
 $(ObjectDir)/mod_CrossSection_TTB.o: mod_CrossSection_TTB.f90 $(makeDep)
@@ -750,6 +794,13 @@ $(ObjectDir)/CT10Pdf.o: $(PDFDir)/CT10Pdf.f $(makeDep)
 	@echo " compiling" $<
 	$(fcomp) -c $< -o $@
 
+$(ObjectDir)/NNPDFDriver.o: $(PDFDir)/NNPDFDriver.f $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -c $< -o $@
+
+$(JHUGenMELAObj): $(JHUGenMELADep) $(JHUGenMELADir)/variables.F90 $(JHUGenMELADir)/includeVars.F90
+	@echo " compiling JHUGenMELA"
+	$(fcomp) -c $(JHUGenMELADep) -o $@
 
 
 

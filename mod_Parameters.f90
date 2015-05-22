@@ -187,6 +187,7 @@ integer, public, parameter :: RecombPrescr = 0   ! 0 = 4-vector addition,   1 = 
 
 ! PDF Set
 character, public :: PDFSetString*(100)
+integer, public :: LHAPDFMember
 
 ! particle 0 = not defined
 integer, public, target :: Up_  = 1
@@ -394,7 +395,7 @@ real(8) :: r2, TopWidthExpansion,WWidthExpansion,WWidthChoice,StopWidthExpansion
 real(8) :: ZWidth,BrZtoEE
 real(8) :: cL,cR,omegasq,f,z
 real(8) :: beta,omega,P0,P3,W0,Ppl,Pmi,Wpl,Wmi,Yp,Yw
-real(8) :: term4,term7,term9
+real(8) :: term4,term7,term9,alphasPDF
 
 !--- Zprime section
 real(8) :: myCos2thw, cot2thH, g_Zpr, f1, f2, Ga_Zpr_pref
@@ -444,6 +445,12 @@ ELSEIF( COLLIDER.EQ.7 ) THEN
 ENDIF
 
 
+#if _UseLHAPDF==1
+
+  alpha_s = alphasPDF(M_Z*100d0)
+
+#else
+
 IF( PDFSet.EQ.2 .AND. (NLOPARAM.EQ.1 .OR. NLOPARAM.EQ.0) ) THEN
   Lambda_QCD = 0.165d0*GeV
   alpha_s = 0.13d0  ! CTEQ6L1
@@ -466,6 +473,8 @@ ELSEIF( PDFSet.EQ.1 .AND. (NLOPARAM.EQ.2) ) THEN
 ELSE
   print *, "alpha_s not set"
 ENDIF
+
+#endif
 
 alpha_s4Pi = alpha_s*4d0*DblPi
 alpha_sOver2Pi = alpha_s/2d0/DblPi

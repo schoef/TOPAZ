@@ -9187,6 +9187,9 @@ END SUBROUTINE
 SUBROUTINE Kinematics_TTBARH(NPlus1PS,Mom,MomOrder,applyPSCut,NBin,PObs)
 use ModMisc
 use ModParameters
+#if _UseJHUGenMELA==1
+use ModTTBH
+#endif
 implicit none
 integer :: NumHadr,NPlus1PS,MomOrder(1:14)
 real(8) :: Mom(1:4,1:14),zeros(1:14)
@@ -9204,8 +9207,9 @@ real(8) :: R_lj(1:5),R_PlepM,pT_lept,ET_lept,mT,dPhiLL,CosTheta1,DphiZt,Dphittba
 integer :: tbar,t,Hig,inLeft,inRight,realp,bbar,lepM,nubar,b,lepP,nu,qdn,qbup,qbdn,qup,L,N,Zl,Za,ferm_Z,Aferm_Z,jlabel
 real(8) :: pT_ll,HT_jet,WithinCone(1:3),RLept,Minv_Z
 integer :: iLept,jLept,jJet,JetIndex(1:4),LepIndex(1:3)
-real(8) :: mT2,pA(2:4),pB(2:4),pTInvis(2:4),mA,mB,mInvis! this is for MT2 calculation
-
+real(8) :: mT2,pA(2:4),pB(2:4),pTInvis(2:4),mA,mB,mInvis! this is for MT2 calculation   
+real(8) :: MomMELA(1:4,1:13),MatElSq_H0,MatElSq_H1,D_0minus
+logical,save :: FirstTime=.true.
 
 applyPSCut = .false.
 
@@ -9436,6 +9440,33 @@ elseif( ObsSet.eq.82) then! ttb+H production with di-leptonic tops
    endif
 
 
+   
+   
+   
+
+ELSEIF( ObsSet.EQ.83 ) THEN
+
+
+#if _UseJHUGenMELA==1
+    if( FirstTime ) then
+!       call NNPDFDriver("./pdfs/NNPDF30_lo_as_0130.LHgrid",33)
+!       call NNinitPDF(0)
+      call InitProcess_TTBH(m_H,m_top)
+      FirstTime = .false.
+    endif
+    MomMELA(1:4,1) = -(/         65d0,           0.0000000000000000d0, 0.0000000000000000d0,      65d0           /)
+    MomMELA(1:4,2) = -(/         65d0,           0.0000000000000000d0, 0.0000000000000000d0,     -65d0           /)  
+    MomMELA(1:4,3:11) = Mom(1:4,3:11)
+    MomMELA(1:4,12:13) = 0d0
+    
+    call EvalXSec_PP_TTBH(MomMELA(1:4,1:13),(/(1d0,0d0),(0d0,0d0)/),TopDecays,2,MatElSq_H0)
+!     print *, 'ppttbh SM',MatElSq_H0
+
+    call EvalXSec_PP_TTBH(MomMELA(1:4,1:13),(/(0d0,0d0),(1d0,0d0)/),TopDecays,2,MatElSq_H1)
+!     print *, 'ppttbh PS',MatElSq_H1
+    
+    D_0minus = MatElSq_H0/(MatElSq_H0 + 2d0*MatElSq_H1 )
+#endif
 
 
 
@@ -13240,17 +13271,56 @@ FUNCTION Convert2DHist(nx,ny,totx,toty)
 end FUNCTION Convert2DHist
 
 
+
+
+
+
 SUBROUTINE setPDFs(x1,x2,MuFac,pdf)
 use ModParameters
 implicit none
 real(8) :: x1,x2,PDFScale,MuFac
 real(8) :: upv(1:2),dnv(1:2),usea(1:2),dsea(1:2),str(1:2),sbar(1:2),chm(1:2),cbar(1:2),bot(1:2),bbar(1:2),glu(1:2),phot
 integer,parameter :: swPDF_u=1, swPDF_d=1, swPDF_c=1, swPDF_s=1, swPDF_b=1, swPDF_g=1
-real(8) :: pdf(-6:6,1:2)
+real(8) :: pdf(-6:6,1:2),NNpdf(1:2,-6:7)
 
         PDFScale=MuFac*100d0
 
+        
+#if _UseLHAPDF==1
 
+        call evolvePDF(x1,PDFScale,NNpdf(1,-6:6))
+        call evolvePDF(x2,PDFScale,NNpdf(2,-6:6))
+        NNpdf(1,-6:7) = NNpdf(1,-6:7)/x1
+        NNpdf(2,-6:7) = NNpdf(2,-6:7)/x2
+           
+        pdf(Up_,1)   = NNpdf(1,+1)         * swPDF_u
+        pdf(AUp_,1)  = NNpdf(1,-1)         * swPDF_u
+        pdf(Dn_,1)   = NNpdf(1,+2)         * swPDF_d
+        pdf(ADn_,1)  = NNpdf(1,-2)         * swPDF_d
+        pdf(Chm_,1)  = NNpdf(1,+3)         * swPDF_c
+        pdf(AChm_,1) = NNpdf(1,-3)         * swPDF_c
+        pdf(Str_,1)  = NNpdf(1,+4)         * swPDF_s
+        pdf(AStr_,1) = NNpdf(1,-4)         * swPDF_s
+        pdf(Bot_,1)  = NNpdf(1,+5)         * swPDF_b
+        pdf(ABot_,1) = NNpdf(1,-5)         * swPDF_b
+        pdf(0,1)     = NNpdf(1,+0)         * swPDF_g            
+            
+        pdf(Up_,2)   = NNpdf(2,+1)         * swPDF_u
+        pdf(AUp_,2)  = NNpdf(2,-1)         * swPDF_u
+        pdf(Dn_,2)   = NNpdf(2,+2)         * swPDF_d
+        pdf(ADn_,2)  = NNpdf(2,-2)         * swPDF_d
+        pdf(Chm_,2)  = NNpdf(2,+3)         * swPDF_c
+        pdf(AChm_,2) = NNpdf(2,-3)         * swPDF_c
+        pdf(Str_,2)  = NNpdf(2,+4)         * swPDF_s
+        pdf(AStr_,2) = NNpdf(2,-4)         * swPDF_s
+        pdf(Bot_,2)  = NNpdf(2,+5)         * swPDF_b
+        pdf(ABot_,2) = NNpdf(2,-5)         * swPDF_b
+        pdf(0,2)     = NNpdf(2,+0)         * swPDF_g            
+     
+#else        
+        
+        
+        
 !   MRSW PDFS
 IF( PDFSET.EQ.1 .AND. NLOPARAM.LE.1) THEN
         if( x1.lt.1d0 ) then ! this is needed for integrated dipole routines, where eta/z appears
@@ -13296,6 +13366,8 @@ IF( PDFSET.EQ.1 .AND. NLOPARAM.LE.1) THEN
             bbar(2)= 0d0
             glu(2) = 0d0
         endif
+        
+        
 ELSEIF( PDFSET.EQ.1 .AND. NLOPARAM.EQ.2) THEN
         if( x1.lt.1d0 ) then ! this is needed for integrated dipole routines, where eta/z appears
 !             call mrst2004(x1,PDFScale,1,upv(1),dnv(1),usea(1),dsea(1),str(1),chm(1),bot(1),glu(1))
@@ -13385,8 +13457,6 @@ ELSEIF( PDFSET.EQ.2 ) THEN
 ENDIF
 
 
-
-
 IF( COLLIDER.EQ.1 ) THEN
 !       PROTON CONTENT
         pdf(Up_,1)   = (upv(1) + usea(1))  * swPDF_u / x1
@@ -13441,6 +13511,9 @@ ELSEIF( COLLIDER.EQ.2 ) THEN
         pdf(ABot_,2) = bbar(2)             * swPDF_b / x2
         pdf(0,2)     = glu(2)              * swPDF_g / x2
 ENDIF
+
+#endif
+
 
 
 RETURN

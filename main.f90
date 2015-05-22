@@ -81,6 +81,7 @@ logical :: dirresult
    Correction=-1
    ObsSet=-1
    PDFSet=1
+   LHAPDFMember = 0
    NLOParam=1
    TopDecays=-100
    XTopDecays=-100
@@ -479,14 +480,17 @@ integer TheUnit
     print *, "_CheckMomenta activated!"
 !DEC$ ENDIF
 
-
    write(TheUnit,"(A)") "# Program parameters:"
    write(TheUnit,"(A,I2,A,F8.3,A)") "# Collider=",Collider," (",Collider_Energy*1d-1," TeV)"
    write(TheUnit,"(A,I2)") "# ObsSet=",ObsSet
    write(TheUnit,"(A,I3)") "# Process=",Process
    write(TheUnit,"(A,I2)") "# Master Process=",MasterProcess
    write(TheUnit,"(A,I2)") "# Correction=",Correction
+#if _UseLHAPDF==1
+   write(TheUnit,"(A,A,A,I3)") "# LHAPDF Set ",trim(PDFSetString), ", member ",LHAPDFMember
+#else
    write(TheUnit,"(A,I2,A)") "# PDF Set=",PDFSet,trim(PDFSetString)
+#endif   
    write(TheUnit,"(A,I2)") "# NLO Parameter=",NLOParam
    write(TheUnit,"(A,I2)") "# Top Decays=",TopDecays
    write(TheUnit,"(A,F9.3,A)") "# MuRen=",MuRen*100," GeV"
@@ -2790,7 +2794,25 @@ END SUBROUTINE
 
 SUBROUTINE InitPDFs()
 use ModParameters
+use ModMisc
 implicit none
+
+
+#if _UseLHAPDF==1
+
+     if( Collider.eq.2 ) call Error("proton-antiproton collisions not implemented for LHAPDFs")
+     IF( NLOPARAM.EQ.0 .OR. NLOPARAM.EQ.1 ) THEN
+!          PDFSetString(:) = "NNPDF30_lo_as_0130"
+         PDFSetString(:) = "MSTW2008lo68cl"
+     ELSEIF( NLOPARAM.EQ.2) THEN
+!          PDFSetString(:) = "NNPDF30_nlo_as_0118"
+         PDFSetString(:) = "MSTW2008nlo68cl"
+     ENDIF
+     
+     call InitPDFset(trim(PDFSetString))
+     call InitPDF(LHAPDFMember)  
+     
+#else
 
 
 IF( PDFSET.EQ.1 ) THEN! MRST/MSTW
@@ -2819,6 +2841,11 @@ ELSEIF( PDFSET  .EQ.2 ) THEN! CTEQ
      PDFSetString(:) = " CTEQ6L1 LO"
   ENDIF
 ENDIF
+
+
+#endif
+
+
 
 
 return
