@@ -850,6 +850,18 @@ ELSEIF( ObsSet.EQ.82 ) THEN! set of observables for ttb+H (di-leptonic tops)
     Rsep_jet    = 0.4d0
 
 
+ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops)
+
+
+    Rsep_jet    = 0.4d0             
+    pT_bjet_cut = 20d0*GeV      *0
+    pT_jet_cut  = 20d0*GeV      *0
+    eta_bjet_cut= 2.5d0         *1d2
+    eta_jet_cut = 2.5d0         *1d2
+    pT_lep_cut  = 20d0*GeV      *0
+    pT_miss_cut = 20d0*GeV      *0
+    eta_lep_cut = 2.5d0         *1d2
+
 ENDIF
 
 
@@ -9191,20 +9203,16 @@ implicit none
 integer :: NumHadr,NPlus1PS,MomOrder(1:14)
 real(8) :: Mom(1:4,1:14),zeros(1:14)
 real(8) :: MomJet(1:4,1:7) !,MomJet_CHECK(1:4,1:7)
-real(8) :: MomHadr(1:4,0:8),MomZ(1:4),MomFermZframe(1:4)
-real(8) :: MomBoost(1:4),MomMiss(1:4),MomObs(1:4)
+real(8) :: MomHadr(1:4,0:8)
+real(8) :: MomBoost(1:4),MomObs(1:4)
 logical :: applyPSCut
-integer :: NBin(:),PartList(1:7),JetList(1:7),NJet,NObsJet,k,NObsJet_Tree,leptj(1:3),i,j,ii,jj
+integer :: NBin(:),PartList(1:7),JetList(1:7),NJet,NObsJet,k,NObsJet_Tree,i,j
 real(8),optional :: PObs(:)
-real(8) :: nZLept,s12,s13,s14,s23,s24,s34
 real(8) :: pT_lep(4),ET_miss,PT_miss,pT_ATop,pT_Top,pT_Higgs,HT,ET_bjet,eta_Higgs
-real(8) :: eta_ATop,eta_Top,eta_lep(1:4),pseudo_Z, pseudo_top, pseudo_tbar
-real(8) :: pT_jet(1:7),eta_jet(1:7),eta_sepa,mT_bln(1:2),pT_Z,eta_Z
-real(8) :: R_lj(1:5),R_PlepM,pT_lept,ET_lept,mT,dPhiLL,CosTheta1,DphiZt,Dphittbar,m_ttbar
+real(8) :: eta_ATop,eta_Top,eta_lep(1:4),m_ttbar
+real(8) :: pT_jet(1:7),eta_jet(1:7)
 integer :: tbar,t,Hig,inLeft,inRight,realp,bbar,lepM,nubar,b,lepP,nu,qdn,qbup,qbdn,qup,L,N,Zl,Za,ferm_Z,Aferm_Z,jlabel
-real(8) :: pT_ll,HT_jet,WithinCone(1:3),RLept,Minv_Z
-integer :: iLept,jLept,jJet,JetIndex(1:4),LepIndex(1:3)
-real(8) :: mT2,pA(2:4),pB(2:4),pTInvis(2:4),mA,mB,mInvis! this is for MT2 calculation
+
 
 
 applyPSCut = .false.
@@ -9435,6 +9443,105 @@ elseif( ObsSet.eq.82) then! ttb+H production with di-leptonic tops
       PObs(2) = pT_Higgs
    endif
 
+
+
+
+
+
+!------------------------ cuts and binning --------------------------------
+elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
+
+    NObsJet_Tree = 4
+    if( .not.(NJet.ge.NObsJet_Tree .and. any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
+        applyPSCut = .true.
+        RETURN
+    endif
+
+
+    pT_ATop = get_PT(Mom(1:4,tbar))
+    pT_Top  = get_PT(Mom(1:4,t))
+    eta_top = get_ETA(Mom(1:4,t))
+    eta_Atop = get_ETA(Mom(1:4,tbar))
+    pT_Higgs= get_PT(Mom(1:4,Hig))
+    eta_Higgs = get_ETA(Mom(1:4,Hig))
+
+    pT_jet(1) = get_PT(MomJet(1:4,1))
+    pT_jet(2) = get_PT(MomJet(1:4,2))
+    pT_jet(3) = get_PT(MomJet(1:4,3))
+    pT_jet(4) = get_PT(MomJet(1:4,4))
+       
+    eta_jet(1) = get_ETA(MomJet(1:4,1))
+    eta_jet(2) = get_ETA(MomJet(1:4,2))
+    eta_jet(3) = get_ETA(MomJet(1:4,3))
+    eta_jet(4) = get_ETA(MomJet(1:4,4))
+
+    pT_lep(1) = get_PT(Mom(1:4,L))
+    eta_lep(1) = get_ETA(Mom(1:4,L))
+
+    pT_miss   = get_PT(Mom(1:4,N))
+
+    delta_eta_T = abs( eta_top - eta_Atop )
+    delta_eta_B = abs( eta_jet(1) - eta_jet(2) )
+    
+    cos_thetaLL = get_CosTheta(  )
+
+
+
+! check cuts
+    if( pT_jet(1).lt.pT_bjet_cut .OR. pT_jet(2).lt.pT_bjet_cut ) then
+        applyPSCut = .true.
+        RETURN
+    endif
+
+    if( abs(eta_jet(1)).gt.eta_bjet_cut .OR. abs(eta_jet(2)).gt.eta_bjet_cut) then
+        applyPSCut = .true.
+        RETURN
+    endif
+
+    if( pT_jet(3).lt.pT_jet_cut .OR. pT_jet(4).lt.pT_jet_cut ) then
+        applyPSCut = .true.
+        RETURN
+    endif
+
+    if( abs(eta_jet(3)).gt.eta_jet_cut .OR. abs(eta_jet(4)).gt.eta_jet_cut) then
+        applyPSCut = .true.
+        RETURN
+    endif
+
+    if( pT_lep(1).lt.pT_lep_cut ) then
+        applyPSCut = .true.
+        RETURN
+    endif
+
+    if( pT_miss.lt.pT_miss_cut ) then
+        applyPSCut = .true.
+        RETURN
+    endif
+
+    if( abs(eta_lep(1)).gt.eta_lep_cut ) then
+        applyPSCut = .true.
+        RETURN
+    endif
+
+
+
+! binning
+    NBin(1) = WhichBin(1,pT_Top)
+!     NBin(2) = WhichBin(2,)
+!     NBin(3) = WhichBin(3,)
+!     NBin(4) = WhichBin(4,)
+!     NBin(5) = WhichBin(5,)
+!     NBin(6) = WhichBin(6,)
+!     NBin(7) = WhichBin(7,)
+    if( present(PObs) ) then
+      PObs(1) = pT_Top
+!       PObs(2) = 
+!       PObs(3) = 
+!       PObs(4) = 
+!       PObs(5) = 
+!       PObs(6) = 
+!       PObs(7) = 
+   endif
 
 
 

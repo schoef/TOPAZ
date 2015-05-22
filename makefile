@@ -3,7 +3,6 @@ ConfigFile = $(Here)/ttbarjets.cfg
 ModuleDir = $(Here)/modules
 ObjectDir = $(Here)/objects
 DipoleDir = $(Here)/dipoles
-OD = $(ObjectDir)
 PDFDir = $(Here)/PDFS
 VegasDir = $(Here)/Vegas
 OptReport = $(Here)/OptRep.txt
