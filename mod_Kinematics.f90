@@ -854,12 +854,12 @@ ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops)
 
 
     Rsep_jet    = 0.4d0             
-    pT_bjet_cut = 20d0*GeV      *0
-    pT_jet_cut  = 20d0*GeV      *0
+    pT_bjet_cut = 20d0*GeV      *0d0
+    pT_jet_cut  = 20d0*GeV      *0d0
     eta_bjet_cut= 2.5d0         *1d2
     eta_jet_cut = 2.5d0         *1d2
-    pT_lep_cut  = 20d0*GeV      *0
-    pT_miss_cut = 20d0*GeV      *0
+    pT_lep_cut  = 20d0*GeV      *0d0
+    pT_miss_cut = 20d0*GeV      *0d0
     eta_lep_cut = 2.5d0         *1d2
 ENDIF
 
@@ -5131,9 +5131,94 @@ ELSEIF( ObsSet.EQ.82 ) THEN! set of observables for ttb+H (di-leptonic tops)
 
             
             
+
+                                       
+
+
+
+
+ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops, stable Higgs)
+          if(Collider.ne.1)  call Error("Collider needs to be LHC!")
+          if(TopDecays.ne.3 .and. TopDecays.ne.4)  call Error("TopDecays needs to be 3 or 4")
+          NumHistograms = 12
+          if( .not.allocated(Histo) ) then
+                allocate( Histo(1:NumHistograms), stat=AllocStatus  )
+                if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
+          endif
+
+          Histo(1)%Info   = "pT(top)"
+          Histo(1)%NBins  = 50
+          Histo(1)%BinSize= 20d0*GeV
+          Histo(1)%LowVal =  0d0*GeV
+          Histo(1)%SetScale= 100d0
+
+          Histo(2)%Info   = "eta(top)"
+          Histo(2)%NBins  = 20
+          Histo(2)%BinSize= 0.5d0
+          Histo(2)%LowVal = -5d0
+          Histo(2)%SetScale= 1d0
+          
+          Histo(3)%Info   = "pT(Higgs)"
+          Histo(3)%NBins  = 50
+          Histo(3)%BinSize= 20d0*GeV
+          Histo(3)%LowVal =  0d0*GeV
+          Histo(3)%SetScale= 100d0
+          
+          Histo(4)%Info   = "eta(Higgs)"
+          Histo(4)%NBins  = 20
+          Histo(4)%BinSize= 0.5d0
+          Histo(4)%LowVal = -5d0
+          Histo(4)%SetScale= 1d0
+          
+          Histo(5)%Info   = "delta_eta(t,tbar)"
+          Histo(5)%NBins  = 20
+          Histo(5)%BinSize= 0.25d0
+          Histo(5)%LowVal = 0d0
+          Histo(5)%SetScale= 1d0
+                   
+          Histo(6)%Info   = "delta_eta(l+,l-)"
+          Histo(6)%NBins  = 20
+          Histo(6)%BinSize= 0.25d0
+          Histo(6)%LowVal = 0d0
+          Histo(6)%SetScale= 1d0
+                   
+          Histo(7)%Info   = "delta_eta(b,bbar)"
+          Histo(7)%NBins  = 20
+          Histo(7)%BinSize= 0.25d0
+          Histo(7)%LowVal = 0d0
+          Histo(7)%SetScale= 1d0                   
          
+          Histo(8)%Info   = "cos(theta_ll)" 
+          Histo(8)%NBins  = 20
+          Histo(8)%BinSize= 0.1d0
+          Histo(8)%LowVal = -1d0
+          Histo(8)%SetScale= 1d0          
          
+          Histo(9)%Info   = "cos(theta_bb)" 
+          Histo(9)%NBins  = 20
+          Histo(9)%BinSize= 0.1d0
+          Histo(9)%LowVal = -1d0
+          Histo(9)%SetScale= 1d0
          
+          Histo(10)%Info   = "cos(theta_H)" 
+          Histo(10)%NBins  = 20
+          Histo(10)%BinSize= 0.1d0
+          Histo(10)%LowVal = -1d0
+          Histo(10)%SetScale= 1d0
+         
+          Histo(11)%Info   = "cos(theta_t)" 
+          Histo(11)%NBins  = 20
+          Histo(11)%BinSize= 0.1d0
+          Histo(11)%LowVal = -1d0
+          Histo(11)%SetScale= 1d0
+          
+          Histo(12)%Info   = "D_cp" 
+          Histo(12)%NBins  = 20
+          Histo(12)%BinSize= 0.05d0
+          Histo(12)%LowVal = 0d0
+          Histo(12)%SetScale= 1d0
+          
+          
           
           
 ELSE
@@ -9204,20 +9289,20 @@ use ModTTBH
 implicit none
 integer :: NumHadr,NPlus1PS,MomOrder(1:14)
 real(8) :: Mom(1:4,1:14),zeros(1:14)
-real(8) :: MomJet(1:4,1:7) !,MomJet_CHECK(1:4,1:7)
+real(8) :: MomJet(1:4,1:7) 
 real(8) :: MomHadr(1:4,0:8)
-real(8) :: MomBoost(1:4),MomObs(1:4),MomMiss(1:4)
+real(8) :: MomBoost(1:4),MomMiss(1:4)
 logical :: applyPSCut
 integer :: NBin(:),PartList(1:7),JetList(1:7),NJet,NObsJet,k,NObsJet_Tree,i,j
 real(8),optional :: PObs(:)
 real(8) :: pT_lep(4),ET_miss,PT_miss,pT_ATop,pT_Top,pT_Higgs,HT,ET_bjet,eta_Higgs
 real(8) :: eta_ATop,eta_Top,eta_lep(1:4),m_ttbar,delta_eta_T,delta_eta_B,cos_thetaLL
 real(8) :: pT_jet(1:7),eta_jet(1:7)
-integer :: tbar,t,Hig,inLeft,inRight,realp,bbar,lepM,nubar,b,lepP,nu,qdn,qbup,qbdn,qup,L,N,Zl,Za,ferm_Z,Aferm_Z,jlabel
-real(8) :: pT_ll,HT_jet,WithinCone(1:3),RLept,Minv_Z
-integer :: iLept,jLept,jJet,JetIndex(1:4),LepIndex(1:3)
+integer :: tbar,t,Hig,inLeft,inRight,realp,bbar,lepM,nubar,b,lepP,nu,qdn,qbup,qbdn,qup,L,N,HDK1,HDK2
+real(8) :: pT_ll,HT_jet,RLept,CosTheta1,CosTheta2,CosThetaStar,delta_eta_L,cos_thetaBB
+integer :: iLept,jLept,jJet
 real(8) :: mT2,pA(2:4),pB(2:4),pTInvis(2:4),mA,mB,mInvis! this is for MT2 calculation   
-real(8) :: MomMELA(1:4,1:13),MatElSq_H0,MatElSq_H1,D_0minus
+real(8) :: MomMELA(1:4,1:13),MatElSq_H0,MatElSq_H1,D_0minus,MomAux1(1:4),MomAux2(1:4),M_aux,MomRest(1:4)
 logical,save :: FirstTime=.true.
 
 
@@ -9237,8 +9322,8 @@ applyPSCut = .false.
   b       = MomOrder(10)
   lepP    = MomOrder(11)
   nu      = MomOrder(12)
-  ferm_Z  = MomOrder(13)
-  Aferm_Z = MomOrder(14)
+  HDK1    = MomOrder(13)
+  HDK2    = MomOrder(14)
   
   qdn    = lepM
   qbup   = nubar
@@ -9290,13 +9375,10 @@ applyPSCut = .false.
 
 
 
-!!! RR 2013/03/16 : havent made any changes for Z decay from here on - it looks like it shoul just be top decay though (other than some cuts on Z leptons -- much later)
-
 NBin(1:NumHistograms) = 0
 MomHadr(1:4,1:7) = 0d0
 PartList(1:7)=(/1,2,3,4,5,6,7/)
 MomMiss(1:4) = 0d0
-MomObs(1:4)  = 0d0
 
 ! separating momenta into hadron momenta and lepton momenta to which various procedures can be applied
 !-------------------------------------------------------
@@ -9458,13 +9540,12 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
         RETURN
     endif
 
-
     pT_ATop = get_PT(Mom(1:4,tbar))
     pT_Top  = get_PT(Mom(1:4,t))
-    eta_top = get_ETA(Mom(1:4,t))
-    eta_Atop = get_ETA(Mom(1:4,tbar))
+    eta_top = get_PseudoETA(Mom(1:4,t))
+    eta_Atop = get_PseudoETA(Mom(1:4,tbar))
     pT_Higgs= get_PT(Mom(1:4,Hig))
-    eta_Higgs = get_ETA(Mom(1:4,Hig))
+    eta_Higgs = get_PseudoETA(Mom(1:4,Hig))
 
     pT_jet(1) = get_PT(MomJet(1:4,1))
     pT_jet(2) = get_PT(MomJet(1:4,2))
@@ -9483,8 +9564,46 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
 
     delta_eta_T = abs( eta_top - eta_Atop )
     delta_eta_B = abs( eta_jet(1) - eta_jet(2) )
+    delta_eta_L = 0d0
     
-    cos_thetaLL = get_CosTheta( Mom(1:4,Hig) )
+    cos_thetaLL = 0d0
+    cos_thetaBB = 0d0
+
+
+! construct cos(theta1)=cos(theta_tt):
+!       MomRest(1:4)  = Mom(1:4,Hig)
+!       MomBoost(1)   = +MomRest(1)
+!       MomBoost(2:4) = -MomRest(2:4)
+!       MomAux(1:4) = Mom(1:4,t)+Mom(1:4,tbar)
+!       M_Aux = get_MInv(MomAux(1:4))
+!       call boost(MomAux(1:4),MomBoost(1:4),M_Aux)
+      CosTheta1 = 0d0
+
+
+
+
+! construct cos(theta*)=Cos(theta_H):    scattering angle of Higgs in ttb+H rest frame
+      MomRest(1:4)= Mom(1:4,tbar) + Mom(1:4,t) + Mom(1:4,Hig)
+      MomBoost(1)   = +MomRest(1)
+      MomBoost(2:4) = -MomRest(2:4)
+      MomAux1(1:4) = Mom(1:4,Hig)
+      M_Aux = M_H
+      call boost(MomAux1(1:4),MomBoost(1:4),M_Aux)
+      CosThetaStar = -Get_CosTheta( MomAux1(1:4) )
+
+            
+      
+! construct cos(theta2)=cos(theta_t):
+      MomRest(1:4)  = Mom(1:4,t)+Mom(1:4,tbar)
+      MomBoost(1)   = +MomRest(1)
+      MomBoost(2:4) = -MomRest(2:4)
+      MomAux1(1:4) = Mom(1:4,Hig)
+      M_Aux = M_H
+      call boost(MomAux1(1:4),MomBoost(1:4),M_Aux)
+      MomAux2(1:4) = Mom(1:4,t)
+      M_Aux = M_Top
+      call boost(MomAux2(1:4),MomBoost(1:4),M_Aux)
+      CosTheta2 = - VectorProd(MomAux1(2:4),MomAux2(2:4))/dsqrt(VectorProd(MomAux1(2:4),MomAux1(2:4)))/dsqrt(VectorProd(MomAux2(2:4),MomAux2(2:4)))
 
 
 
@@ -9534,17 +9653,13 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
       call InitProcess_TTBH(m_H,m_top)
       FirstTime = .false.
     endif
-    MomMELA(1:4,1) = -(/         65d0,           0.0000000000000000d0, 0.0000000000000000d0,      65d0           /)
-    MomMELA(1:4,2) = -(/         65d0,           0.0000000000000000d0, 0.0000000000000000d0,     -65d0           /)  
+    MomMELA(1:4,1) = -Collider_Energy/2d0 *  (/+1d0, 0d0, 0d0, 1d0 /)
+    MomMELA(1:4,2) = -Collider_Energy/2d0 *  (/+1d0, 0d0, 0d0,-1d0 /)  
     MomMELA(1:4,3:11) = Mom(1:4,3:11)
     MomMELA(1:4,12:13) = 0d0
-    
-    call EvalXSec_PP_TTBH(MomMELA(1:4,1:13),(/(1d0,0d0),(0d0,0d0)/),TopDecays,2,MatElSq_H0)
-!     print *, 'ppttbh SM',MatElSq_H0
 
+    call EvalXSec_PP_TTBH(MomMELA(1:4,1:13),(/(1d0,0d0),(0d0,0d0)/),TopDecays,2,MatElSq_H0)
     call EvalXSec_PP_TTBH(MomMELA(1:4,1:13),(/(0d0,0d0),(1d0,0d0)/),TopDecays,2,MatElSq_H1)
-!     print *, 'ppttbh PS',MatElSq_H1
-    
     D_0minus = MatElSq_H0/(MatElSq_H0 + 2d0*MatElSq_H1 )
 
 #endif    
@@ -9552,20 +9667,29 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
 
 ! binning
     NBin(1) = WhichBin(1,pT_Top)
-!     NBin(2) = WhichBin(2,)
-!     NBin(3) = WhichBin(3,)
-!     NBin(4) = WhichBin(4,)
-!     NBin(5) = WhichBin(5,)
-!     NBin(6) = WhichBin(6,)
-!     NBin(7) = WhichBin(7,)
+    NBin(2) = WhichBin(2,eta_Top)
+    NBin(3) = WhichBin(3,pT_Higgs)
+    NBin(4) = WhichBin(4,eta_Higgs)
+    NBin(5) = WhichBin(5,delta_eta_T)
+    NBin(6) = WhichBin(6,delta_eta_L)
+    NBin(7) = WhichBin(7,delta_eta_B)
+    NBin(8) = WhichBin(8,cos_thetaLL)
+    NBin(9) = WhichBin(9,cos_thetaBB)
+    NBin(10)= WhichBin(10,CosThetaStar)
+    NBin(11)= WhichBin(11,CosTheta2)
+    NBin(12)= WhichBin(12,D_0minus)
     if( present(PObs) ) then
       PObs(1) = pT_Top
-!       PObs(2) = 
-!       PObs(3) = 
-!       PObs(4) = 
-!       PObs(5) = 
-!       PObs(6) = 
-!       PObs(7) = 
+      PObs(2) = eta_Top
+      PObs(3) = pT_Higgs
+      PObs(4) = eta_Higgs
+      PObs(5) = delta_eta_T
+      PObs(6) = delta_eta_L
+      PObs(7) = delta_eta_B
+      PObs(8) = cos_thetaLL
+      PObs(9) = cos_thetaBB
+      PObs(10)= CosTheta2
+      PObs(11)= D_0minus
    endif
 
 

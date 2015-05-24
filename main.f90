@@ -2802,11 +2802,11 @@ implicit none
 
      if( Collider.eq.2 ) call Error("proton-antiproton collisions not implemented for LHAPDFs")
      IF( NLOPARAM.EQ.0 .OR. NLOPARAM.EQ.1 ) THEN
-!          PDFSetString(:) = "NNPDF30_lo_as_0130"
-         PDFSetString(:) = "MSTW2008lo68cl"
+         PDFSetString(:) = "NNPDF30_lo_as_0130"
+!          PDFSetString(:) = "MSTW2008lo68cl"
      ELSEIF( NLOPARAM.EQ.2) THEN
-!          PDFSetString(:) = "NNPDF30_nlo_as_0118"
-         PDFSetString(:) = "MSTW2008nlo68cl"
+         PDFSetString(:) = "NNPDF30_nlo_as_0118"
+!          PDFSetString(:) = "MSTW2008nlo68cl"
      ENDIF
      
      call InitPDFset(trim(PDFSetString))

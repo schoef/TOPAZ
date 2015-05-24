@@ -26,7 +26,7 @@ LHAPDFDir=/home/schulze/lib/LHAPDF-6.1.5/lib/
 #          LHAPDF_DATA_PATH=/.../LHAPDF-x.y.z/share/LHAPDF/:${LHAPDF_DATA_PATH}
 
 
-# interface to JHUGenMELA
+# interface to JHUGenMELA (requires UseLHAPDF=Yes)
 useJHUGenMELA = No
 
 

@@ -20,7 +20,7 @@ integer(8), public, save :: PSCutCounter=0
 integer(8), public, save :: SkipCounter=0
 logical,public ,parameter :: TTBZ_SpeedUp=.false.  !  good idea but doesn't work. always set to .false.
 integer, public :: TTBZ_DebugSwitch=0   !   0=disabled, 1=bosonic loops, 2=fermionic loops, 3=gamma5 renormalization
-logical, public,parameter :: LO_ReWeighting=.true.
+logical, public,parameter :: LO_ReWeighting=.false.
 real, public,allocatable :: Weights(:,:)
 
 ! PVegas (MPI) part
