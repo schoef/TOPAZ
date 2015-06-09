@@ -15,10 +15,10 @@ Flags =
 Opt = Yes
 
 # MPI features, Yes/No. run with: mpiexec -n 4 ./TOPAZ_MPI ...
-useMPI = Yes
+useMPI = No
 
 # link pdfs via LHA library ('Yes' or 'No')
-UseLHAPDF=Yes
+UseLHAPDF=No
 LHAPDFDir=/afs/cern.ch/user/m/maschulz/lib/LHAPDF-6.1.5/lib/
 # LHAPDFDir=directory which contains libLHAPDF.a, libLHAPDF.la, libLHAPDF.so
 # remember to export 
@@ -27,7 +27,7 @@ LHAPDFDir=/afs/cern.ch/user/m/maschulz/lib/LHAPDF-6.1.5/lib/
 
 
 # interface to JHUGenMELA (requires UseLHAPDF=Yes)
-useJHUGenMELA = Yes
+useJHUGenMELA = No
 
 
 ifeq ($(useMPI),Yes)
