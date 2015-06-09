@@ -2903,8 +2903,10 @@ logical, save :: FirstTime=.true.
   if(TheUnit.ne.6) then 
     filename = trim(HistoFile)//'.dat'
     open(unit=TheUnit,  file=trim(filename),form='formatted',access= 'sequential',status='replace')   ! Histogram file
-    filename = trim(HistoFile)//'_2D'//'.dat'
-    open(unit=TheUnit+200,  file=trim(filename),form='formatted',access= 'sequential',status='replace')   ! 2-d Histogram file
+    if( Num2DHistograms.gt.0 ) then
+        filename = trim(HistoFile)//'_2D'//'.dat'
+        open(unit=TheUnit+200,  file=trim(filename),form='formatted',access= 'sequential',status='replace')   ! 2-d Histogram file
+    endif
 !   writing status file
     filename = trim(HistoFile)//'.status'
     if( FirstTime ) then
@@ -2977,7 +2979,7 @@ logical, save :: FirstTime=.true.
 !NB error not implemented yet...
                 Error=0d0
              endif
-             write(TheUnit+200,"(I2,A,2X,1PE10.3,A,2X,1PE10.3,A,2X,1PE23.16,A,2X,1PE23.16,A,2X,I9,A)") NHisto,"|",BinVal2,"|",BinVal3,"|",Value,"|",Error,"|",Hits,"|"
+             if( Num2DHistograms.gt.0 ) write(TheUnit+200,"(I2,A,2X,1PE10.3,A,2X,1PE10.3,A,2X,1PE23.16,A,2X,1PE23.16,A,2X,I9,A)") NHisto,"|",BinVal2,"|",BinVal3,"|",Value,"|",Error,"|",Hits,"|"
           endif
 
        enddo
@@ -3011,7 +3013,7 @@ logical, save :: FirstTime=.true.
   if(TheUnit.ne.6) then
     close(TheUnit)
     close(TheUnit+1)
-    close(TheUnit+200)
+    if( Num2DHistograms.gt.0 ) close(TheUnit+200)
   endif
 
 return

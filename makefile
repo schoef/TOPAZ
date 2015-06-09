@@ -15,11 +15,11 @@ Flags =
 Opt = Yes
 
 # MPI features, Yes/No. run with: mpiexec -n 4 ./TOPAZ_MPI ...
-useMPI = No
+useMPI = Yes
 
 # link pdfs via LHA library ('Yes' or 'No')
-UseLHAPDF=No
-LHAPDFDir=/home/schulze/lib/LHAPDF-6.1.5/lib/
+UseLHAPDF=Yes
+LHAPDFDir=/afs/cern.ch/user/m/maschulz/lib/LHAPDF-6.1.5/lib/
 # LHAPDFDir=directory which contains libLHAPDF.a, libLHAPDF.la, libLHAPDF.so
 # remember to export 
 #          LD_LIBRARY_PATH=/.../LHAPDF-x.y.z/lib/:${LD_LIBRARY_PATH}
@@ -27,7 +27,7 @@ LHAPDFDir=/home/schulze/lib/LHAPDF-6.1.5/lib/
 
 
 # interface to JHUGenMELA (requires UseLHAPDF=Yes)
-useJHUGenMELA = No
+useJHUGenMELA = Yes
 
 
 ifeq ($(useMPI),Yes)
@@ -70,7 +70,7 @@ fcomp = $(F95compiler) $(IfortOpts) @$(ConfigFile)
 
 
 
-makeDep = $(ConfigFile) makefile
+# makeDep = $(ConfigFile) makefile
 
 
 # fastjet stuff
@@ -757,10 +757,15 @@ $(ObjectDir)/mod_IntDipoles%.o: $(DipoleDir)/mod_IntDipoles%.f90 $(makeDep)
 	$(fcomp) -c $(DipoleDir)/mod_IntDipoles$*".f90" -o $(ObjectDir)/mod_IntDipoles$*".o"
 
 
-
+ifeq ($(useMPI),No)
 $(VegasObj): $(VegasDir)/vegas.f $(VegasDir)/vegas_common.f $(makeDep)
 	@echo " compiling" $<
 	$(fcomp) -D_WriteTmpHisto=1 -c $(VegasDir)/vegas.f -o $(VegasObj)
+else
+$(VegasObj): $(VegasDir)/pvegas_mpi.c $(makeDep)
+	@echo " compiling" $<
+	$(ccomp) -D_WriteTmpHisto=1 -c $(VegasDir)/pvegas_mpi.c -o $(VegasObj)
+endif
 	
 $(ObjectDir)/genps.o: $(PSDir)/genps.c $(makeDep)
 	@echo " compiling" $<

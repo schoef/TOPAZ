@@ -387,7 +387,7 @@ IF( TTBZ_DebugSwitch.EQ.0 .OR. TTBZ_DebugSwitch.EQ.1 ) THEN
              AccPoles = CheckPoles(PrimAmps(APrimAmp),BornAmps(APrimAmp),rdiv(1:2))
 !              print *, 'accpoles after QP', accpoles 
              if ( AccPoles .gt. QPtol) then
-                 print *, 'QP fails: ', AccPoles,APrimAmp
+!                  print *, 'QP fails: ', AccPoles,APrimAmp
                 PrimAmps(APrimAmp)%Result=0d0
                 pole_skipped=pole_skipped+1
                 SkipCounter = SkipCounter + 1
@@ -556,7 +556,7 @@ IF( TTBZ_DebugSwitch.EQ.0 .OR. TTBZ_DebugSwitch.EQ.2 ) THEN
 
              AccPoles = CheckPoles(PrimAmps(APrimAmp),BornAmps(APrimAmp),rdiv(1:2))
              if ( AccPoles .gt. QPtol) then
-                 print *, 'QP fails: ', AccPoles,APrimAmp
+!                  print *, 'QP fails: ', AccPoles,APrimAmp
                 PrimAmps(APrimAmp)%Result=0d0
                 pole_skipped=pole_skipped+1
                 SkipCounter = SkipCounter + 1
@@ -770,7 +770,7 @@ IF( TTBZ_DebugSwitch.EQ.0 .OR. TTBZ_DebugSwitch.EQ.2 ) THEN
 
              AccPoles = CheckPoles(PrimAmps(APrimAmp),BornAmps(APrimAmp),rdiv(1:2))
              if ( AccPoles .gt. QPtol) then
-                 print *, 'QP fails: ', AccPoles,APrimAmp
+!                  print *, 'QP fails: ', AccPoles,APrimAmp
                 PrimAmps(APrimAmp)%Result=0d0
                 pole_skipped=pole_skipped+1
                 SkipCounter = SkipCounter + 1
@@ -1500,7 +1500,7 @@ IF( TTBZ_DebugSwitch.EQ.0 .OR. TTBZ_DebugSwitch.EQ.1 ) THEN
             AccPoles = CheckPoles(PrimAmps(APrimAmp),BornAmps(APrimAmp),rdiv(1:2))
             prim_opp_err(APrimAmp)=opp_err
             if ( AccPoles .gt. QPtol .or. prim_opp_err(APrimAmp) .gt. 1d-2) then
-               print *, 'QP fails: ', AccPoles, prim_opp_err(APrimAmp)
+!                print *, 'QP fails: ', AccPoles, prim_opp_err(APrimAmp)
                PrimAmps(APrimAmp)%Result=0d0
                pole_skipped=pole_skipped+1               
                SkipCounter = SkipCounter + 1
@@ -1613,7 +1613,7 @@ IF( TTBZ_DebugSwitch.EQ.0 .OR. TTBZ_DebugSwitch.EQ.2 ) THEN
 
             AccPoles = CheckPoles(PrimAmps(APrimAmp),BornAmps(APrimAmp),rdiv(1:2))
             if ( AccPoles .gt. QPtol ) then
-               print *, 'QP fails: ', AccPoles
+!                print *, 'QP fails: ', AccPoles
                PrimAmps(APrimAmp)%Result=0d0
                pole_skipped=pole_skipped+1
                SkipCounter = SkipCounter + 1
@@ -1698,7 +1698,7 @@ IF( TTBZ_DebugSwitch.EQ.0 .OR. TTBZ_DebugSwitch.EQ.2 ) THEN
 
          AccPoles = CheckPoles(PrimAmps(APrimAmp),BornAmps(APrimAmp),rdiv(1:2))
          if ( AccPoles .gt. QPtol ) then
-            print *, 'QP fails: ', AccPoles
+!             print *, 'QP fails: ', AccPoles
             PrimAmps(APrimAmp)%Result=0d0
             pole_skipped=pole_skipped+1
             SkipCounter = SkipCounter + 1

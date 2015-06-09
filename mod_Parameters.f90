@@ -6,7 +6,7 @@ integer, public :: Collider, Process, PDFSet, NLOParam, TopDecays, XTopDecays, Z
 integer, public :: MasterProcess, Correction, ObsSet
 integer, public :: VegasIt0,VegasIt1,VegasNc0,VegasNc1,VegasMxDim,VegasSeed
 integer, public :: VegasIt0_default,VegasIt1_default,VegasNc0_default,VegasNc1_default
-integer, public :: NumHistograms,Num2DHistograms
+integer, public :: NumHistograms=0,Num2DHistograms=0
 integer, public :: Fragm_Func_Type
 real(8), public :: alpha_frag,beta_frag,delta_frag
 real(8), public :: Lambda_QCD

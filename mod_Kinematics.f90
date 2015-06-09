@@ -5139,7 +5139,7 @@ ELSEIF( ObsSet.EQ.82 ) THEN! set of observables for ttb+H (di-leptonic tops)
 
 ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops, stable Higgs)
           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
-          if(TopDecays.ne.3 .and. TopDecays.ne.4)  call Error("TopDecays needs to be 3 or 4")
+          if(TopDecays.ne.1 .and. TopDecays.ne.3 .and. TopDecays.ne.4)  call Error("TopDecays needs to be 1 or 3 or 4")
           NumHistograms = 12
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
@@ -9347,20 +9347,18 @@ applyPSCut = .false.
    endif
    zeros(1) = (Mom(1:4,tbar).dot.Mom(1:4,tbar)) - m_Top**2
    zeros(2) = (Mom(1:4,t).dot.Mom(1:4,t)) - m_Top**2
-   if (ZDecays .le. 10) then   ! Z onshell
-      zeros(3) = (Mom(1:4,Hig).dot.Mom(1:4,Hig)) - M_H**2
-   else ! Z off shell, so this check is meaningless
-      zeros(3)=0d0
-   endif
+   zeros(3) = 0d0
    zeros(4) =  Mom(1:4,bbar).dot.Mom(1:4,bbar)
    zeros(5) =  Mom(1:4,lepM).dot.Mom(1:4,lepM)
    zeros(6) =  Mom(1:4,nubar).dot.Mom(1:4,nubar)
    zeros(7) =  Mom(1:4,b).dot.Mom(1:4,b)
    zeros(8) =  Mom(1:4,lepP).dot.Mom(1:4,lepP)
    zeros(9) =  Mom(1:4,nu).dot.Mom(1:4,nu)
-
-
+!    zeros(10)=  ((Mom(1:4,lepM)+Mom(1:4,nubar)).dot.(Mom(1:4,lepM)+Mom(1:4,nubar))) - m_W**2
+!    zeros(11)=  ((Mom(1:4,lepP)+Mom(1:4,nu)).dot.(Mom(1:4,lepP)+Mom(1:4,nu))) - m_W**2
    if( NPlus1PS.eq.1 ) zeros(12)=  Mom(1:4,realp).dot.Mom(1:4,realp)
+   
+
    if( TopDecays.eq.0 .and. any(abs(zeros(1:3)/Mom(1,inLeft)**2).gt.1d-8) ) then
       print *, "ERROR: onshell-ness violation in SUBROUTINE Kinematics_TTBARZ(): ",zeros(1:3)
       print *, Mom(1:4,1:3)
@@ -9394,6 +9392,8 @@ IF( TOPDECAYS.EQ.0 ) THEN  ! no top decays
 ELSEIF( TOPDECAYS.EQ.1 .OR. TOPDECAYS.eq.-1 ) THEN  ! di-leptonic decay
     MomHadr(1:4,1) = Mom(1:4,bbar)
     MomHadr(1:4,2) = Mom(1:4,b)     ! Bot
+    L = LepM  ! ambiguously defined for di-leptons
+    N = nubar
     if(NPlus1PS.eq.0) then
         NumHadr = 2
     else
@@ -9488,10 +9488,10 @@ elseif( ObsSet.eq.82) then! ttb+H production with di-leptonic tops
     endif
 
 
-    if( njet.eq.3 .and. get_PT(MomJet(1:4,3)).gt.10d0*GeV  ) then! reject events with resolved jet
-        applyPSCut = .true.
-        RETURN        
-    endif
+!     if( njet.eq.3 .and. get_PT(MomJet(1:4,3)).gt.10d0*GeV  ) then! reject events with resolved jet
+!         applyPSCut = .true.
+!         RETURN        
+!     endif
 
 
 
@@ -9528,14 +9528,23 @@ elseif( ObsSet.eq.82) then! ttb+H production with di-leptonic tops
 
     if( present(PObs) ) then
       PObs(1) = pT_Top
-      PObs(2) = pT_Higgs
+      PObs(2) = pT_ATop
+      PObs(3) = eta_top
+      PObs(4) = eta_Atop
+      PObs(5) = m_ttbar
+      PObs(6) = pT_Higgs
+      PObs(7) = eta_Higgs
    endif
 
 !------------------------ cuts and binning --------------------------------
 elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
 
-    NObsJet_Tree = 4
-    if( .not.(NJet.ge.NObsJet_Tree .and. any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
+!     NObsJet_Tree = 4
+!     if( .not.(NJet.ge.NObsJet_Tree .and. any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
+!         applyPSCut = .true.
+!         RETURN
+!     endif
+    if( .not.( any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
         applyPSCut = .true.
         RETURN
     endif
@@ -9655,9 +9664,17 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
     endif
     MomMELA(1:4,1) = -Collider_Energy/2d0 *  (/+1d0, 0d0, 0d0, 1d0 /)
     MomMELA(1:4,2) = -Collider_Energy/2d0 *  (/+1d0, 0d0, 0d0,-1d0 /)  
-    MomMELA(1:4,3:11) = Mom(1:4,3:11)
+    MomMELA(1:4,3) = Mom(1:4,Hig)
+    MomMELA(1:4,4) = Mom(1:4,tbar)
+    MomMELA(1:4,5) = Mom(1:4,t)
+    MomMELA(1:4,6) = Mom(1:4,bbar)
+    MomMELA(1:4,7) = Mom(1:4,lepM)
+    MomMELA(1:4,8) = Mom(1:4,nubar)
+    MomMELA(1:4,9) = Mom(1:4,b)
+    MomMELA(1:4,10)= Mom(1:4,lepP)
+    MomMELA(1:4,11)= Mom(1:4,nu)
     MomMELA(1:4,12:13) = 0d0
-
+    
     call EvalXSec_PP_TTBH(MomMELA(1:4,1:13),(/(1d0,0d0),(0d0,0d0)/),TopDecays,2,MatElSq_H0)
     call EvalXSec_PP_TTBH(MomMELA(1:4,1:13),(/(0d0,0d0),(1d0,0d0)/),TopDecays,2,MatElSq_H1)
     D_0minus = MatElSq_H0/(MatElSq_H0 + 2d0*MatElSq_H1 )
@@ -9691,9 +9708,6 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
       PObs(10)= CosTheta2
       PObs(11)= D_0minus
    endif
-
-
-
 
 
 
