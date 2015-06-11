@@ -435,6 +435,7 @@ allObjects =   				$(ObjectDir)/mod_Misc.o \
 					$(ObjectDir)/mod_MyRecurrence.o \
 					$(ObjectDir)/mod_MyWeylRecurrence.o \
 					$(ObjectDir)/mod_Amplitudes.o \
+					$(ObjectDir)/mod_SingleTopHAmps.o \
 					$(ObjectDir)/mod_Amplitudes_Zprime.o \
 					$(ObjectDir)/mod_Amplitudes_eeTTB.o \
 					$(OPPObj) \
@@ -475,6 +476,7 @@ allObjects =   				$(ObjectDir)/mod_Misc.o \
 					$(ObjectDir)/mod_CrossSection_eeTTB.o \
 					$(ObjectDir)/mod_CrossSection_TTBZ.o \
 					$(ObjectDir)/mod_CrossSection_TTBH.o \
+					$(ObjectDir)/mod_CrossSection_TH.o \
 					$(ObjectDir)/main.o
 
 
@@ -557,6 +559,11 @@ $(ObjectDir)/mod_Amplitudes.o: mod_Amplitudes.f90 $(makeDep)
 	@echo " compiling" $<
 	$(fcomp) -c $< -o $@
 
+$(ObjectDir)/mod_SingleTopHAmps.o: mod_SingleTopHAmps.f90 $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -c $< -o $@
+
+
 $(ObjectDir)/mod_Amplitudes_Zprime.o: mod_Amplitudes_Zprime.f90 $(makeDep)
 	@echo " compiling" $<
 	$(fcomp) -c $< -o $@
@@ -602,6 +609,10 @@ $(ObjectDir)/mod_CrossSection_TTBZ.o: mod_CrossSection_TTBZ.f90 $(makeDep)
 
 
 $(ObjectDir)/mod_CrossSection_TTBH.o: mod_CrossSection_TTBH.f90 $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -c $< -o $@
+
+$(ObjectDir)/mod_CrossSection_TH.o: mod_CrossSection_TH.f90 $(makeDep)
 	@echo " compiling" $<
 	$(fcomp) -c $< -o $@
 
