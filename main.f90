@@ -230,7 +230,10 @@ logical :: dirresult
         read(arg(10:16),*) DelGam2V
     elseif( arg(1:9) .eq. "DelGam2A=" ) then
         read(arg(10:16),*) DelGam2A
-
+     elseif( arg(1:6) .eq. "kappa=") then
+        read(arg(7:13),*) kappaTTBH
+     elseif( arg(1:12) .eq. "kappa_tilde=") then
+        read(arg(13:18),*) kappaTTBH_tilde
     elseif( arg(1:9).eq."DipAlpha=" ) then
         read(arg(10:10),*) iDipAlpha(1)
         read(arg(11:11),*) iDipAlpha(2)
@@ -549,10 +552,11 @@ integer TheUnit
        write(TheUnit,'(A,F8.5)') '# BSM ttbZ vector2=',DeltaF2V
        write(TheUnit,'(A,F8.5)') '# BSM ttbZ axial2= ',DeltaF2A
     endif
-    if ( (ObsSet.ge.80 .and. ObsSet.le.89)  ) then
+    if ( (ObsSet.ge.80 .and. ObsSet.le.89) .or. (ObsSet .ge. 91 .and. ObsSet .le.99)  ) then
        write(TheUnit,'(A,F10.5,A)') "# m(H)=",m_H*100d0, " GeV"
        write(TheUnit,'(A,F10.5,A)') "# Gamma(H)=",Ga_H*100d0, " GeV"    
        write(TheUnit,"(A,I2)") "# H Decays=",HDecays
+       write(TheUnit,'(A,F10.5,A)') "# vev=",Vev*100d0, " GeV"
        write(TheUnit,"(A,F10.5)") "# kappa=",kappaTTBH  
        write(TheUnit,"(A,F10.5)") "# kappa_tilde=",kappaTTBH_tilde
        
@@ -657,6 +661,7 @@ use ModCrossSection_TTBJ
 use ModCrossSection_TTBP
 use ModCrossSection_TTBZ
 use ModCrossSection_TTBH
+use ModCrossSection_TH
 use ModCrossSection_TTBETmiss
 use ModCrossSection_ZprimeTTB
 use ModCrossSection_eeTTB
@@ -2002,6 +2007,34 @@ ENDIF
 
 
 
+IF( MASTERPROCESS.EQ.73 ) THEN
+IF( CORRECTION   .EQ.0 ) THEN
+  call vegas(EvalCS_LO_tdubH,VG_Result,VG_Error,VG_Chi2)
+  if( warmup ) then
+   itmx = VegasIt1
+   ncall= VegasNc1
+   call InitHisto()
+   call vegas1(EvalCS_LO_tdubH,VG_Result,VG_Error,VG_Chi2)
+  endif
+ENDIF
+ENDIF
+
+IF( MASTERPROCESS.EQ.74 ) THEN
+IF( CORRECTION   .EQ.0 ) THEN
+  call vegas(EvalCS_LO_tbardubbarH,VG_Result,VG_Error,VG_Chi2)
+  if( warmup ) then
+   itmx = VegasIt1
+   ncall= VegasNc1
+   call InitHisto()
+   call vegas1(EvalCS_LO_tbardubbarH,VG_Result,VG_Error,VG_Chi2)
+  endif
+ENDIF
+ENDIF
+
+
+
+
+
 return
 END SUBROUTINE
 !DEC$ ENDIF
@@ -2017,6 +2050,7 @@ use ModCrossSection_TTBJ
 use ModCrossSection_TTBP
 use ModCrossSection_TTBZ
 use ModCrossSection_TTBH
+use ModCrossSection_TH
 use ModCrossSection_TTBETmiss
 use ModCrossSection_ZprimeTTB
 use ModCrossSection_eeTTB
@@ -2740,6 +2774,40 @@ IF( (CORRECTION.LE.1) .AND. PROCESS.EQ.62 ) THEN
     call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_1L_Zprime_ttbqqb_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
   endif
 
+ENDIF
+ENDIF
+
+
+
+IF( MASTERPROCESS.EQ.73 ) THEN
+IF( CORRECTION.EQ.0 .OR. CORRECTION.EQ.3 ) THEN
+  init=0
+  call ClearRedHisto()
+  call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_LO_tdubH_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  if( warmup ) then
+    init=1
+    itmx = VegasIt1
+    ncall= VegasNc1
+    call InitHisto()
+    call ClearRedHisto()
+    call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_LO_tdubH_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  endif
+ENDIF
+ENDIF
+
+IF( MASTERPROCESS.EQ.74 ) THEN
+IF( CORRECTION.EQ.0 .OR. CORRECTION.EQ.3 ) THEN
+  init=0
+  call ClearRedHisto()
+  call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_LO_tbardubbarH_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  if( warmup ) then
+    init=1
+    itmx = VegasIt1
+    ncall= VegasNc1
+    call InitHisto()
+    call ClearRedHisto()
+    call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_LO_tbardubbarH_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  endif
 ENDIF
 ENDIF
 
