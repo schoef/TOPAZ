@@ -100,8 +100,8 @@ real(8), public :: DelGam2V,DelGam2A       ! q-dependent coupling for the photon
 
 
 ! top-H couplings
-real(8), public, parameter :: kappaTTBH       = 1d0
-real(8), public, parameter :: kappaTTBH_tilde = 0d0
+real(8), public :: kappaTTBH      
+real(8), public :: kappaTTBH_tilde
 
 
 ! Zprime couplings

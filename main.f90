@@ -118,16 +118,22 @@ logical :: dirresult
    DKRE_switch=0
    iDipAlpha(1:5)=0
    DipAlpha2=1d0
-! default for BSM top-Z  couplings
+! default for BSM top-Z couplings
    AbsDelF1A=0d0
    AbsDelF1V=0d0
    RelDelF1A=0d0
    RelDelF1V=0d0
    RelDelF2A=0d0
    RelDelF2V=0d0
+! default for BSM top-photon couplings   
    DelGam2V=0d0
    DelGam2A=0d0
+! default for BSM top-Higgs couplings
+   kappaTTBH=1d0
+   kappaTTBH_tilde=0d0
 
+   
+   
    NumArgs = NArgs()-1
    do NArg=1,NumArgs
     call GetArg(NArg,arg)
@@ -2998,7 +3004,7 @@ logical, save :: FirstTime=.true.
   write(TheUnit,"(A,2X,1F20.10)") "# EvalCounter  =",dble(EvalCounter)
   write(TheUnit,"(A,2X,1F20.10)") "# PSCutCounter =",dble(PSCutCounter)
   write(TheUnit,"(A,2X,1F20.10)") "# SkipCounter  =",dble(SkipCounter)
-  if( dble(SkipCounter)/dble(EvalCounter) .gt. 0.02d0 ) write(TheUnit,"(A,2X)") "# **** WARNING  ****: SkipCounter is larger than 2%"
+  if( EvalCounter.gt.0 .and. dble(SkipCounter)/dble(EvalCounter) .gt. 0.02d0 ) write(TheUnit,"(A,2X)") "# **** WARNING  ****: SkipCounter is larger than 2%"
   write(TheUnit,"(A,2X,1PE20.10,2X,1PE20.5)") "#TotCS[fb]=",VG_Result,VG_Error
   do NHisto=1,NumHistograms
 !     print *, NHisto

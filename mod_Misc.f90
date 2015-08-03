@@ -2886,6 +2886,75 @@ END SUBROUTINE
 
 
 
+      
+      FUNCTION vbqV_Weyl(sp,e1,coupl_left,coupl_right,HDcoupl_left,HDcoupl_right,q)!   generalization of spb2_
+      implicit none
+      complex(8), intent(in) :: e1(:)
+      complex(8), intent(in) :: sp(:)
+      complex(8), intent(in) :: coupl_left,coupl_right
+      complex(8), intent(in), optional :: q(:)     
+      complex(8), intent(in), optional :: HDcoupl_left,HDcoupl_right
+      complex(8) :: vbqV_Weyl(size(sp)),ubarqslZsl(size(sp)),ubarZslqsl(size(sp)),ubarsig(size(sp))
+      integer,parameter :: Ds=4, ColorlessParticle=2
+
+          if (ColorlessParticle .eq. 1) then 
+            vbqV_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.false.,spb2_Weyl(sp,e1)) + coupl_right*Chir_Weyl(.true.,spb2_Weyl(sp,e1)) )
+            
+          elseif (ColorlessParticle .eq. 2) then              ! see RR notes
+            vbqV_Weyl = -(0d0,1d0) *( coupl_left*Chir_Weyl(.false.,spb2_Weyl(sp,e1)) + coupl_right*Chir_Weyl(.true.,spb2_Weyl(sp,e1))  )
+            if( present(q) ) then
+                ubarZslqsl=spb2_Weyl(spb2_Weyl(sp,e1),q)                 ! ubar Zslash qslash  = ubar Z_mu gamma^mu q_nu gamma^nu
+                ubarqslZsl=spb2_Weyl(spb2_Weyl(sp,q),e1)                 ! ubar qslash Zslash  = ubar q_mu gamma^mu Z_nu gamma^nu
+                ubarsig=-(ubarZslqsl-ubarqslZsl)/2d0                     ! i*sigma_{mu,nu}Z^{mu}q^{nu} = -[Zsl,qsl]/2
+                vbqV_Weyl = vbqV_Weyl -(0d0,1d0) *(   &
+                  & + HDcoupl_left*( iChir_Weyl(.false.,ubarsig) ) &
+                  & + HDcoupl_right*(iChir_Weyl(.true.,ubarsig)) )
+            endif
+                  
+          elseif (ColorlessParticle .eq. 3) then              ! this is for a scalar, e.g. Higgs
+            vbqV_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.false.,sp) + coupl_right*Chir_Weyl(.true.,sp) )  
+          endif
+
+      RETURN
+      END FUNCTION
+
+
+
+      FUNCTION vVq_Weyl(e1,sp,coupl_left,coupl_right,HDcoupl_left,HDcoupl_right,q)! generalization of spi2_
+      implicit none
+      complex(8), intent(in) :: e1(:)
+      complex(8), intent(in) :: sp(:)
+      complex(8), intent(in) :: coupl_left,coupl_right
+      complex(8), intent(in), optional :: q(:)      
+      complex(8), intent(in), optional :: HDcoupl_left,HDcoupl_right
+      complex(8) :: vVq_Weyl(size(sp)),qslZslv(size(sp)),Zslqslv(size(sp)),sigv(size(sp))
+      integer,parameter :: Ds=4, ColorlessParticle=2
+ 
+          
+          if (ColorlessParticle .eq. 1) then 
+            vVq_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.true., spi2_Weyl(e1,sp)) + coupl_right*Chir_Weyl(.false., spi2_Weyl(e1,sp)) )  
+
+          elseif (ColorlessParticle .eq. 2) then
+            vVq_Weyl=-(0d0,1d0) *( coupl_left*Chir_Weyl(.true., spi2_Weyl(e1,sp)) + coupl_right*Chir_Weyl(.false., spi2_Weyl(e1,sp)) )
+            if( present(q) ) then
+                Zslqslv=spi2_Weyl(e1,spi2_Weyl(q,sp))
+                qslZslv=spi2_Weyl(q,spi2_Weyl(e1,sp))
+                sigv=-(Zslqslv-qslZslv)/2d0                        ! i*sigma_{mu,nu}Z^{mu}q^{nu} = -[Zsl,qsl]/2
+                vVq_Weyl = vVq_Weyl -(0d0,1d0) *( & 
+                  & + HDcoupl_left*(iChir_Weyl(.false.,sigv)) &
+                  & + HDcoupl_right*(iChir_Weyl(.true.,sigv)) )
+            endif
+          
+          elseif (ColorlessParticle .eq. 3) then           ! this is for a scalar, e.g. Higgs
+            vVq_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.false.,sp) + coupl_right*Chir_Weyl(.true.,sp) )
+          endif
+
+      RETURN
+      END FUNCTION
+
+
+
+      
 
 
 
@@ -3948,6 +4017,9 @@ END SUBROUTINE
 
                end function Chir_check
 
+               
+
+               
              recursive function iChir(sign,sp) result(res)
 ! RR -- this function is needed for the electric and dipole moment like couplings,
 !!      which have a 1 +\- i*gamma5 (see 0811.3842)
@@ -3981,6 +4053,31 @@ END SUBROUTINE
 
 
 
+               
+             FUNCTION iChir_Weyl(sign,sp)!  = 0.5(1 + lambda I*gamma^5)
+             implicit none
+             logical :: sign
+             double complex :: sp(1:4)
+             double complex :: iChir_Weyl(1:4)
+             double complex,parameter :: cpl=(0.5d0,+0.5d0)
+             double complex,parameter :: cmi=(0.5d0,-0.5d0)
+
+                if(sign) then ! lambda=+
+                  iChir_Weyl(1) = cpl * sp(1) 
+                  iChir_Weyl(2) = cpl * sp(2) 
+                  iChir_Weyl(3) = cmi * sp(3)
+                  iChir_Weyl(4) = cmi * sp(4)
+                else ! lambda=-
+                  iChir_Weyl(1) = cmi * sp(1) 
+                  iChir_Weyl(2) = cmi * sp(2) 
+                  iChir_Weyl(3) = cpl * sp(3)
+                  iChir_Weyl(4) = cpl * sp(4)
+                endif
+
+             RETURN
+             END FUNCTION
+
+             
 !--------------------Weyl routines-----------------------
 
           SUBROUTINE ubarSpi_Weyl(p,i,ubarSpi)  ! i=+1 is ES to Chir_Weyl(.false.), i=-1 is ES to Chir_Weyl(.true.)

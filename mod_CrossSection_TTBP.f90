@@ -3606,7 +3606,7 @@ include 'vegas_common.f'
   EvalCS_DKP_1L_ttbgg_1 = 0d0
   EvalCS_DKP_1L_ttbgg_2 = 0d0
 
-  call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+  call PDFMapping(2,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top ) then
       EvalCS_DKP_1L_ttbgg = 0d0
       return
