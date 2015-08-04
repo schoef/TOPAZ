@@ -471,6 +471,7 @@ allObjects =   				$(ObjectDir)/mod_Misc.o \
 					$(ObjectDir)/mod_CrossSection_TTB.o \
 					$(ObjectDir)/mod_CrossSection_TTBJ.o \
 					$(ObjectDir)/mod_CrossSection_TTBP.o \
+					$(ObjectDir)/mod_CrossSection_TTBP_anomcoupl.o \
 					$(ObjectDir)/mod_CrossSection_TTBETmiss.o \
 					$(ObjectDir)/mod_CrossSection_ZprimeTTB.o \
 					$(ObjectDir)/mod_CrossSection_eeTTB.o \
@@ -589,6 +590,10 @@ $(ObjectDir)/mod_CrossSection_TTBJ.o: mod_CrossSection_TTBJ.f90 $(makeDep)
 
 
 $(ObjectDir)/mod_CrossSection_TTBP.o: mod_CrossSection_TTBP.f90 $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -c $< -o $@
+
+$(ObjectDir)/mod_CrossSection_TTBP_anomcoupl.o: mod_CrossSection_TTBP_anomcoupl.f90 $(makeDep)
 	@echo " compiling" $<
 	$(fcomp) -c $< -o $@
 

@@ -665,6 +665,7 @@ use ModMisc
 use ModCrossSection_TTB
 use ModCrossSection_TTBJ
 use ModCrossSection_TTBP
+use ModCrossSection_TTBP_anomcoupl
 use ModCrossSection_TTBZ
 use ModCrossSection_TTBH
 use ModCrossSection_TH
@@ -1183,36 +1184,68 @@ ENDIF
 
 IF( MASTERPROCESS.EQ.8 ) THEN
 IF( CORRECTION   .LE.1 ) THEN
-  call vegas(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  else 
+      call vegas(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ELSEIF( CORRECTION.EQ.3 ) THEN
-  call vegas(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ELSEIF( CORRECTION.EQ.4 ) THEN
-  call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ELSEIF( CORRECTION.EQ.5 ) THEN
-  call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+     call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+     call vegas(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ELSE
   call Error("this correction is not available")
@@ -1222,36 +1255,68 @@ ENDIF
 
 IF( MASTERPROCESS.EQ.9 ) THEN
 IF( CORRECTION   .LE.1 ) THEN
-  call vegas(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ELSEIF( CORRECTION.EQ.3 ) THEN
-  call vegas(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ELSEIF( CORRECTION.EQ.4 ) THEN
-  call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ELSEIF( CORRECTION.EQ.5 ) THEN
-  call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ENDIF
 ENDIF
@@ -1260,12 +1325,20 @@ ENDIF
 
 IF( MASTERPROCESS.EQ.10 ) THEN
 IF( CORRECTION.EQ.2 ) THEN
-  call vegas(EvalCS_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ENDIF
 ENDIF
@@ -1275,12 +1348,20 @@ ENDIF
 
 IF( MASTERPROCESS.EQ.11 ) THEN
 IF( CORRECTION.EQ.2 ) THEN
-  call vegas(EvalCS_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ENDIF
 ENDIF
@@ -2054,6 +2135,7 @@ use ModMisc
 use ModCrossSection_TTB
 use ModCrossSection_TTBJ
 use ModCrossSection_TTBP
+use ModCrossSection_TTBP_anomcoupl
 use ModCrossSection_TTBZ
 use ModCrossSection_TTBH
 use ModCrossSection_TH
