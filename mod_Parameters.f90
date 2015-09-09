@@ -98,7 +98,7 @@ real(8), public :: AbsDelF1A, AbsDelF1V    !, DeltaF2A, DeltaF2V    ! later
 real(8), public :: RelDelF1A, RelDelF1V, RelDelF2A, RelDelF2V   !, DeltaF2A, DeltaF2V    ! later
 real(8), public :: DelGam2V,DelGam2A       ! q-dependent coupling for the photon
 
-logical, parameter :: TTBPhoton_SMonly = .true.
+logical, parameter :: TTBPhoton_SMonly = .true.  ! true: no anomalous ttb+gamma couplings,  false: anomalous ttb+gamma couplings
 
 ! top-H couplings
 real(8), public :: kappaTTBH      
