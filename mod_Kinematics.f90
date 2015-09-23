@@ -854,13 +854,13 @@ ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops)
 
 
     Rsep_jet    = 0.4d0             
-    pT_bjet_cut = 20d0*GeV      *0d0
-    pT_jet_cut  = 20d0*GeV      *0d0
-    eta_bjet_cut= 2.5d0         *1d2
-    eta_jet_cut = 2.5d0         *1d2
-    pT_lep_cut  = 20d0*GeV      *0d0
-    pT_miss_cut = 20d0*GeV      *0d0
-    eta_lep_cut = 2.5d0         *1d2
+    pT_bjet_cut = 20d0*GeV      !*0d0
+    pT_jet_cut  = 20d0*GeV      !*0d0
+    eta_bjet_cut= 2.5d0         !*1d2
+    eta_jet_cut = 2.5d0         !*1d2
+    pT_lep_cut  = 20d0*GeV      !*0d0
+    pT_miss_cut = 20d0*GeV      !*0d0
+    eta_lep_cut = 2.5d0         !*1d2
 ENDIF
 
 
@@ -5139,7 +5139,8 @@ ELSEIF( ObsSet.EQ.82 ) THEN! set of observables for ttb+H (di-leptonic tops)
 
 ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops, stable Higgs)
           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
-          if(TopDecays.ne.1 .and. TopDecays.ne.3 .and. TopDecays.ne.4)  call Error("TopDecays needs to be 1 or 3 or 4")
+!          if(TopDecays.ne.1 .and. TopDecays.ne.3 .and. TopDecays.ne.4)  call Error("TopDecays needs to be 1 or 3 or 4")
+          if(TopDecays.ne.3 .and. TopDecays.ne.4 )  call Error("TopDecays needs to be 3 or 4")
           NumHistograms = 12
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
@@ -5199,7 +5200,7 @@ ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops, s
           Histo(9)%BinSize= 0.1d0
           Histo(9)%LowVal = -1d0
           Histo(9)%SetScale= 1d0
-         
+          
           Histo(10)%Info   = "cos(theta_H)" 
           Histo(10)%NBins  = 20
           Histo(10)%BinSize= 0.1d0
@@ -9301,7 +9302,6 @@ real(8) :: pT_jet(1:7),eta_jet(1:7)
 integer :: tbar,t,Hig,inLeft,inRight,realp,bbar,lepM,nubar,b,lepP,nu,qdn,qbup,qbdn,qup,L,N,HDK1,HDK2
 real(8) :: pT_ll,HT_jet,RLept,CosTheta1,CosTheta2,CosThetaStar,delta_eta_L,cos_thetaBB
 integer :: iLept,jLept,jJet
-real(8) :: mT2,pA(2:4),pB(2:4),pTInvis(2:4),mA,mB,mInvis! this is for MT2 calculation   
 real(8) :: MomMELA(1:4,1:13),MatElSq_H0,MatElSq_H1,D_0minus,MomAux1(1:4),MomAux2(1:4),M_aux,MomRest(1:4)
 logical,save :: FirstTime=.true.
 
@@ -9539,15 +9539,15 @@ elseif( ObsSet.eq.82) then! ttb+H production with di-leptonic tops
 !------------------------ cuts and binning --------------------------------
 elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
 
-!     NObsJet_Tree = 4
-!     if( .not.(NJet.ge.NObsJet_Tree .and. any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
-!         applyPSCut = .true.
-!         RETURN
-!     endif
-    if( .not.( any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
-        applyPSCut = .true.
-        RETURN
-    endif
+     NObsJet_Tree = 4
+     if( .not.(NJet.ge.NObsJet_Tree .and. any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
+         applyPSCut = .true.
+         RETURN
+     endif
+!    if( .not.( any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
+!        applyPSCut = .true.
+!        RETURN
+!    endif
 
     pT_ATop = get_PT(Mom(1:4,tbar))
     pT_Top  = get_PT(Mom(1:4,t))
@@ -9596,23 +9596,27 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
       MomBoost(1)   = +MomRest(1)
       MomBoost(2:4) = -MomRest(2:4)
       MomAux1(1:4) = Mom(1:4,Hig)
-      M_Aux = M_H
+      MomAux2(1:4) = (/0d0,0d0,0d0,1d0/) ! z-axis
+      M_Aux = dabs( get_MInv(MomRest(1:4)) + 1d-12 )
       call boost(MomAux1(1:4),MomBoost(1:4),M_Aux)
-      CosThetaStar = -Get_CosTheta( MomAux1(1:4) )
+      call boost(MomAux2(1:4),MomBoost(1:4),M_Aux)
+      CosThetaStar = Get_CosAlpha( MomAux1(1:4),MomAux2(1:4) )
 
-            
+      
       
 ! construct cos(theta2)=cos(theta_t):
       MomRest(1:4)  = Mom(1:4,t)+Mom(1:4,tbar)
       MomBoost(1)   = +MomRest(1)
       MomBoost(2:4) = -MomRest(2:4)
       MomAux1(1:4) = Mom(1:4,Hig)
-      M_Aux = M_H
-      call boost(MomAux1(1:4),MomBoost(1:4),M_Aux)
       MomAux2(1:4) = Mom(1:4,t)
-      M_Aux = M_Top
+      MomAux2(1:4) = (/0d0,0d0,0d0,1d0/) ! z-axis
+
+
+      M_Aux = dabs( get_MInv(MomRest(1:4)) + 1d-12 )
+      call boost(MomAux1(1:4),MomBoost(1:4),M_Aux)
       call boost(MomAux2(1:4),MomBoost(1:4),M_Aux)
-      CosTheta2 = - VectorProd(MomAux1(2:4),MomAux2(2:4))/dsqrt(VectorProd(MomAux1(2:4),MomAux1(2:4)))/dsqrt(VectorProd(MomAux2(2:4),MomAux2(2:4)))
+      CosTheta2 = Get_CosAlpha( MomAux1(1:4),MomAux2(1:4) )
 
 
 
@@ -9705,8 +9709,9 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
       PObs(7) = delta_eta_B
       PObs(8) = cos_thetaLL
       PObs(9) = cos_thetaBB
-      PObs(10)= CosTheta2
-      PObs(11)= D_0minus
+      PObs(10)= CosThetaStar
+      PObs(11)= CosTheta2
+      PObs(12)= D_0minus
    endif
 
 
