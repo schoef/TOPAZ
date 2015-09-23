@@ -56,7 +56,7 @@ real(8),public :: MInv_LB, MInv_T2
 
 
 !DEC$ IF(_UseMPIVegas.EQ.1)
-integer,public,parameter :: NUMHISTO=30       ! this has to match the constants in pvegas_mpi.c
+integer,public,parameter :: NUMHISTO=40       ! this has to match the constants in pvegas_mpi.c
 integer,public,parameter :: MXHISTOBINS=500
 type, BIND(C) :: ReducedHistogram
     real(8) :: Value(1:MXHISTOBINS)
@@ -861,6 +861,16 @@ ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops)
     pT_lep_cut  = 20d0*GeV      !*0d0
     pT_miss_cut = 20d0*GeV      !*0d0
     eta_lep_cut = 2.5d0         !*1d2
+
+
+ELSEIF( ObsSet.EQ.91 ) THEN! set of observables for t+H (stable tops)
+
+ELSEIF( ObsSet.EQ.92 ) THEN! set of observables for tb+H (stable tops)
+
+ELSEIF( ObsSet.EQ.93 ) THEN! set of observables for t+H leptonic top decay)
+    Rsep_jet    = 0.5d0
+ELSEIF( ObsSet.EQ.94 ) THEN! set of observables for tb+H (leptonic top decay)
+    Rsep_jet    = 0.5d0
 ENDIF
 
 
@@ -5219,7 +5229,762 @@ ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops, s
           Histo(12)%LowVal = 0d0
           Histo(12)%SetScale= 1d0
           
-          
+     
+
+
+
+ ELSEIF( ObsSet.EQ.91 ) THEN! set of observables for tH (stable tops)                                                                                                         
+         if(Collider.ne.1)  call Error("Collider needs to be LHC!")
+         if(TopDecays.ne.0)  call Error("TopDecays needs to be 0")
+         NumHistograms = 22
+         if( .not.allocated(Histo) ) then
+            allocate( Histo(1:NumHistograms), stat=AllocStatus  )
+            if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
+         endif
+
+          Histo(1)%Info   = "pT(top)"
+          Histo(1)%NBins  = 50
+          Histo(1)%BinSize= 10d0*GeV
+          Histo(1)%LowVal =  0d0*GeV
+          Histo(1)%SetScale= 100d0
+
+          Histo(2)%Info   = "eta(top)"
+          Histo(2)%NBins  = 60
+          Histo(2)%BinSize= 0.1d0
+          Histo(2)%LowVal = -3d0
+          Histo(2)%SetScale= 1d0
+
+          Histo(3)%Info   = "y(top)"
+          Histo(3)%NBins  = 60
+          Histo(3)%BinSize= 0.1d0
+          Histo(3)%LowVal = -3d0
+          Histo(3)%SetScale= 1d0
+
+          Histo(4)%Info   = "pT(jet)"
+          Histo(4)%NBins  = 50
+          Histo(4)%BinSize= 10d0*GeV
+          Histo(4)%LowVal =  0d0*GeV
+          Histo(4)%SetScale= 100d0
+
+          Histo(5)%Info   = "y(jet)"
+          Histo(5)%NBins  = 60
+          Histo(5)%BinSize= 0.2d0
+          Histo(5)%LowVal = -6d0
+          Histo(5)%SetScale= 1d0
+
+          Histo(6)%Info   = "pT(Higgs)"
+          Histo(6)%NBins  = 50
+          Histo(6)%BinSize= 10d0*GeV
+          Histo(6)%LowVal =  0d0*GeV
+          Histo(6)%SetScale= 100d0
+
+          Histo(7)%Info   = "m(tj)"
+          Histo(7)%NBins  = 50
+          Histo(7)%BinSize= 10d0*GeV
+          Histo(7)%LowVal =  0d0*GeV
+          Histo(7)%SetScale= 100d0
+
+          Histo(8)%Info   = "y(Higgs)"
+          Histo(8)%NBins  = 100
+          Histo(8)%BinSize= 0.1d0
+          Histo(8)%LowVal = -5d0
+          Histo(8)%SetScale= 1d0
+
+          Histo(9)%Info   = "eta(Higgs)"
+          Histo(9)%NBins  = 100
+          Histo(9)%BinSize= 0.1d0
+          Histo(9)%LowVal = -5d0
+          Histo(9)%SetScale= 1d0
+
+          Histo(10)%Info   = "y(tj)"
+          Histo(10)%NBins  = 60
+          Histo(10)%BinSize= 0.1d0
+          Histo(10)%LowVal = -3d0
+          Histo(10)%SetScale= 1d0
+
+          Histo(11)%Info   = "eta(tj)"
+          Histo(11)%NBins  = 60
+          Histo(11)%BinSize= 0.2d0
+          Histo(11)%LowVal = -6d0
+          Histo(11)%SetScale= 1d0
+
+          Histo(12)%Info   = "Deltay(t,j)"
+          Histo(12)%NBins  = 100
+          Histo(12)%BinSize= 0.1d0
+          Histo(12)%LowVal = -5d0
+          Histo(12)%SetScale= 1d0
+
+          Histo(13)%Info   = "m(Htop)"
+          Histo(13)%NBins  = 40
+          Histo(13)%BinSize= 50d0*GeV
+          Histo(13)%LowVal = 0d0*GeV
+          Histo(13)%SetScale= 100d0
+
+          Histo(14)%Info   = "m(Hj)"
+          Histo(14)%NBins  = 50
+          Histo(14)%BinSize= 10d0*GeV
+          Histo(14)%LowVal =  0d0*GeV
+          Histo(14)%SetScale= 100d0
+
+          Histo(15)%Info   = "y(Ht)"
+          Histo(15)%NBins  = 60
+          Histo(15)%BinSize= 0.1d0
+          Histo(15)%LowVal = -3d0
+          Histo(15)%SetScale= 1d0
+
+          Histo(16)%Info   = "eta(Ht)"
+          Histo(16)%NBins  = 60
+          Histo(16)%BinSize= 0.2d0
+          Histo(16)%LowVal = -6d0
+          Histo(16)%SetScale= 1d0
+
+          Histo(17)%Info   = "y(Hj)"
+          Histo(17)%NBins  = 80
+          Histo(17)%BinSize= 0.1d0
+          Histo(17)%LowVal = -4d0
+          Histo(17)%SetScale= 1d0
+
+          Histo(18)%Info   = "eta(Hj)"
+          Histo(18)%NBins  = 100
+          Histo(18)%BinSize= 0.1d0
+          Histo(18)%LowVal = -5d0
+          Histo(18)%SetScale= 1d0
+
+          Histo(19)%Info   = "Deltay(H,t)"
+          Histo(19)%NBins  = 100
+          Histo(19)%BinSize= 0.1d0
+          Histo(19)%LowVal = -5d0
+          Histo(19)%SetScale= 1d0
+
+          Histo(20)%Info   = "Delta eta(H,T)"
+          Histo(20)%NBins  = 100
+          Histo(20)%BinSize= 0.1d0
+          Histo(20)%LowVal = -5d0
+          Histo(20)%SetScale= 1d0
+
+          Histo(21)%Info   = "Deltay(H,j)"
+          Histo(21)%NBins  = 100
+          Histo(21)%BinSize= 0.1d0
+          Histo(21)%LowVal = -5d0
+          Histo(21)%SetScale= 1d0
+
+          Histo(22)%Info   = "Delta eta(H,j)"
+          Histo(22)%NBins  = 100
+          Histo(22)%BinSize= 0.1d0
+          Histo(22)%LowVal = -5d0
+          Histo(22)%SetScale= 1d0
+
+
+ELSEIF( ObsSet.EQ.92 ) THEN! set of observables for tb+H (stable tops)                                                                                             
+                                                                                                                                                                         
+         if(Collider.ne.1)  call Error("Collider needs to be LHC!")
+         if(TopDecays.ne.0)  call Error("TopDecays needs to be 0")
+         NumHistograms = 22
+         if( .not.allocated(Histo) ) then
+            allocate( Histo(1:NumHistograms), stat=AllocStatus  )
+            if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
+         endif
+
+          Histo(1)%Info   = "pT(Atop)"
+          Histo(1)%NBins  = 50
+          Histo(1)%BinSize= 10d0*GeV
+          Histo(1)%LowVal =  0d0*GeV
+          Histo(1)%SetScale= 100d0
+
+          Histo(2)%Info   = "eta(Atop)"
+          Histo(2)%NBins  = 60
+          Histo(2)%BinSize= 0.1d0
+          Histo(2)%LowVal = -3d0
+          Histo(2)%SetScale= 1d0
+
+          Histo(3)%Info   = "y(Atop)"
+          Histo(3)%NBins  = 60
+          Histo(3)%BinSize= 0.1d0
+          Histo(3)%LowVal = -3d0
+          Histo(3)%SetScale= 1d0
+
+          Histo(4)%Info   = "pT(jet)"
+          Histo(4)%NBins  = 50
+          Histo(4)%BinSize= 10d0*GeV
+          Histo(4)%LowVal =  0d0*GeV
+          Histo(4)%SetScale= 100d0
+
+          Histo(5)%Info   = "y(jet)"
+          Histo(5)%NBins  = 60
+          Histo(5)%BinSize= 0.2d0
+          Histo(5)%LowVal = -6d0
+          Histo(5)%SetScale= 1d0
+
+          Histo(6)%Info   = "pT(Higgs)"
+          Histo(6)%NBins  = 50
+          Histo(6)%BinSize= 10d0*GeV
+          Histo(6)%LowVal =  0d0*GeV
+          Histo(6)%SetScale= 100d0
+
+          Histo(7)%Info   = "m(tbarj)"
+          Histo(7)%NBins  = 50
+          Histo(7)%BinSize= 10d0*GeV
+          Histo(7)%LowVal =  0d0*GeV
+          Histo(7)%SetScale= 100d0
+
+          Histo(8)%Info   = "y(Higgs)"
+          Histo(8)%NBins  = 100
+          Histo(8)%BinSize= 0.1d0
+          Histo(8)%LowVal = -5d0
+          Histo(8)%SetScale= 1d0
+
+          Histo(9)%Info   = "eta(Higgs)"
+          Histo(9)%NBins  = 100
+          Histo(9)%BinSize= 0.1d0
+          Histo(9)%LowVal = -5d0
+          Histo(9)%SetScale= 1d0
+
+          Histo(10)%Info   = "y(tbarj)"
+          Histo(10)%NBins  = 60
+          Histo(10)%BinSize= 0.1d0
+          Histo(10)%LowVal = -3d0
+          Histo(10)%SetScale= 1d0
+
+          Histo(11)%Info   = "eta(tbarj)"
+          Histo(11)%NBins  = 60
+          Histo(11)%BinSize= 0.2d0
+          Histo(11)%LowVal = -6d0
+          Histo(11)%SetScale= 1d0
+
+          Histo(12)%Info   = "Deltay(tbar,j)"
+          Histo(12)%NBins  = 100
+          Histo(12)%BinSize= 0.1d0
+          Histo(12)%LowVal = -5d0
+          Histo(12)%SetScale= 1d0
+
+          Histo(13)%Info   = "m(Htop)"
+          Histo(13)%NBins  = 40
+          Histo(13)%BinSize= 50d0*GeV
+          Histo(13)%LowVal = 0d0*GeV
+          Histo(13)%SetScale= 100d0
+
+          Histo(14)%Info   = "m(Hj)"
+          Histo(14)%NBins  = 50
+          Histo(14)%BinSize= 10d0*GeV
+          Histo(14)%LowVal =  0d0*GeV
+          Histo(14)%SetScale= 100d0
+
+          Histo(15)%Info   = "y(Htbar)"
+          Histo(15)%NBins  = 60
+          Histo(15)%BinSize= 0.1d0
+          Histo(15)%LowVal = -3d0
+          Histo(15)%SetScale= 1d0
+
+          Histo(16)%Info   = "eta(Htbar)"
+          Histo(16)%NBins  = 60
+          Histo(16)%BinSize= 0.2d0
+          Histo(16)%LowVal = -6d0
+          Histo(16)%SetScale= 1d0
+
+          Histo(17)%Info   = "y(Hj)"
+          Histo(17)%NBins  = 80
+          Histo(17)%BinSize= 0.1d0
+          Histo(17)%LowVal = -4d0
+          Histo(17)%SetScale= 1d0
+
+          Histo(18)%Info   = "eta(Hj)"
+          Histo(18)%NBins  = 100
+          Histo(18)%BinSize= 0.1d0
+          Histo(18)%LowVal = -5d0
+          Histo(18)%SetScale= 1d0
+
+          Histo(19)%Info   = "Deltay(H,tbar)"
+          Histo(19)%NBins  = 100
+          Histo(19)%BinSize= 0.1d0
+          Histo(19)%LowVal = -5d0
+          Histo(19)%SetScale= 1d0
+
+          Histo(20)%Info   = "Delta eta(H,Tbar)"
+          Histo(20)%NBins  = 100
+          Histo(20)%BinSize= 0.1d0
+          Histo(20)%LowVal = -5d0
+          Histo(20)%SetScale= 1d0
+
+
+          Histo(21)%Info   = "Deltay(H,j)"
+          Histo(21)%NBins  = 100
+          Histo(21)%BinSize= 0.1d0
+          Histo(21)%LowVal = -5d0
+          Histo(21)%SetScale= 1d0
+
+          Histo(22)%Info   = "Delta eta(H,j)"
+          Histo(22)%NBins  = 100
+          Histo(22)%BinSize= 0.1d0
+          Histo(22)%LowVal = -5d0
+          Histo(22)%SetScale= 1d0
+       
+ELSEIF( ObsSet.EQ.93 .or. ObsSet .eq. 95 ) THEN! set of observables for tH (leptonic top decay)                                                            
+         if(Collider.ne.1)  call Error("Collider needs to be LHC!")
+         if(TopDecays.ne.1)  call Error("TopDecays needs to be 1")
+         NumHistograms = 37
+         if( .not.allocated(Histo) ) then
+            allocate( Histo(1:NumHistograms), stat=AllocStatus  )
+            if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
+         endif
+
+
+          Histo(1)%Info   = "pT(e+)"
+          Histo(1)%NBins  = 20
+          Histo(1)%BinSize= 10d0*GeV
+          Histo(1)%LowVal = 0d0*GeV
+          Histo(1)%SetScale= 100d0
+
+          Histo(2)%Info   = "eta(e+)"
+          Histo(2)%NBins  = 22
+          Histo(2)%BinSize= 0.2d0
+          Histo(2)%LowVal = -2.2d0
+          Histo(2)%SetScale= 1d0
+
+          Histo(3)%Info   = "pT(miss)"
+          Histo(3)%NBins  = 20
+          Histo(3)%BinSize= 10d0*GeV
+          Histo(3)%LowVal = 0d0*GeV
+          Histo(3)%SetScale= 100d0
+
+          Histo(4)%Info   = "pT(j)"
+          Histo(4)%NBins  = 50
+          Histo(4)%BinSize= 10d0*GeV
+          Histo(4)%LowVal = 0d0*GeV
+          Histo(4)%SetScale= 100d0
+
+          Histo(5)%Info   = "eta(j)"
+          Histo(5)%NBins  = 60
+          Histo(5)%BinSize= 0.2d0
+          Histo(5)%LowVal = -6d0
+          Histo(5)%SetScale= 1d0
+
+          Histo(6)%Info   = "pT(b)"
+          Histo(6)%NBins  = 50
+          Histo(6)%BinSize= 10d0*GeV
+          Histo(6)%LowVal = 0d0*GeV
+          Histo(6)%SetScale= 100d0
+
+          Histo(7)%Info   = "eta(b)"
+          Histo(7)%NBins  = 60
+          Histo(7)%BinSize= 0.2d0
+          Histo(7)%LowVal = -6d0
+          Histo(7)%SetScale= 1d0
+
+          Histo(8)%Info   = "pT(H)"
+          Histo(8)%NBins  = 50
+          Histo(8)%BinSize= 10d0*GeV
+          Histo(8)%LowVal = 0d0*GeV
+          Histo(8)%SetScale= 100d0
+
+          Histo(9)%Info   = "m(W,trans)"
+          Histo(9)%NBins  = 50
+          Histo(9)%BinSize= 10d0*GeV
+          Histo(9)%LowVal = 0d0*GeV
+          Histo(9)%SetScale= 100d0
+
+          Histo(10)%Info   = "y(H)"
+          Histo(10)%NBins  = 100
+          Histo(10)%BinSize= 0.1d0
+          Histo(10)%LowVal = -5d0
+          Histo(10)%SetScale= 1d0
+
+          Histo(11)%Info   = "y(b,ep)"
+          Histo(11)%NBins  = 100
+          Histo(11)%BinSize= 0.1d0
+          Histo(11)%LowVal = -5d0
+          Histo(11)%SetScale= 1d0
+
+          Histo(12)%Info   = "y(j,ep)"
+          Histo(12)%NBins  = 100
+          Histo(12)%BinSize= 0.1d0
+          Histo(12)%LowVal = -5d0
+          Histo(12)%SetScale= 1d0
+
+          Histo(13)%Info   = "eta(H)"
+          Histo(13)%NBins  = 100
+          Histo(13)%BinSize= 0.1d0
+          Histo(13)%LowVal = -5d0
+          Histo(13)%SetScale= 1d0
+
+          Histo(14)%Info   = "eta(W)"
+          Histo(14)%NBins  = 100
+          Histo(14)%BinSize= 0.1d0
+          Histo(14)%LowVal = -5d0
+          Histo(14)%SetScale= 1d0
+
+          Histo(15)%Info   = "Delta eta(j,b)"
+          Histo(15)%NBins  = 100
+          Histo(15)%BinSize= 0.1d0
+          Histo(15)%LowVal = -5d0
+          Histo(15)%SetScale= 1d0
+
+          Histo(16)%Info   = "Delta R(b,e+)"
+          Histo(16)%NBins  = 100
+          Histo(16)%BinSize= 0.1d0
+          Histo(16)%LowVal = -5d0
+          Histo(16)%SetScale= 1d0
+
+          Histo(17)%Info   = "Delta R(j,e+)"
+          Histo(17)%NBins  = 100
+          Histo(17)%BinSize= 0.1d0
+          Histo(17)%LowVal = -5d0
+          Histo(17)%SetScale= 1d0
+
+          Histo(18)%Info   = "m(H,b)"
+          Histo(18)%NBins  = 50
+          Histo(18)%BinSize= 10d0*GeV
+          Histo(18)%LowVal = 0d0*GeV
+          Histo(18)%SetScale= 100d0
+
+          Histo(19)%Info   = "m(W,b)"
+          Histo(19)%NBins  = 50
+          Histo(19)%BinSize= 10d0*GeV
+          Histo(19)%LowVal = 0d0*GeV
+          Histo(19)%SetScale= 100d0
+
+          Histo(20)%Info   = "m(W,j)"
+          Histo(20)%NBins  = 50
+          Histo(20)%BinSize= 10d0*GeV
+          Histo(20)%LowVal = 0d0*GeV
+          Histo(20)%SetScale= 100d0
+
+          Histo(21)%Info   = "m(H,j)"
+          Histo(21)%NBins  = 30
+          Histo(21)%BinSize= 5d0*GeV
+          Histo(21)%LowVal = 125d0*GeV
+          Histo(21)%SetScale= 100d0
+
+          Histo(22)%Info   = "y(H,j)"
+          Histo(22)%NBins  = 80
+          Histo(22)%BinSize= 0.1d0
+          Histo(22)%LowVal = -4d0
+          Histo(22)%SetScale= 1d0
+
+          Histo(23)%Info   = "eta(H,j)"
+          Histo(23)%NBins  = 80
+          Histo(23)%BinSize= 0.1d0
+          Histo(23)%LowVal = -4d0
+          Histo(23)%SetScale= 1d0
+
+          Histo(24)%Info   = "eta(H,b)"
+          Histo(24)%NBins  = 80
+          Histo(24)%BinSize= 0.1d0
+          Histo(24)%LowVal = -4d0
+          Histo(24)%SetScale= 1d0
+
+          Histo(25)%Info   = "eta(W,b)"
+          Histo(25)%NBins  = 80
+          Histo(25)%BinSize= 0.1d0
+          Histo(25)%LowVal = -4d0
+          Histo(25)%SetScale= 1d0
+
+          Histo(26)%Info   = "eta(W,j)"
+          Histo(26)%NBins  = 80
+          Histo(26)%BinSize= 0.1d0
+          Histo(26)%LowVal = -4d0
+          Histo(26)%SetScale= 1d0
+
+          Histo(27)%Info   = "Delta eta(H,j)"
+          Histo(27)%NBins  = 100
+          Histo(27)%BinSize= 0.1d0
+          Histo(27)%LowVal = -5d0
+          Histo(27)%SetScale= 1d0
+
+          Histo(28)%Info   = "Delta y(H,j)"
+          Histo(28)%NBins  = 100
+          Histo(28)%BinSize= 0.1d0
+          Histo(28)%LowVal = -5d0
+          Histo(28)%SetScale= 1d0
+
+          Histo(29)%Info   = "Delta eta(H,b)"
+          Histo(29)%NBins  = 100
+          Histo(29)%BinSize= 0.1d0
+          Histo(29)%LowVal = -5d0
+          Histo(29)%SetScale= 1d0
+
+          Histo(30)%Info   = "Delta eta(W,j)"
+          Histo(30)%NBins  = 100
+          Histo(30)%BinSize= 0.1d0
+          Histo(30)%LowVal = -5d0
+          Histo(30)%SetScale= 1d0
+
+          Histo(31)%Info   = "Delta eta(W,b)"
+          Histo(31)%NBins  = 100
+          Histo(31)%BinSize= 0.1d0
+          Histo(31)%LowVal = -5d0
+          Histo(31)%SetScale= 1d0
+
+          Histo(32)%Info   = "Delta eta(H,ep)"
+          Histo(32)%NBins  = 100
+          Histo(32)%BinSize= 0.1d0
+          Histo(32)%LowVal = -5d0
+          Histo(32)%SetScale= 1d0
+
+          Histo(33)%Info   = "m(H,b,ep)"
+          Histo(33)%NBins  = 50
+          Histo(33)%BinSize= 10d0*GeV
+          Histo(33)%LowVal = 0d0*GeV
+          Histo(33)%SetScale= 100d0
+
+          Histo(34)%Info   = "m(H,j,ep)"
+          Histo(34)%NBins  = 50
+          Histo(34)%BinSize= 10d0*GeV
+          Histo(34)%LowVal = 0d0*GeV
+          Histo(34)%SetScale= 100d0
+
+          Histo(35)%Info   = "Delta eta(t,j)"
+          Histo(35)%NBins  = 100
+          Histo(35)%BinSize= 0.1d0
+          Histo(35)%LowVal = -5d0
+          Histo(35)%SetScale= 1d0
+
+          Histo(36)%Info   = "Delta eta(t,H)"
+          Histo(36)%NBins  = 100
+          Histo(36)%BinSize= 0.1d0
+          Histo(36)%LowVal = -5d0
+          Histo(36)%SetScale= 1d0
+
+          Histo(37)%Info   = "cos theta(l,j1)"
+          Histo(37)%NBins  = 20
+          Histo(37)%BinSize= 0.1d0
+          Histo(37)%LowVal = -1d0
+          Histo(37)%SetScale= 1d0
+
+
+ELSEIF( ObsSet.EQ.94 .or. ObsSet .eq. 96) THEN! set of observables for tbH (leptonic top decay)                                                         
+
+                                          
+         if(Collider.ne.1)  call Error("Collider needs to be LHC!")
+         if(TopDecays.ne.1)  call Error("TopDecays needs to be 1")
+         NumHistograms = 37
+         if( .not.allocated(Histo) ) then
+            allocate( Histo(1:NumHistograms), stat=AllocStatus  )
+            if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
+         endif
+
+
+          Histo(1)%Info   = "pT(-)"
+          Histo(1)%NBins  = 20
+          Histo(1)%BinSize= 10d0*GeV
+          Histo(1)%LowVal = 0d0*GeV
+          Histo(1)%SetScale= 100d0
+
+          Histo(2)%Info   = "eta(e-)"
+          Histo(2)%NBins  = 22
+          Histo(2)%BinSize= 0.2d0
+          Histo(2)%LowVal = -2.2d0
+          Histo(2)%SetScale= 1d0
+
+          Histo(3)%Info   = "pT(miss)"
+          Histo(3)%NBins  = 20
+          Histo(3)%BinSize= 10d0*GeV
+          Histo(3)%LowVal = 0d0*GeV
+          Histo(3)%SetScale= 100d0
+
+          Histo(4)%Info   = "pT(j)"
+          Histo(4)%NBins  = 50
+          Histo(4)%BinSize= 10d0*GeV
+          Histo(4)%LowVal = 0d0*GeV
+          Histo(4)%SetScale= 100d0
+
+          Histo(5)%Info   = "eta(j)"
+          Histo(5)%NBins  = 60
+          Histo(5)%BinSize= 0.2d0
+          Histo(5)%LowVal = -6d0
+          Histo(5)%SetScale= 1d0
+
+          Histo(6)%Info   = "pT(bbar)"
+          Histo(6)%NBins  = 50
+          Histo(6)%BinSize= 10d0*GeV
+          Histo(6)%LowVal = 0d0*GeV
+          Histo(6)%SetScale= 100d0
+
+          Histo(7)%Info   = "eta(bbar)"
+          Histo(7)%NBins  = 60
+          Histo(7)%BinSize= 0.2d0
+          Histo(7)%LowVal = -6d0
+          Histo(7)%SetScale= 1d0
+
+          Histo(8)%Info   = "pT(H)"
+          Histo(8)%NBins  = 50
+          Histo(8)%BinSize= 10d0*GeV
+          Histo(8)%LowVal = 0d0*GeV
+          Histo(8)%SetScale= 100d0
+
+          Histo(9)%Info   = "m(W,trans)"
+          Histo(9)%NBins  = 50
+          Histo(9)%BinSize= 10d0*GeV
+          Histo(9)%LowVal = 0d0*GeV
+          Histo(9)%SetScale= 100d0
+
+          Histo(10)%Info   = "y(H)"
+          Histo(10)%NBins  = 100
+          Histo(10)%BinSize= 0.1d0
+          Histo(10)%LowVal = -5d0
+          Histo(10)%SetScale= 1d0
+
+          Histo(11)%Info   = "y(b,em)"
+          Histo(11)%NBins  = 100
+          Histo(11)%BinSize= 0.1d0
+          Histo(11)%LowVal = -5d0
+          Histo(11)%SetScale= 1d0
+
+          Histo(12)%Info   = "y(j,em)"
+          Histo(12)%NBins  = 100
+          Histo(12)%BinSize= 0.1d0
+          Histo(12)%LowVal = -5d0
+          Histo(12)%SetScale= 1d0
+
+          Histo(13)%Info   = "eta(H)"
+          Histo(13)%NBins  = 100
+          Histo(13)%BinSize= 0.1d0
+          Histo(13)%LowVal = -5d0
+          Histo(13)%SetScale= 1d0
+
+          Histo(14)%Info   = "eta(W)"
+          Histo(14)%NBins  = 100
+          Histo(14)%BinSize= 0.1d0
+          Histo(14)%LowVal = -5d0
+          Histo(14)%SetScale= 1d0
+
+          Histo(15)%Info   = "Delta eta(j,bbar)"
+          Histo(15)%NBins  = 100
+          Histo(15)%BinSize= 0.1d0
+          Histo(15)%LowVal = -5d0
+          Histo(15)%SetScale= 1d0
+
+          Histo(16)%Info   = "Delta R(bbar,e-)"
+          Histo(16)%NBins  = 100
+          Histo(16)%BinSize= 0.1d0
+          Histo(16)%LowVal = -5d0
+          Histo(16)%SetScale= 1d0
+
+          Histo(17)%Info   = "Delta R(j,e-)"
+          Histo(17)%NBins  = 100
+          Histo(17)%BinSize= 0.1d0
+          Histo(17)%LowVal = -5d0
+          Histo(17)%SetScale= 1d0
+
+          Histo(18)%Info   = "m(H,bbar)"
+          Histo(18)%NBins  = 50
+          Histo(18)%BinSize= 10d0*GeV
+          Histo(18)%LowVal = 0d0*GeV
+          Histo(18)%SetScale= 100d0
+
+          Histo(19)%Info   = "m(W,bbar)"
+          Histo(19)%NBins  = 50
+          Histo(19)%BinSize= 10d0*GeV
+          Histo(19)%LowVal = 0d0*GeV
+          Histo(19)%SetScale= 100d0
+
+          Histo(20)%Info   = "m(W,j)"
+          Histo(20)%NBins  = 50
+          Histo(20)%BinSize= 10d0*GeV
+          Histo(20)%LowVal = 0d0*GeV
+          Histo(20)%SetScale= 100d0
+
+          Histo(21)%Info   = "m(H,j)"
+          Histo(21)%NBins  = 30
+          Histo(21)%BinSize= 5d0*GeV
+          Histo(21)%LowVal = 125d0*GeV
+          Histo(21)%SetScale= 100d0
+
+          Histo(22)%Info   = "y(H,j)"
+          Histo(22)%NBins  = 80
+          Histo(22)%BinSize= 0.1d0
+          Histo(22)%LowVal = -4d0
+          Histo(22)%SetScale= 1d0
+
+          Histo(23)%Info   = "eta(H,j)"
+          Histo(23)%NBins  = 80
+          Histo(23)%BinSize= 0.1d0
+          Histo(23)%LowVal = -4d0
+          Histo(23)%SetScale= 1d0
+
+          Histo(24)%Info   = "eta(H,bbar)"
+          Histo(24)%NBins  = 80
+          Histo(24)%BinSize= 0.1d0
+          Histo(24)%LowVal = -4d0
+          Histo(24)%SetScale= 1d0
+
+          Histo(25)%Info   = "eta(W,bbar)"
+          Histo(25)%NBins  = 80
+          Histo(25)%BinSize= 0.1d0
+          Histo(25)%LowVal = -4d0
+          Histo(25)%SetScale= 1d0
+
+          Histo(26)%Info   = "eta(W,j)"
+          Histo(26)%NBins  = 80
+          Histo(26)%BinSize= 0.1d0
+          Histo(26)%LowVal = -4d0
+          Histo(26)%SetScale= 1d0
+
+          Histo(27)%Info   = "Delta eta(H,j)"
+          Histo(27)%NBins  = 100
+          Histo(27)%BinSize= 0.1d0
+          Histo(27)%LowVal = -5d0
+          Histo(27)%SetScale= 1d0
+
+          Histo(28)%Info   = "Delta y(H,j)"
+          Histo(28)%NBins  = 100
+          Histo(28)%BinSize= 0.1d0
+          Histo(28)%LowVal = -5d0
+          Histo(28)%SetScale= 1d0
+
+          Histo(29)%Info   = "Delta eta(H,bbar)"
+          Histo(29)%NBins  = 100
+          Histo(29)%BinSize= 0.1d0
+          Histo(29)%LowVal = -5d0
+          Histo(29)%SetScale= 1d0
+
+          Histo(30)%Info   = "Delta eta(W,j)"
+          Histo(30)%NBins  = 100
+          Histo(30)%BinSize= 0.1d0
+          Histo(30)%LowVal = -5d0
+          Histo(30)%SetScale= 1d0
+
+          Histo(31)%Info   = "Delta eta(W,bbar)"
+          Histo(31)%NBins  = 100
+          Histo(31)%BinSize= 0.1d0
+          Histo(31)%LowVal = -5d0
+          Histo(31)%SetScale= 1d0
+
+          Histo(32)%Info   = "Delta eta(H,em)"
+          Histo(32)%NBins  = 100
+          Histo(32)%BinSize= 0.1d0
+          Histo(32)%LowVal = -5d0
+          Histo(32)%SetScale= 1d0
+
+          Histo(33)%Info   = "m(H,bbar,em)"
+          Histo(33)%NBins  = 50
+          Histo(33)%BinSize= 10d0*GeV
+          Histo(33)%LowVal = 0d0*GeV
+          Histo(33)%SetScale= 100d0
+
+          Histo(34)%Info   = "m(H,j,em)"
+          Histo(34)%NBins  = 50
+          Histo(34)%BinSize= 10d0*GeV
+          Histo(34)%LowVal = 0d0*GeV
+          Histo(34)%SetScale= 100d0
+
+          Histo(35)%Info   = "Delta eta(tbar,j)"
+          Histo(35)%NBins  = 100
+          Histo(35)%BinSize= 0.1d0
+          Histo(35)%LowVal = -5d0
+          Histo(35)%SetScale= 1d0
+
+          Histo(36)%Info   = "Delta eta(tbar,H)"
+          Histo(36)%NBins  = 100
+          Histo(36)%BinSize= 0.1d0
+          Histo(36)%LowVal = -5d0
+          Histo(36)%SetScale= 1d0
+
+          Histo(37)%Info   = "cos theta(l,j1)"
+          Histo(37)%NBins  = 20
+          Histo(37)%BinSize= 0.1d0
+          Histo(37)%LowVal = -1d0
+          Histo(37)%SetScale= 1d0
+     
           
           
 ELSE
@@ -6308,6 +7073,47 @@ real(8),parameter :: NPr=3, PiWgtPr = (2d0*Pi)**(4-NPr*3) * (4d0*Pi)**(NPr-1)
 return
 END SUBROUTINE
 
+
+
+SUBROUTINE EvalPhasespace_2to3ArbMass(EHat,Mass,xRndPS,Mom,PSWgt)
+use ModProcess
+use ModMisc
+use ModParameters
+implicit none
+real(8) :: EHat
+real(8) :: PSWgt,PSWgt2,PSWgt3,Mass(1:3)
+real(8) :: xRndPS(1:5)
+real(8) :: Mom(1:4,1:5),TmpMom(1:4)
+! real(8) :: MomDK(1:4,1:6)                                                                                                                                                     
+! integer :: NPart,i                                                                                                                                                            
+! real(8) :: vel,parx,theta ! for checks                                                                                                                                        
+integer :: Pcol1,Pcol2,Steps
+real(8) :: SingDepth,velo,parx
+real(8),parameter :: NPr=3, PiWgtPr = (2d0*Pi)**(4-NPr*3) * (4d0*Pi)**(NPr-1)
+
+
+  call genps(3,Ehat,xRndPS(1:5),Mass,Mom(1:4,3:5),PSWgt)
+  PSWgt = PSWgt*PiWgtPr
+
+!   call yeti3(Ehat,xRndPS(1:5),(/m_Top,m_Top,Mass/),Mom(1:4,3:5),PSWgt)                                                                                                        
+!   TmpMom(1:4) = Mom(1:4,3)                                                                                                                                                    
+!   Mom(1:4,3)  = Mom(1:4,5)                                                                                                                                                    
+!   Mom(1:4,5)  = TmpMom(1:4)                                                                                                                                                   
+
+!  particles on the beam axis:                                                                                                                                                  
+   Mom(1,1) =  EHat*0.5d0
+   Mom(2,1) =  0d0
+   Mom(3,1) =  0d0
+   Mom(4,1) = +EHat*0.5d0
+
+   Mom(1,2) =  EHat*0.5d0
+   Mom(2,2) =  0d0
+   Mom(3,2) =  0d0
+   Mom(4,2) = -EHat*0.5d0
+
+
+return
+END SUBROUTINE
 
 
 SUBROUTINE EvalPhasespace_2to4M(EHat,Masses,xRndPS,Mom,PSWgt)
@@ -9729,6 +10535,751 @@ END SUBROUTINE
 
 
 
+
+
+
+
+
+
+SUBROUTINE Kinematics_TH(NPlus1PS,Mom,MomOrder,applyPSCut,NBin,PObs)
+  use ModMisc
+  use ModParameters
+  implicit none
+  integer :: NPlus1PS,MomOrder(1:11)
+  real(8) :: Mom(1:4,1:11),zeros(1:9)
+  integer :: t,ljet,Hig,inLeft,inRight,realp,b,lepP,nu,Hdk1,Hdk2,k
+  real(8) :: MomJet(1:4,1:7) !,MomJet_CHECK(1:4,1:7)                                                                                                                    
+  real(8) :: MomHadr(1:4,0:8),MomMiss(1:4)
+  real(8) :: pT_top,pT_higgs,pT_j,eta_j,eta_top,eta_Higgs,y_top,y_Higgs,y_j,eta_Hj,Dy_jt,Dy_Ht,Dy_Hj,Deta_Hj,Deta_Ht,eta_Ht,y_Ht,y_tj,m_Ht,eta_tj,y_Hj,m_tj,m_Hj
+  real(8) :: pT_miss,pT_ep,pT_b,eta_ep,eta_b,y_bep,y_jep,eta_W,eta_Hb,eta_Wj,eta_Wb,Deta_jb,Deta_Hb,Deta_Wj,Deta_Wb,Deta_tj,m_Hb,m_Wb,m_Wj,m_Hbep,m_Hjep,DR_bep,mtrans_W,HTtot,DR_jep,Deta_Hep, costheta_j,costheta_l,costheta_lj,DR_bj
+  real(8),optional :: PObs(:)
+  logical :: applyPSCut
+  integer :: NBin(:),PartList(1:7),JetList(1:7),NJet,NumHadr
+
+
+  applyPSCut = .false.
+
+! momentum ordering
+  t      = MomOrder(1)
+  ljet   = MomOrder(2) 
+  Hig     = MomOrder(3)
+  inLeft  = MomOrder(4)
+  inRight = MomOrder(5)
+  realp   = MomOrder(6)
+  b    = MomOrder(7)
+  lepP    = MomOrder(8)
+  nu   = MomOrder(9)
+  Hdk1    = MomOrder(10)
+  Hdk2    = MomOrder(11)
+
+!DEC$ IF(_CheckMomenta .EQ.1)
+   zeros(:) = 0d0
+   if(TopDecays.eq.0) then
+      zeros(1:4) = Mom(1:4,inLeft)+Mom(1:4,inRight) - Mom(1:4,ljet) - Mom(1:4,t) - Mom(1:4,Hig)
+   else
+      zeros(1:4) = Mom(1:4,inLeft)+Mom(1:4,inRight) - Mom(1:4,ljet) - Mom(1:4,b)-Mom(1:4,lepP)-Mom(1:4,nu) - Mom(1:4,Hdk1)-Mom(1:4,Hdk2)
+   endif
+   if( NPlus1PS.eq.1 ) zeros(1:4) = zeros(1:4) - Mom(1:4,realp)
+   if( any(abs(zeros(1:4)/Mom(1,inLeft)).gt.1d-8) ) then
+      print *, "ERROR: energy-momentum violation in SUBROUTINE Kinematics_TH(): ",NPlus1PS,zeros(1:4)
+      print *, "momenta dump:"
+      do k=1,12
+         print *,k, Mom(1:4,k)
+      enddo
+   endif
+   zeros(1) = (Mom(1:4,t).dot.Mom(1:4,t)) - m_Top**2
+   zeros(2) = (Mom(1:4,Hig).dot.Mom(1:4,Hig)) - M_H**2
+   zeros(3) = (Mom(1:4,ljet).dot.Mom(1:4,ljet))
+   zeros(4) = (Mom(1:4,b).dot.Mom(1:4,b))
+   zeros(5) = (Mom(1:4,lepP).dot.Mom(1:4,lepP))
+   zeros(6) = (Mom(1:4,nu).dot.Mom(1:4,nu))
+   zeros(7) = (Mom(1:4,Hdk1).dot.Mom(1:4,Hdk1))
+   zeros(8) = (Mom(1:4,Hdk2).dot.Mom(1:4,Hdk2))
+
+
+   if( NPlus1PS.eq.1 ) zeros(9)=  Mom(1:4,realp).dot.Mom(1:4,realp)
+   if( TopDecays.eq.0 .and. any(abs(zeros(1:3)/Mom(1,inLeft)**2).gt.1d-8) ) then
+      print *, "ERROR: onshell-ness violation in SUBROUTINE Kinematics_TH(): ",zeros(1:3)
+      print *, Mom(1:4,1:3)
+   endif
+   if( TopDecays.ne.0 .and. any(abs(zeros(1:9)/Mom(1,inLeft)**2).gt.1d-8) ) then
+      print *, "ERROR: onshell-ness violation in SUBROUTINE Kinematics_TH(): ",zeros(1:9)
+      print *, "momenta dump:"
+      print *, Mom(1:4,1:9)
+   endif
+   print *, "CHECK MOMENTA PASSED!"
+!DEC$ ENDIF  
+
+
+NBin(1:NumHistograms) = 0
+MomHadr(1:4,1:7) = 0d0
+PartList(1:7)=(/1,2,3,4,5,6,7/)
+MomMiss(1:4) = 0d0
+
+
+
+IF( TOPDECAYS.EQ.0 ) THEN  ! no top decays
+   MomHadr(1:4,1) = Mom(1:4,ljet)
+    if(NPlus1PS.eq.0) then
+        NumHadr = 1
+    else
+        NumHadr = 2
+        MomHadr(1:4,NumHadr) = Mom(1:4,realp)
+    endif
+
+ELSEIF( TOPDECAYS.EQ.1 .OR. TOPDECAYS.eq.-1 ) THEN  ! di-leptonic decay                                                                                                         
+!    MomHadr(1:4,1) = Mom(1:4,bbar)
+   MomHadr(1:4,1) = Mom(1:4,b)     ! Bot                                                                                                                                       
+   MomHadr(1:4,2) = Mom(1:4,ljet)
+ 
+    if(NPlus1PS.eq.0) then
+        NumHadr = 2
+    else
+        NumHadr = 3
+        MomHadr(1:4,NumHadr) = Mom(1:4,realp)
+    endif
+
+ELSE
+  call Error("this decay is not yet implemented")
+ENDIF
+
+
+
+
+!---------------------- kT jet algorithm ---------------------------------                                                                                                     
+! important: b-quarks need to be at the first two positions of MomHadr(:,:)                                                                                                    
+! recombination of MomHadr(1:4,i) and MomHadr(1:4,j) results in MomJet(1:4,i) with i<j.                                                                                        
+! but take care: some MomJet(1:4,i) can be zero, this is why we apply pt_order                                                                                                 
+
+    NJet=0
+    MomJet(1:4,1:7) = MomHadr(1:4,1:7)
+    
+    call JetAlgo_kt(Rsep_jet,PartList(1:NumHadr),MomHadr(1:4,1:NumHadr),NJet,JetList(1:NumHadr),MomJet(1:4,1:NumHadr)) ! hard protojets in beam pipe are counted as jets   
+    call pT_order(2,MomJet(1:4,1:2))
+    call pT_order(NumHadr-2,MomJet(1:4,3:NumHadr))
+
+! call SwitchEnergyComponent(MomHadr(1:4,1:NumHadr))                                                                                                                           
+! call fastjetppgenkt(MomHadr(1:4,1:NumHadr),NumHadr,Rsep_jet,-1d0,MomJet(1:4,1:NumHadr),NJet)! 4th argument:  +1d0=kT,  -1d0=anti-kT,   0d0=CA                               
+! call SwitchEnergyComponentBack(MomJet_CHECK(1:4,1:NumHadr))                                                              
+
+    
+    if( ObsSet.eq.91) then! t+H production without top decays at LHC                                                                                                      
+
+
+       pT_Top  = get_PT(Mom(1:4,t))
+       pT_Higgs= get_PT(Mom(1:4,Hig))
+       pT_j= get_PT(Mom(1:4,ljet))
+
+       y_top=get_eta(Mom(1:4,t))
+       y_Higgs=get_eta(Mom(1:4,Hig))
+       y_j=get_eta(Mom(1:4,ljet))
+
+       eta_top=get_pseudoeta(Mom(1:4,t))
+       eta_Higgs=get_pseudoeta(Mom(1:4,Hig))
+       eta_j=get_pseudoeta(Mom(1:4,ljet))
+
+       eta_tj=get_pseudoeta(Mom(1:4,t)+Mom(1:4,ljet))
+       eta_Hj=get_pseudoeta(Mom(1:4,Hig)+Mom(1:4,ljet))
+       eta_Ht=get_pseudoeta(Mom(1:4,Hig)+Mom(1:4,t))
+
+       y_tj=get_eta(Mom(1:4,t)+Mom(1:4,ljet))       
+       y_Hj=get_eta(Mom(1:4,Hig)+Mom(1:4,ljet))
+       y_Ht=get_eta(Mom(1:4,Hig)+Mom(1:4,t))
+       
+       m_Ht=get_MInv(Mom(1:4,Hig)+Mom(1:4,t))
+       m_Hj=get_MInv(Mom(1:4,Hig)+Mom(1:4,ljet))
+       m_tj=get_MInv(Mom(1:4,t)+Mom(1:4,ljet))
+       
+       Dy_Hj=y_Higgs-y_j
+       Dy_Ht=y_Higgs-y_top
+       Dy_jt=y_j-y_top
+
+       Deta_Hj=eta_Higgs-eta_j
+       Deta_Ht=eta_Higgs-eta_top
+
+       ! binning                                                                                                                                             
+       NBin(1) = WhichBin(1,pT_Top)
+       NBin(2) = WhichBin(2,eta_Top)
+       NBin(3) = WhichBin(3,y_Top)
+       NBin(4) = WhichBin(4,pT_j)
+       NBin(5) = WhichBin(5,y_j)
+       NBin(6) = WhichBin(6,pT_Higgs)
+       NBin(7) = WhichBin(7,m_tj)
+       NBin(8) = WhichBin(8,y_Higgs)
+       NBin(9) = WhichBin(9,eta_Higgs)
+       NBin(10) = WhichBin(10,y_tj)
+       NBin(11) = WhichBin(11,eta_tj)
+       NBin(12) = WhichBin(12,Dy_jt)
+       NBin(13) = WhichBin(13,m_Ht)
+       NBin(14) = WhichBin(14,m_Hj)
+       NBin(15) = WhichBin(15,y_Ht)
+       NBin(16) = WhichBin(16,eta_Ht)
+       NBin(17) = WhichBin(17,y_Hj)
+       NBin(18) = WhichBin(18,eta_Hj)
+       NBin(19) = WhichBin(19,Dy_Ht)
+       NBin(20) = WhichBin(20,Deta_Ht)
+       NBin(21) = WhichBin(21,Dy_Hj)
+       NBin(22) = WhichBin(22,Deta_Hj)
+
+       if( present(PObs) ) then
+          PObs(1) = pT_Top
+          PObs(2) = eta_Top
+          PObs(3) = y_Top
+          PObs(4) = pt_j
+          PObs(5) = y_j
+          PObs(6) = pT_Higgs
+          PObs(7) = m_tj
+          PObs(8) = y_Higgs
+          PObs(9) = eta_Higgs
+          PObs(10) = y_tj
+          PObs(11) = eta_tj
+          POBs(12) = Dy_jt
+          PObs(13) = m_Ht
+          PObs(14) = m_Hj
+          PObs(15) = y_Ht
+          PObs(16) = eta_Ht
+          PObs(17) = y_Hj
+          PObs(18) = eta_Hj
+          POBs(19) = Dy_Ht
+          POBs(20) = Deta_Ht
+          POBs(21) = Dy_Hj
+          POBs(22) = Deta_Hj
+
+       endif
+       !-------------------------------------------------------             
+    elseif (ObsSet .eq. 93 .or. ObsSet .eq. 95) then      ! leptonic top decay
+       pT_ep = get_PT(Mom(1:4,lepP))
+       pT_miss = get_PT(Mom(1:4,nu))
+       pT_Higgs= get_PT(Mom(1:4,Hig))
+       pT_j = get_PT(Mom(1:4,ljet))
+       pT_b = get_PT(Mom(1:4,b))
+       pT_Top= get_PT(Mom(1:4,t))
+       
+       eta_ep=get_pseudoeta(Mom(1:4,lepP))
+       eta_b=get_pseudoeta(Mom(1:4,b))
+       eta_top=get_pseudoeta(Mom(1:4,t))
+       eta_Higgs=get_pseudoeta(Mom(1:4,Hig))
+       eta_j=get_pseudoeta(Mom(1:4,ljet))
+       eta_W=get_pseudoeta(Mom(1:4,lepP)+Mom(1:4,nu))
+       eta_Hj=get_pseudoeta(Mom(1:4,ljet)+Mom(1:4,Hig))
+       eta_Hb=get_pseudoeta(Mom(1:4,b)+Mom(1:4,Hig))
+       eta_Wj=get_pseudoeta(Mom(1:4,lepP)+Mom(1:4,nu)+Mom(1:4,ljet))
+       eta_Wb=get_pseudoeta(Mom(1:4,lepP)+Mom(1:4,nu)+Mom(1:4,b))
+
+       DR_bj=get_R(Mom(1:4,b),Mom(1:4,ljet))
+       DR_bep=get_R(Mom(1:4,b),Mom(1:4,lepP))
+       DR_jep=get_R(Mom(1:4,ljet),Mom(1:4,lepP))
+
+
+       IF (ObsSet .eq. 95) THEN
+          if (pT_ep .le. pT_lep_cut .or. pT_b .le. pT_bjet_cut .or. pT_j .le. pT_jet_cut) then
+             applyPSCut = .true.
+             RETURN
+          endif
+
+          if (abs(eta_ep) .ge. eta_lep_cut .or. abs(eta_j) .ge. eta_jet_cut .or. abs(eta_b) .ge. eta_bjet_cut) then
+             applyPSCut = .true.
+             RETURN
+          endif
+
+          if (DR_bj .le. Rsep_jet .or. DR_bep .le. Rsep_lepjet .or. DR_jep .le. Rsep_lepjet) then
+             applyPSCut = .true.
+             RETURN
+          endif
+       ENDIF
+
+
+ !      y_top=get_eta(Mom(1:4,t))
+       y_Higgs=get_eta(Mom(1:4,Hig))
+       y_bep=get_eta(Mom(1:4,b)+Mom(1:4,lepP))
+       y_jep=get_eta(Mom(1:4,ljet)+Mom(1:4,lepP))
+       y_Hj=get_eta(Mom(1:4,ljet)+Mom(1:4,Hig))
+       y_j=get_eta(Mom(1:4,ljet))
+       
+       costheta_j = get_CosTheta(Mom(1:4,ljet))
+       costheta_l = get_CosTheta(Mom(1:4,lepP))
+!       costheta_lj=costheta_l-costheta_j
+       costheta_lj=get_cosalpha(Mom(1:4,lepP),Mom(1:4,ljet))
+
+       Deta_jb=eta_j-eta_b
+       Deta_Hj=eta_Higgs-eta_j
+       Deta_Hb=eta_Higgs-eta_b
+       Deta_Wj=eta_W-eta_j
+       Deta_Wb=eta_W-eta_b
+       Deta_Ht=eta_Higgs-eta_top
+       Deta_Hep=eta_Higgs-eta_ep
+       Deta_tj=eta_top-eta_j
+       Dy_Hj=y_Higgs-y_j
+
+       m_Hb=get_MInv(Mom(1:4,Hig)+Mom(1:4,b))
+       m_Hj=get_MInv(Mom(1:4,Hig)+Mom(1:4,ljet))
+       m_Wb=get_MInv(Mom(1:4,lepP)+Mom(1:4,nu)+Mom(1:4,b))
+       m_Wj=get_MInv(Mom(1:4,lepP)+Mom(1:4,nu)+Mom(1:4,ljet))
+       m_Hbep=get_MInv(Mom(1:4,Hig)+Mom(1:4,b)+Mom(1:4,lepP))
+       m_Hjep=get_MInv(Mom(1:4,Hig)+Mom(1:4,ljet)+Mom(1:4,lepP))
+       
+       mtrans_W=get_MT(Mom(1:4,lepP),Mom(1:4,nu))
+
+      
+       NBin(1) = WhichBin(1,pT_ep)
+       NBin(2) = WhichBin(2,eta_ep)
+       NBin(3) = WhichBin(3,pt_miss)
+       NBin(4) = WhichBin(4,pt_j)
+       NBin(5) = WhichBin(5,eta_j)
+       NBin(6) = WhichBin(6,pt_b)
+       NBin(7) = WhichBin(7,eta_b)
+       NBin(8) = WhichBin(8,pt_Higgs)
+       NBin(9) = WhichBin(9,mtrans_W)
+       NBin(10) = WhichBin(10,y_Higgs)
+       NBin(11) = WhichBin(11,y_bep)
+       NBin(12) = WhichBin(12,y_jep)
+       NBin(13) = WhichBin(13,eta_Higgs)
+       NBin(14) = WhichBin(14,eta_W)
+       NBin(15) = WhichBin(15,Deta_jb)
+       NBin(16) = WhichBin(16,DR_bep)
+       NBin(17) = WhichBin(17,DR_jep)
+       NBin(18) = WhichBin(18,m_Hb)
+       NBin(19) = WhichBin(19,m_Wb)
+       NBin(20) = WhichBin(20,m_Wj)
+       NBin(21) = WhichBin(21,m_Hj)
+       NBin(22) = WhichBin(22,y_Hj)
+       NBin(23) = WhichBin(23,eta_Hj)
+       NBin(24) = WhichBin(24,eta_Hb)
+       NBin(25) = WhichBin(25,eta_Wb)
+       NBin(26) = WhichBin(26,eta_Wj)
+       NBin(27) = WhichBin(27,Dy_Hj)
+       NBin(28) = WhichBin(28,Deta_Hj)
+       NBin(29) = WhichBin(29,Deta_Hb)
+       NBin(30) = WhichBin(30,Deta_Wj)
+       NBin(31) = WhichBin(31,Deta_wb)
+       NBin(32) = WhichBin(32,Deta_Hep)
+       NBin(33) = WhichBin(33,m_Hbep)
+       NBin(34) = WhichBin(34,m_Hjep)
+       NBin(35) = WhichBin(35,Deta_tj)
+       NBin(36) = WhichBin(36,Deta_Ht)
+       NBin(37) = WhichBin(37,costheta_lj)
+
+
+      if( present(PObs) ) then
+
+
+       Pobs(1) = pT_ep
+       PObs(2) = eta_ep
+       PObs(3) = pt_miss
+       PObs(4) = pt_j
+       PObs(5) = eta_j
+       PObs(6) = pt_b
+       PObs(7) = eta_b
+       PObs(8) = pt_Higgs
+       PObs(9) = mtrans_W
+       PObs(10) = y_Higgs
+       PObs(11) = y_bep
+       PObs(12) = y_jep
+       PObs(13) = eta_Higgs
+       PObs(14) = eta_W
+       PObs(15) = Deta_jb
+       PObs(16) = DR_bep
+       PObs(17) = DR_jep
+       PObs(18) = m_Hb
+       PObs(19) = m_Wb
+       PObs(20) = m_Wj
+       PObs(21) = m_Hj
+       PObs(22) = y_Hj
+       PObs(23) = eta_Hj
+       PObs(24) = eta_Hb
+       PObs(25) = eta_Wb
+       PObs(26) = eta_Wj
+       PObs(27) = Dy_Hj
+       PObs(28) = Deta_Hj
+       PObs(29) = Deta_Hb
+       PObs(30) = Deta_Wj
+       PObs(31) = Deta_wb
+       PObs(32) = Deta_Hep
+       PObs(33) = m_Hbep
+       PObs(34) = m_Hjep
+       PObs(35) = Deta_tj
+       PObs(36) = Deta_Ht
+       PObs(37) = costheta_lj
+endif
+
+
+    else
+       print *, "ObsSet not implemented",ObsSet
+       stop
+    endif
+
+
+return
+END SUBROUTINE Kinematics_TH
+
+
+
+
+SUBROUTINE Kinematics_TBH(NPlus1PS,Mom,MomOrder,applyPSCut,NBin,PObs)
+  use ModMisc
+  use ModParameters
+  implicit none
+  integer :: NPlus1PS,MomOrder(1:11)
+  real(8) :: Mom(1:4,1:11),zeros(1:9)
+  integer :: tbar,ljet,Hig,inLeft,inRight,realp,bbar,lepM,nubar,Hdk1,Hdk2,k
+  real(8) :: MomJet(1:4,1:7) !,MomJet_CHECK(1:4,1:7)                                                                
+  real(8) :: MomHadr(1:4,0:8),MomMiss(1:4)
+  real(8) :: pT_ATop,pT_higgs,pT_j,eta_j,eta_atop,eta_Higgs,y_atop,y_Higgs,y_j,eta_Hj,Dy_jtbar,Dy_Htbar,Dy_Hj,Deta_Hj,Deta_Htbar,y_Htbar,y_tbarj,m_Htbar,eta_tbarj,y_Hj,m_tbarj,m_Hj,eta_Htbar
+  real(8) :: pT_miss,pT_em,pT_bbar,eta_em,eta_bbar,y_bbarem,y_jem,eta_W,eta_Hbbar,eta_Wj,eta_Wbbar,Deta_jbbar,Deta_Hbbar,Deta_Wj,Deta_Wbbar,Deta_tbarj,m_Hbbar,m_Wbbar,m_Wj,m_Hbbarem,m_Hjem,DR_bbarem,mtrans_W,HTtot,DR_jem,Deta_Hem,costheta_j,costheta_l,costheta_lj,DR_bbarj
+  real(8),optional :: PObs(:)
+  logical :: applyPSCut
+  integer :: NBin(:),PartList(1:7),JetList(1:7),NJet,NumHadr
+
+
+  applyPSCut = .false.
+
+! momentum ordering                                                                                                                                                        
+  tbar      = MomOrder(1)
+  ljet   = MomOrder(2)
+  Hig     = MomOrder(3)
+  inLeft  = MomOrder(4)
+  inRight = MomOrder(5)
+  realp   = MomOrder(6)
+  bbar    = MomOrder(7)
+  lepM    = MomOrder(8)
+  nubar   = MomOrder(9)
+  Hdk1    = MomOrder(10)
+  Hdk2    = MomOrder(11)
+
+
+!DEC$ IF(_CheckMomenta .EQ.1)                                                                                                                                              
+   zeros(:) = 0d0
+   if(TopDecays.eq.0) then
+      zeros(1:4) = Mom(1:4,inLeft)+Mom(1:4,inRight) - Mom(1:4,ljet) - Mom(1:4,tbar) - Mom(1:4,Hig)
+   else
+      zeros(1:4) = Mom(1:4,inLeft)+Mom(1:4,inRight) - Mom(1:4,ljet) - Mom(1:4,bbar)-Mom(1:4,lepM)-Mom(1:4,nubar) - Mom(1:4,Hdk1)-Mom(1:4,Hdk2)
+   endif
+   if( NPlus1PS.eq.1 ) zeros(1:4) = zeros(1:4) - Mom(1:4,realp)
+   if( any(abs(zeros(1:4)/Mom(1,inLeft)).gt.1d-8) ) then
+      print *, "ERROR: energy-momentum violation in SUBROUTINE Kinematics_TBH(): ",NPlus1PS,zeros(1:4)
+      print *, "momenta dump:"
+      do k=1,12
+         print *,k, Mom(1:4,k)
+      enddo
+   endif
+   zeros(1) = (Mom(1:4,tbar).dot.Mom(1:4,tbar)) - m_Top**2
+   zeros(2) = (Mom(1:4,Hig).dot.Mom(1:4,Hig)) - M_H**2
+   zeros(3) = (Mom(1:4,ljet).dot.Mom(1:4,ljet))
+   zeros(4) = (Mom(1:4,bbar).dot.Mom(1:4,bbar))
+   zeros(5) = (Mom(1:4,lepM).dot.Mom(1:4,lepM))
+   zeros(6) = (Mom(1:4,nubar).dot.Mom(1:4,nubar))
+   zeros(7) = (Mom(1:4,Hdk1).dot.Mom(1:4,Hdk1))
+   zeros(8) = (Mom(1:4,Hdk2).dot.Mom(1:4,Hdk2))
+
+
+   if( NPlus1PS.eq.1 ) zeros(9)=  Mom(1:4,realp).dot.Mom(1:4,realp)
+   if( TopDecays.eq.0 .and. any(abs(zeros(1:3)/Mom(1,inLeft)**2).gt.1d-8) ) then
+      print *, "ERROR: onshell-ness violation in SUBROUTINE Kinematics_TH(): ",zeros(1:3)
+      print *, Mom(1:4,1:3)
+   endif
+   if( TopDecays.ne.0 .and. any(abs(zeros(1:9)/Mom(1,inLeft)**2).gt.1d-8) ) then
+      print *, "ERROR: onshell-ness violation in SUBROUTINE Kinematics_TH(): ",zeros(1:9)
+      print *, "momenta dump:"
+      print *, Mom(1:4,1:9)
+   endif
+   print *, "CHECK MOMENTA PASSED!"
+!DEC$ ENDIF                                                                                                          
+NBin(1:NumHistograms) = 0
+MomHadr(1:4,1:7) = 0d0
+PartList(1:7)=(/1,2,3,4,5,6,7/)
+MomMiss(1:4) = 0d0
+
+IF( TOPDECAYS.EQ.0 ) THEN  ! no top decays    
+   MomHadr(1:4,1) = Mom(1:4,ljet)                                                                           
+    if(NPlus1PS.eq.0) then
+        NumHadr = 1
+    else
+        NumHadr = 2
+        MomHadr(1:4,NumHadr) = Mom(1:4,realp)
+    endif
+
+ELSEIF( TOPDECAYS.EQ.1 .OR. TOPDECAYS.eq.-1 ) THEN  ! di-leptonic decay                                                                                                         
+   MomHadr(1:4,1) = Mom(1:4,bbar)     ! anti-b                                      
+   MomHadr(1:4,2) = Mom(1:4,ljet)
+ 
+    if(NPlus1PS.eq.0) then
+        NumHadr = 2
+    else
+        NumHadr = 3
+        MomHadr(1:4,NumHadr) = Mom(1:4,realp)
+    endif
+
+ELSE
+  call Error("this decay is not yet implemented")
+ENDIF
+
+
+
+
+
+!---------------------- kT jet algorithm ---------------------------------                                                                                                     
+! important: b-quarks need to be at the first two positions of MomHadr(:,:)                                                                                                    
+! recombination of MomHadr(1:4,i) and MomHadr(1:4,j) results in MomJet(1:4,i) with i<j.                                                                                        
+! but take care: some MomJet(1:4,i) can be zero, this is why we apply pt_order                                                                                                 
+
+    NJet=0
+    MomJet(1:4,1:7) = MomHadr(1:4,1:7)
+    call JetAlgo_kt(Rsep_jet,PartList(1:NumHadr),MomHadr(1:4,1:NumHadr),NJet,JetList(1:NumHadr),MomJet(1:4,1:NumHadr)) ! hard protojets in beam pipe are counted as jets
+    call pT_order(2,MomJet(1:4,1:2))
+    call pT_order(NumHadr-2,MomJet(1:4,3:NumHadr))
+
+
+! call SwitchEnergyComponent(MomHadr(1:4,1:NumHadr))                                                                                                                           
+! call fastjetppgenkt(MomHadr(1:4,1:NumHadr),NumHadr,Rsep_jet,-1d0,MomJet(1:4,1:NumHadr),NJet)! 4th argument:  +1d0=kT,  -1d0=anti-kT,   0d0=CA                    
+! call SwitchEnergyComponentBack(MomJet_CHECK(1:4,1:NumHadr))                                                                                                            
+if( ObsSet.eq.92) then! tb+H production without top decays at LHC
+       pT_ATop  = get_PT(Mom(1:4,tbar))
+       pT_Higgs= get_PT(Mom(1:4,Hig))
+       pT_j= get_PT(Mom(1:4,ljet))
+
+       y_atop=get_eta(Mom(1:4,tbar))
+       y_Higgs=get_eta(Mom(1:4,Hig))
+       y_j=get_eta(Mom(1:4,ljet))
+
+       eta_atop=get_pseudoeta(Mom(1:4,tbar))
+       eta_Higgs=get_pseudoeta(Mom(1:4,Hig))
+       eta_j=get_pseudoeta(Mom(1:4,ljet))
+
+       eta_Hj=get_pseudoeta(Mom(1:4,Hig)+Mom(1:4,ljet))
+
+       Dy_Hj=y_Higgs-y_j
+       Dy_Htbar=y_Higgs-y_atop
+       Dy_jtbar=y_j-y_atop
+
+       Deta_Hj=eta_Higgs-eta_j
+       Deta_Htbar=eta_Higgs-eta_atop
+
+       eta_tbarj=get_pseudoeta(Mom(1:4,tbar)+Mom(1:4,ljet))
+       eta_Hj=get_pseudoeta(Mom(1:4,Hig)+Mom(1:4,ljet))
+       eta_Htbar=get_pseudoeta(Mom(1:4,Hig)+Mom(1:4,tbar))
+
+       y_tbarj=get_eta(Mom(1:4,tbar)+Mom(1:4,ljet))
+       y_Hj=get_eta(Mom(1:4,Hig)+Mom(1:4,ljet))
+       y_Htbar=get_eta(Mom(1:4,Hig)+Mom(1:4,tbar))
+
+       m_Htbar=get_MInv(Mom(1:4,Hig)+Mom(1:4,tbar))
+       m_Hj=get_MInv(Mom(1:4,Hig)+Mom(1:4,ljet))
+       m_tbarj=get_MInv(Mom(1:4,tbar)+Mom(1:4,ljet))
+
+
+      ! binning                                                                                                
+       NBin(1) = WhichBin(1,pT_ATop)
+       NBin(2) = WhichBin(2,eta_ATop)
+       NBin(3) = WhichBin(3,y_ATop)
+       NBin(4) = WhichBin(4,pT_j)
+       NBin(5) = WhichBin(5,y_j)
+       NBin(6) = WhichBin(6,pT_Higgs)
+       NBin(7) = WhichBin(7,m_tbarj)
+       NBin(8) = WhichBin(8,y_Higgs)
+       NBin(9) = WhichBin(9,eta_Higgs)
+       NBin(10) = WhichBin(10,y_tbarj)
+       NBin(11) = WhichBin(11,eta_tbarj)
+       NBin(12) = WhichBin(12,Dy_jtbar)
+       NBin(13) = WhichBin(13,m_Htbar)
+       NBin(14) = WhichBin(14,m_Hj)
+       NBin(15) = WhichBin(15,y_Htbar)
+       NBin(16) = WhichBin(16,eta_Htbar)
+       NBin(17) = WhichBin(17,y_Hj)
+       NBin(18) = WhichBin(18,eta_Hj)
+       NBin(19) = WhichBin(19,Dy_Htbar)
+       NBin(20) = WhichBin(20,Deta_Htbar)
+       NBin(21) = WhichBin(21,Dy_Hj)
+       NBin(22) = WhichBin(22,Deta_Hj)
+
+       if( present(PObs) ) then
+          PObs(1) = pT_ATop
+          PObs(2) = eta_ATop
+          PObs(3) = y_ATop
+          PObs(4) = pT_j
+          PObs(5) = y_j
+          PObs(6) = pT_Higgs
+          PObs(7) = m_tbarj
+          PObs(8) = y_Higgs
+          PObs(9) = eta_Higgs
+          PObs(10) = y_tbarj
+          PObs(11) = eta_tbarj
+          PObs(12) = Dy_jtbar
+          PObs(13) = m_Htbar
+          PObs(14) = m_Hj
+          PObs(15) = y_Htbar
+          PObs(16) = eta_Htbar
+          PObs(17) = y_Hj
+          PObs(18) = eta_Hj
+          PObs(19) = Dy_Htbar
+          PObs(20) = Deta_Htbar
+          PObs(21) = Dy_Hj
+          PObs(22) = Deta_Hj
+       endif
+       !-------------------------------------------------------                                                                   
+    elseif (ObsSet .eq. 94 .or. ObsSet .eq. 96) then      ! leptonic top decay
+       pT_em = get_PT(Mom(1:4,lepM))
+       pT_miss = get_PT(Mom(1:4,nubar))
+       pT_Higgs= get_PT(Mom(1:4,Hig))
+       pT_j = get_PT(Mom(1:4,ljet))
+       pT_bbar = get_PT(Mom(1:4,bbar))
+       pT_ATop= get_PT(Mom(1:4,tbar))
+       
+       eta_em=get_pseudoeta(Mom(1:4,lepM))
+       eta_bbar=get_pseudoeta(Mom(1:4,bbar))
+       eta_atop=get_pseudoeta(Mom(1:4,tbar))
+       eta_Higgs=get_pseudoeta(Mom(1:4,Hig))
+       eta_j=get_pseudoeta(Mom(1:4,ljet))
+       eta_W=get_pseudoeta(Mom(1:4,lepM)+Mom(1:4,nubar))
+       eta_Hj=get_pseudoeta(Mom(1:4,ljet)+Mom(1:4,Hig))
+       eta_Hbbar=get_pseudoeta(Mom(1:4,bbar)+Mom(1:4,Hig))
+       eta_Wj=get_pseudoeta(Mom(1:4,lepM)+Mom(1:4,nubar)+Mom(1:4,ljet))
+       eta_Wbbar=get_pseudoeta(Mom(1:4,lepM)+Mom(1:4,nubar)+Mom(1:4,bbar))
+
+       DR_bbarj=get_R(Mom(1:4,bbar),Mom(1:4,ljet))
+       DR_bbarem=get_R(Mom(1:4,bbar),Mom(1:4,lepM))
+       DR_jem=get_R(Mom(1:4,ljet),Mom(1:4,lepM))
+
+
+       IF (ObsSet .eq. 96) THEN
+          if (pT_em .le. pT_lep_cut .or. pT_bbar .le. pT_bjet_cut .or. pT_j .le. pT_jet_cut) then
+             applyPSCut = .true.
+             RETURN
+          endif
+
+          if (abs(eta_em) .ge. eta_lep_cut .or. abs(eta_j) .ge. eta_jet_cut .or. abs(eta_bbar) .ge. eta_bjet_cut) then
+             applyPSCut = .true.
+             RETURN
+          endif
+
+          if (DR_bbarj .le. Rsep_jet .or. DR_bbarem .le. Rsep_lepjet .or. DR_jem .le. Rsep_lepjet) then
+             applyPSCut = .true.
+             RETURN
+          endif
+       ENDIF
+
+
+ !      y_atop=get_eta(Mom(1:4,t))
+       y_Higgs=get_eta(Mom(1:4,Hig))
+       y_bbarem=get_eta(Mom(1:4,bbar)+Mom(1:4,lepM))
+       y_jem=get_eta(Mom(1:4,ljet)+Mom(1:4,lepM))
+       y_Hj=get_eta(Mom(1:4,ljet)+Mom(1:4,Hig))
+       y_j=get_eta(Mom(1:4,ljet))
+
+       costheta_j = get_CosTheta(Mom(1:4,ljet))
+       costheta_l = get_CosTheta(Mom(1:4,lepM))
+!       costheta_lj=costheta_l-costheta_j
+       costheta_lj=get_cosalpha(Mom(1:4,lepM),Mom(1:4,ljet))
+
+       Deta_jbbar=eta_j-eta_bbar
+       Deta_Hj=eta_Higgs-eta_j
+       Deta_Hbbar=eta_Higgs-eta_bbar
+       Deta_Wj=eta_W-eta_j
+       Deta_Wbbar=eta_W-eta_bbar
+       Deta_Htbar=eta_Higgs-eta_atop
+       Deta_Hem=eta_Higgs-eta_em
+       Deta_tbarj=eta_atop-eta_j
+       Dy_Hj=y_Higgs-y_j
+
+       m_Hbbar=get_MInv(Mom(1:4,Hig)+Mom(1:4,bbar))
+       m_Hj=get_MInv(Mom(1:4,Hig)+Mom(1:4,ljet))
+       m_Wbbar=get_MInv(Mom(1:4,lepM)+Mom(1:4,nubar)+Mom(1:4,bbar))
+       m_Wj=get_MInv(Mom(1:4,lepM)+Mom(1:4,nubar)+Mom(1:4,ljet))
+       m_Hbbarem=get_MInv(Mom(1:4,Hig)+Mom(1:4,bbar)+Mom(1:4,lepM))
+       m_Hjem=get_MInv(Mom(1:4,Hig)+Mom(1:4,ljet)+Mom(1:4,lepM))
+       
+       mtrans_W=get_MT(Mom(1:4,lepM),Mom(1:4,nubar))
+       
+       NBin(1) = WhichBin(1,pT_em)
+       NBin(2) = WhichBin(2,eta_em)
+       NBin(3) = WhichBin(3,pt_miss)
+       NBin(4) = WhichBin(4,pt_j)
+       NBin(5) = WhichBin(5,eta_j)
+       NBin(6) = WhichBin(6,pt_bbar)
+       NBin(7) = WhichBin(7,eta_bbar)
+       NBin(8) = WhichBin(8,pt_Higgs)
+       NBin(9) = WhichBin(9,mtrans_W)
+       NBin(10) = WhichBin(10,y_Higgs)
+       NBin(11) = WhichBin(11,y_bbarem)
+       NBin(12) = WhichBin(12,y_jem)
+       NBin(13) = WhichBin(13,eta_Higgs)
+       NBin(14) = WhichBin(14,eta_W)
+       NBin(15) = WhichBin(15,Deta_jbbar)
+       NBin(16) = WhichBin(16,DR_bbarem)
+       NBin(17) = WhichBin(17,DR_jem)
+       NBin(18) = WhichBin(18,m_Hbbar)
+       NBin(19) = WhichBin(19,m_Wbbar)
+       NBin(20) = WhichBin(20,m_Wj)
+       NBin(21) = WhichBin(21,m_Hj)
+       NBin(22) = WhichBin(22,y_Hj)
+       NBin(23) = WhichBin(23,eta_Hj)
+       NBin(24) = WhichBin(24,eta_Hbbar)
+       NBin(25) = WhichBin(25,eta_Wbbar)
+       NBin(26) = WhichBin(26,eta_Wj)
+       NBin(27) = WhichBin(27,Dy_Hj)
+       NBin(28) = WhichBin(28,Deta_Hj)
+       NBin(29) = WhichBin(29,Deta_Hbbar)
+       NBin(30) = WhichBin(30,Deta_Wj)
+       NBin(31) = WhichBin(31,Deta_wbbar)
+       NBin(32) = WhichBin(32,Deta_Hem)
+       NBin(33) = WhichBin(33,m_Hbbarem)
+       NBin(34) = WhichBin(34,m_Hjem)
+       NBin(35) = WhichBin(35,Deta_tbarj)
+       NBin(36) = WhichBin(36,Deta_Htbar)
+       NBin(37) = WhichBin(37,costheta_lj)
+
+
+      if( present(PObs) ) then
+
+
+       Pobs(1) = pT_em
+       PObs(2) = eta_em
+       PObs(3) = pt_miss
+       PObs(4) = pt_j
+       PObs(5) = eta_j
+       PObs(6) = pt_bbar
+       PObs(7) = eta_bbar
+       PObs(8) = pt_Higgs
+       PObs(9) = mtrans_W
+       PObs(10) = y_Higgs
+       PObs(11) = y_bbarem
+       PObs(12) = y_jem
+       PObs(13) = eta_Higgs
+       PObs(14) = eta_W
+       PObs(15) = Deta_jbbar
+       PObs(16) = DR_bbarem
+       PObs(17) = DR_jem
+       PObs(18) = m_Hbbar
+       PObs(19) = m_Wbbar
+       PObs(20) = m_Wj
+       PObs(21) = m_Hj
+       PObs(22) = y_Hj
+       PObs(23) = eta_Hj
+       PObs(24) = eta_Hbbar
+       PObs(25) = eta_Wbbar
+       PObs(26) = eta_Wj
+       PObs(27) = Dy_Hj
+       PObs(28) = Deta_Hj
+       PObs(29) = Deta_Hbbar
+       PObs(30) = Deta_Wj
+       PObs(31) = Deta_wbbar
+       PObs(32) = Deta_Hem
+       PObs(33) = m_Hbbarem
+       PObs(34) = m_Hjem
+       PObs(35) = Deta_tbarj
+       PObs(36) = Deta_Htbar
+       PObs(37) = costheta_lj
+endif
+
+
+                                                                                                                                                                               
+    else
+       print *, "ObsSet not implemented",ObsSet
+       stop
+    endif
+
+
+return
+END SUBROUTINE Kinematics_TBH
 
 
 

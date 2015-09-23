@@ -2886,6 +2886,75 @@ END SUBROUTINE
 
 
 
+      
+      FUNCTION vbqV_Weyl(sp,e1,coupl_left,coupl_right,HDcoupl_left,HDcoupl_right,q)!   generalization of spb2_
+      implicit none
+      complex(8), intent(in) :: e1(:)
+      complex(8), intent(in) :: sp(:)
+      complex(8), intent(in) :: coupl_left,coupl_right
+      complex(8), intent(in), optional :: q(:)     
+      complex(8), intent(in), optional :: HDcoupl_left,HDcoupl_right
+      complex(8) :: vbqV_Weyl(size(sp)),ubarqslZsl(size(sp)),ubarZslqsl(size(sp)),ubarsig(size(sp))
+      integer,parameter :: Ds=4, ColorlessParticle=2
+
+          if (ColorlessParticle .eq. 1) then 
+            vbqV_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.false.,spb2_Weyl(sp,e1)) + coupl_right*Chir_Weyl(.true.,spb2_Weyl(sp,e1)) )
+            
+          elseif (ColorlessParticle .eq. 2) then              ! see RR notes
+            vbqV_Weyl = -(0d0,1d0) *( coupl_left*Chir_Weyl(.false.,spb2_Weyl(sp,e1)) + coupl_right*Chir_Weyl(.true.,spb2_Weyl(sp,e1))  )
+            if( present(q) ) then
+                ubarZslqsl=spb2_Weyl(spb2_Weyl(sp,e1),q)                 ! ubar Zslash qslash  = ubar Z_mu gamma^mu q_nu gamma^nu
+                ubarqslZsl=spb2_Weyl(spb2_Weyl(sp,q),e1)                 ! ubar qslash Zslash  = ubar q_mu gamma^mu Z_nu gamma^nu
+                ubarsig=-(ubarZslqsl-ubarqslZsl)/2d0                     ! i*sigma_{mu,nu}Z^{mu}q^{nu} = -[Zsl,qsl]/2
+                vbqV_Weyl = vbqV_Weyl -(0d0,1d0) *(   &
+                  & + HDcoupl_left*( iChir_Weyl(.false.,ubarsig) ) &
+                  & + HDcoupl_right*(iChir_Weyl(.true.,ubarsig)) )
+            endif
+                  
+          elseif (ColorlessParticle .eq. 3) then              ! this is for a scalar, e.g. Higgs
+            vbqV_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.false.,sp) + coupl_right*Chir_Weyl(.true.,sp) )  
+          endif
+
+      RETURN
+      END FUNCTION
+
+
+
+      FUNCTION vVq_Weyl(e1,sp,coupl_left,coupl_right,HDcoupl_left,HDcoupl_right,q)! generalization of spi2_
+      implicit none
+      complex(8), intent(in) :: e1(:)
+      complex(8), intent(in) :: sp(:)
+      complex(8), intent(in) :: coupl_left,coupl_right
+      complex(8), intent(in), optional :: q(:)      
+      complex(8), intent(in), optional :: HDcoupl_left,HDcoupl_right
+      complex(8) :: vVq_Weyl(size(sp)),qslZslv(size(sp)),Zslqslv(size(sp)),sigv(size(sp))
+      integer,parameter :: Ds=4, ColorlessParticle=2
+ 
+          
+          if (ColorlessParticle .eq. 1) then 
+            vVq_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.true., spi2_Weyl(e1,sp)) + coupl_right*Chir_Weyl(.false., spi2_Weyl(e1,sp)) )  
+
+          elseif (ColorlessParticle .eq. 2) then
+            vVq_Weyl=-(0d0,1d0) *( coupl_left*Chir_Weyl(.true., spi2_Weyl(e1,sp)) + coupl_right*Chir_Weyl(.false., spi2_Weyl(e1,sp)) )
+            if( present(q) ) then
+                Zslqslv=spi2_Weyl(e1,spi2_Weyl(q,sp))
+                qslZslv=spi2_Weyl(q,spi2_Weyl(e1,sp))
+                sigv=-(Zslqslv-qslZslv)/2d0                        ! i*sigma_{mu,nu}Z^{mu}q^{nu} = -[Zsl,qsl]/2
+                vVq_Weyl = vVq_Weyl -(0d0,1d0) *( & 
+                  & + HDcoupl_left*(iChir_Weyl(.false.,sigv)) &
+                  & + HDcoupl_right*(iChir_Weyl(.true.,sigv)) )
+            endif
+          
+          elseif (ColorlessParticle .eq. 3) then           ! this is for a scalar, e.g. Higgs
+            vVq_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.false.,sp) + coupl_right*Chir_Weyl(.true.,sp) )
+          endif
+
+      RETURN
+      END FUNCTION
+
+
+
+      
 
 
 
@@ -3948,6 +4017,9 @@ END SUBROUTINE
 
                end function Chir_check
 
+               
+
+               
              recursive function iChir(sign,sp) result(res)
 ! RR -- this function is needed for the electric and dipole moment like couplings,
 !!      which have a 1 +\- i*gamma5 (see 0811.3842)
@@ -3981,6 +4053,31 @@ END SUBROUTINE
 
 
 
+               
+             FUNCTION iChir_Weyl(sign,sp)!  = 0.5(1 + lambda I*gamma^5)
+             implicit none
+             logical :: sign
+             double complex :: sp(1:4)
+             double complex :: iChir_Weyl(1:4)
+             double complex,parameter :: cpl=(0.5d0,+0.5d0)
+             double complex,parameter :: cmi=(0.5d0,-0.5d0)
+
+                if(sign) then ! lambda=+
+                  iChir_Weyl(1) = cpl * sp(1) 
+                  iChir_Weyl(2) = cpl * sp(2) 
+                  iChir_Weyl(3) = cmi * sp(3)
+                  iChir_Weyl(4) = cmi * sp(4)
+                else ! lambda=-
+                  iChir_Weyl(1) = cmi * sp(1) 
+                  iChir_Weyl(2) = cmi * sp(2) 
+                  iChir_Weyl(3) = cpl * sp(3)
+                  iChir_Weyl(4) = cpl * sp(4)
+                endif
+
+             RETURN
+             END FUNCTION
+
+             
 !--------------------Weyl routines-----------------------
 
           SUBROUTINE ubarSpi_Weyl(p,i,ubarSpi)  ! i=+1 is ES to Chir_Weyl(.false.), i=-1 is ES to Chir_Weyl(.true.)
@@ -4611,6 +4708,84 @@ END SUBROUTINE
              vbarSpi(1:4) = dconjg( (/ vSpi(3), vSpi(4), vSpi(1), vSpi(2) /) )
 
           END SUBROUTINE
+
+
+
+
+      subroutine spinoru(N,p,za,zb,s)
+!---Calculate spinor products      
+!---taken from MCFM & modified by R. Rontsch, May 2015
+!---extended to deal with negative energies ie with all momenta outgoing                                                                
+!---Arbitrary conventions of Bern, Dixon, Kosower, Weinzierl,                                                                                  
+!---za(i,j)*zb(j,i)=s(i,j)                      
+      implicit none
+      real(8) :: p(:,:),two
+      integer, parameter :: mxpart=14
+      complex(8):: c23(N),f(N),rt(N),za(:,:),zb(:,:),czero,cone,ci
+      real(8)   :: s(:,:)
+      integer i,j,N
+      
+      if (size(p,1) .ne. N) then
+         call Error("spinorz: momentum mismatch")
+      endif
+      two=2d0
+      czero=dcmplx(0d0,0d0)
+      cone=dcmplx(1d0,0d0)
+      ci=dcmplx(0d0,1d0)
+      
+
+!---if one of the vectors happens to be zero this routine fails.                                                                                                                
+      do j=1,N
+         za(j,j)=czero
+         zb(j,j)=za(j,j)
+
+!-----positive energy case                                                                                                                                                      
+         if (p(j,4) .gt. 0d0) then
+            rt(j)=dsqrt(p(j,4)+p(j,1))
+            c23(j)=dcmplx(p(j,3),-p(j,2))
+            f(j)=cone
+         else
+!-----negative energy case                                                                                                                                                      
+            rt(j)=dsqrt(-p(j,4)-p(j,1))
+            c23(j)=dcmplx(-p(j,3),p(j,2))
+            f(j)=ci
+         endif
+      enddo
+      do i=2,N
+         do j=1,i-1
+         s(i,j)=two*(p(i,4)*p(j,4)-p(i,1)*p(j,1)-p(i,2)*p(j,2)-p(i,3)*p(j,3))
+         za(i,j)=f(i)*f(j)*(c23(i)*dcmplx(rt(j)/rt(i))-c23(j)*dcmplx(rt(i)/rt(j)))
+
+         if (abs(s(i,j)).lt.1d-5) then
+         zb(i,j)=-(f(i)*f(j))**2*dconjg(za(i,j))
+         else
+         zb(i,j)=-dcmplx(s(i,j))/za(i,j)
+         endif
+         za(j,i)=-za(i,j)
+         zb(j,i)=-zb(i,j)
+         s(j,i)=s(i,j)
+         enddo
+      enddo
+
+
+!      return
+    end subroutine spinoru
+
+    subroutine convert_to_MCFM(p)
+      implicit none
+! converts from (E,px,py,pz) tp (px,py,pz,E)
+      real(8) :: p(4),tmp(4)
+
+      tmp(1)=p(1)
+      tmp(2)=p(2)
+      tmp(3)=p(3)
+      tmp(4)=p(4)
+
+      p(1)=tmp(2)
+      p(2)=tmp(3)
+      p(3)=tmp(4)
+      p(4)=tmp(1)
+    end subroutine convert_to_MCFM
 
 
 

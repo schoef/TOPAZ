@@ -1,4 +1,9 @@
-MODULE ModCrossSection_TTBP
+
+! currently this is a copy of ModCrossSection_TTBP and should be replaced with the subroutines from ttbZ 
+
+
+
+MODULE ModCrossSection_TTBP_anomcoupl
 use ModTopDecay
 implicit none
 
@@ -13,13 +18,13 @@ contains
 
 
 
-FUNCTION EvalCS_1L_ttbggp_MPI(yRnd,VgsWgt,res)
+FUNCTION EvalCS_anomcoupl_1L_ttbggp_MPI(yRnd,VgsWgt,res)
 implicit none
-integer :: EvalCS_1L_ttbggp_MPI
+integer :: EvalCS_anomcoupl_1L_ttbggp_MPI
 real(8) ::  yRnd(*),res(*),VgsWgt
 
-res(1) = EvalCS_1L_ttbggp(yRnd,VgsWgt)
-EvalCS_1L_ttbggp_MPI=0
+res(1) = EvalCS_anomcoupl_1L_ttbggp(yRnd,VgsWgt)
+EvalCS_anomcoupl_1L_ttbggp_MPI=0
 RETURN
 END FUNCTION
 
@@ -28,7 +33,7 @@ END FUNCTION
 
 
 
-FUNCTION EvalCS_1L_ttbggp(yRnd,VgsWgt)
+FUNCTION EvalCS_anomcoupl_1L_ttbggp(yRnd,VgsWgt)
 use ModProcess
 use ModKinematics
 use ModUCuts
@@ -39,7 +44,7 @@ use ModMyRecurrence
 use ModParameters
 use ModIntDipoles_GGTTBGP
 implicit none
-real(8) ::  EvalCS_1L_ttbggp,yRnd(1:VegasMxDim),VgsWgt
+real(8) ::  EvalCS_anomcoupl_1L_ttbggp,yRnd(1:VegasMxDim),VgsWgt
 complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1),FermionLoopPartAmp(1:3,-2:1)
 complex(8) :: BosonicPartAmp(1:3,-2:1),mydummy
 integer :: iHel,jHel,kHel,iPrimAmp,jPrimAmp
@@ -57,12 +62,12 @@ include 'misc/global_import'
 include 'vegas_common.f'
 
 
-EvalCS_1L_ttbggp = 0d0
+EvalCS_anomcoupl_1L_ttbggp = 0d0
 !print *, 'COMPARISON OF gg -> ttb+photon through (massive) fermions loops, in mod_CrosssSection_TTBP'
 
    call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
    if( EHat.le.(2d0*m_Top+pT_pho_cut)  ) then
-      EvalCS_1L_ttbggp = 0d0
+      EvalCS_anomcoupl_1L_ttbggp = 0d0
       return
    endif
    FluxFac = 1d0/(2d0*EHat**2)
@@ -83,7 +88,7 @@ ENDIF
 
    call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
    if( applyPSCut ) then
-      EvalCS_1L_ttbggp = 0d0
+      EvalCS_anomcoupl_1L_ttbggp = 0d0
       return
    endif
 
@@ -185,7 +190,7 @@ ELSEIF( Correction.EQ.1 ) THEN
               if( AccPoles.gt.1d-3 ) then
                   print *, "SKIP",AccPoles
 !                   call WritePrimAmpResult(PrimAmps(iPrimAmp),BornAmps(iPrimAmp),rdiv,(/EHat/))
-                  EvalCS_1L_ttbggp = 0d0
+                  EvalCS_anomcoupl_1L_ttbggp = 0d0
                   SkipCounter = SkipCounter + 1
                   return
               endif
@@ -447,7 +452,7 @@ ENDIF
 IF( Correction.EQ.0 ) THEN
 !  normalization
    LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * WidthExpansion
-   EvalCS_1L_ttbggp = LO_Res_Unpol * PreFac
+   EvalCS_anomcoupl_1L_ttbggp = LO_Res_Unpol * PreFac
 
 ELSEIF( Correction.EQ.1 ) THEN
 !  overall normalization: (4*Pi)^eps/Gamma(1-eps)
@@ -468,7 +473,7 @@ ELSEIF( Correction.EQ.1 ) THEN
    LO_Res_Unpol = LO_Res_Unpol                         * ISFac * (alpha_s4Pi*RunFactor)**2                            * Q_top**2*alpha4Pi*PhotonCouplCorr
    NLO_Res_UnPol(-2:1) = NLO_Res_UnPol(-2:1)           * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha_sOver2Pi*RunFactor * Q_top**2*alpha4Pi*PhotonCouplCorr
    NLO_Res_UnPol_Ferm(-2:1) = NLO_Res_UnPol_Ferm(-2:1) * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha_sOver2Pi*RunFactor * Q_top**2*alpha4Pi*PhotonCouplCorr
-   EvalCS_1L_ttbggp = ( NLO_Res_UnPol(0)+NLO_Res_UnPol(1) + NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1) ) * PreFac
+   EvalCS_anomcoupl_1L_ttbggp = ( NLO_Res_UnPol(0)+NLO_Res_UnPol(1) + NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1) ) * PreFac
 
 
 ELSEIF( CORRECTION.EQ.3 ) THEN
@@ -487,11 +492,11 @@ ELSEIF( CORRECTION.EQ.3 ) THEN
 
    call EvalIntDipoles_GGTTBGP((/MomExt(1:4,4),MomExt(1:4,3),MomExt(1:4,5),-MomExt(1:4,1),-MomExt(1:4,2)/),MomExt(1:4,6:11),xE,HOp(1:3))
    HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
-   EvalCS_1L_ttbggp = HOp(1)    * pdf(0,1)  * pdf(0,2)   &
+   EvalCS_anomcoupl_1L_ttbggp = HOp(1)    * pdf(0,1)  * pdf(0,2)   &
                     + HOp(2)/xE * pdf_z(0,1)* pdf(0,2)   &
                     + HOp(3)/xE * pdf(0,1)  * pdf_z(0,2)
 
-! print *, "real singularitites",EvalCS_1L_ttbggp
+! print *, "real singularitites",EvalCS_anomcoupl_1L_ttbggp
 ! pause
 ENDIF
 
@@ -512,8 +517,8 @@ ENDIF
 !        pause
 
 
-   if( IsNan(EvalCS_1L_ttbggp) ) then
-        print *, "NAN:",EvalCS_1L_ttbggp
+   if( IsNan(EvalCS_anomcoupl_1L_ttbggp) ) then
+        print *, "NAN:",EvalCS_anomcoupl_1L_ttbggp
         print *, yRnd(:)
         print *, NLO_Res_UnPol(0),NLO_Res_UnPol(1),NLO_Res_UnPol_Ferm(0),NLO_Res_UnPol_Ferm(1)
         print *, PSWgt , VgsWgt , PDFFac, sHatJacobi
@@ -521,17 +526,17 @@ ENDIF
         print *, "Mom"
         print *, MomExt(1:4,:)
         print *, "SKIP EVENT!!!!!"
-        EvalCS_1L_ttbggp = 0d0
+        EvalCS_anomcoupl_1L_ttbggp = 0d0
         return
    endif
 
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbggp)
+      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_1L_ttbggp)
    enddo
 
 
-   EvalCS_1L_ttbggp = EvalCS_1L_ttbggp/VgsWgt
+   EvalCS_anomcoupl_1L_ttbggp = EvalCS_anomcoupl_1L_ttbggp/VgsWgt
 
 RETURN
 END FUNCTION
@@ -543,7 +548,7 @@ END FUNCTION
 
 
 
-FUNCTION EvalCS_1L_ttbqqbp(yRnd,VgsWgt)
+FUNCTION EvalCS_anomcoupl_1L_ttbqqbp(yRnd,VgsWgt)
 use ModProcess
 use ModKinematics
 use ModUCuts
@@ -556,7 +561,7 @@ use ModIntDipoles_QQBTTBGP
 use ModIntDipoles_QGTTBQP
 use ModIntDipoles_QBGTTBQBP
 implicit none
-real(8) ::  EvalCS_1L_ttbqqbp,yRnd(1:VegasMxDim),VgsWgt,xE
+real(8) ::  EvalCS_anomcoupl_1L_ttbqqbp,yRnd(1:VegasMxDim),VgsWgt,xE
 complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1)
 complex(8) :: BosonicPartAmp(1:2,-2:1),FermionPartAmp(1:2,-2:1),mydummy(1:2),LOPartAmp(1:2)
 integer :: iHel,iPrimAmp,jPrimAmp
@@ -574,10 +579,10 @@ include "vegas_common.f"
 
 
 
-  EvalCS_1L_ttbqqbp = 0d0
+  EvalCS_anomcoupl_1L_ttbqqbp = 0d0
   call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top+pT_pho_cut ) then
-      EvalCS_1L_ttbqqbp = 0d0
+      EvalCS_anomcoupl_1L_ttbqqbp = 0d0
       return
   endif
   FluxFac = 1d0/(2d0*EHat**2)
@@ -595,7 +600,7 @@ ENDIF
 
    call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
    if( applyPSCut ) then
-      EvalCS_1L_ttbqqbp = 0d0
+      EvalCS_anomcoupl_1L_ttbqqbp = 0d0
       return
    endif
 
@@ -755,7 +760,7 @@ ENDIF
               if( AccPoles.gt.1d-3 ) then
                   print *, "SKIP",AccPoles
 !                 call WritePrimAmpResult(PrimAmps(iPrimAmp),BornAmps(iPrimAmp),rdiv,(/EHat/))
-                  EvalCS_1L_ttbqqbp = 0d0
+                  EvalCS_anomcoupl_1L_ttbqqbp = 0d0
                   SkipCounter = SkipCounter + 1
                   return
               endif
@@ -973,7 +978,7 @@ ENDIF
 IF( CORRECTION.EQ.0 ) THEN
 !  normalization
    LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * WidthExpansion
-   EvalCS_1L_ttbqqbp = LO_Res_Unpol * PreFac
+   EvalCS_anomcoupl_1L_ttbqqbp = LO_Res_Unpol * PreFac
 
 ELSEIF( CORRECTION.EQ.1 ) THEN
 !  overall normalization: (4*Pi)^eps/Gamma(1-eps)
@@ -998,7 +1003,7 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
    NLO_Res_UnPol_Ferm(-2:1) = NLO_Res_UnPol_Ferm(-2:1) * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * alpha_sOver2Pi*RunFactor
 
 
-   EvalCS_1L_ttbqqbp = ( NLO_Res_UnPol(0)+NLO_Res_UnPol(1) + NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1) ) * PreFac
+   EvalCS_anomcoupl_1L_ttbqqbp = ( NLO_Res_UnPol(0)+NLO_Res_UnPol(1) + NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1) ) * PreFac
 
 
 
@@ -1020,7 +1025,7 @@ ELSEIF( CORRECTION.EQ.3 ) THEN
    IF( PROCESS.EQ.30 ) THEN
       call EvalIntDipoles_QQBTTBGP((/MomExt(1:4,4),MomExt(1:4,3),MomExt(1:4,5),-MomExt(1:4,1),-MomExt(1:4,2)/),MomExt(1:4,6:11),xE,HOp(1:2,1:3))
       HOp(1:2,1:3) = HOp(1:2,1:3)*RunFactor**3 * PreFac
-      EvalCS_1L_ttbqqbp= HOp(1,1)    * (pdf(Up_,1)*pdf(AUp_,2)+pdf(Chm_,1)*pdf(AChm_,2) ) &
+      EvalCS_anomcoupl_1L_ttbqqbp= HOp(1,1)    * (pdf(Up_,1)*pdf(AUp_,2)+pdf(Chm_,1)*pdf(AChm_,2) ) &
                         +HOp(1,2)/xE * (pdf_z(Up_,1)*pdf(AUp_,2)+pdf_z(Chm_,1)*pdf(AChm_,2) ) &
                         +HOp(1,3)/xE * (pdf(Up_,1)*pdf_z(AUp_,2)+pdf(Chm_,1)*pdf_z(AChm_,2) ) &
                         +HOp(2,1)    * (pdf(Dn_,1)*pdf(ADn_,2)+pdf(Str_,1)*pdf(AStr_,2)+pdf(Bot_,1)*pdf(ABot_,2) ) &
@@ -1029,7 +1034,7 @@ ELSEIF( CORRECTION.EQ.3 ) THEN
 
       call EvalIntDipoles_QQBTTBGP((/MomExt(1:4,4),MomExt(1:4,3),MomExt(1:4,5),-MomExt(1:4,2),-MomExt(1:4,1)/),MomExt(1:4,6:11),xE,HOp(1:2,1:3))
       HOp(1:2,1:3) = HOp(1:2,1:3)*RunFactor**3 * PreFac
-      EvalCS_1L_ttbqqbp= EvalCS_1L_ttbqqbp        &
+      EvalCS_anomcoupl_1L_ttbqqbp= EvalCS_anomcoupl_1L_ttbqqbp        &
                         +HOp(1,1)    * (pdf(Up_,2)*pdf(AUp_,1)+pdf(Chm_,2)*pdf(AChm_,1) ) &
                         +HOp(1,2)/xE * (pdf_z(Up_,2)*pdf(AUp_,1)+pdf_z(Chm_,2)*pdf(AChm_,1) ) &
                         +HOp(1,3)/xE * (pdf(Up_,2)*pdf_z(AUp_,1)+pdf(Chm_,2)*pdf_z(AChm_,1) ) &
@@ -1042,7 +1047,7 @@ ELSEIF( CORRECTION.EQ.3 ) THEN
    ELSEIF( PROCESS.EQ.24 ) THEN
       call EvalIntDipoles_QGTTBQP((/MomExt(1:4,4),MomExt(1:4,3),MomExt(1:4,5),-MomExt(1:4,1),-MomExt(1:4,2)/),MomExt(1:4,6:11),xE,HOp(1:2,1:3))
       HOp(1:2,1:3) = HOp(1:2,1:3)*RunFactor**3 * PreFac
-      EvalCS_1L_ttbqqbp=HOp(1,1)    *  (pdf(Up_,1)*pdf(0,2)+pdf(Chm_,1)*pdf(0,2) ) &
+      EvalCS_anomcoupl_1L_ttbqqbp=HOp(1,1)    *  (pdf(Up_,1)*pdf(0,2)+pdf(Chm_,1)*pdf(0,2) ) &
                         +HOp(1,2)/xE * (pdf_z(Up_,1)*pdf(0,2)+pdf_z(Chm_,1)*pdf(0,2) ) &
                         +HOp(1,3)/xE * (pdf(Up_,1)*pdf_z(0,2)+pdf(Chm_,1)*pdf_z(0,2) ) &
                         +HOp(2,1)    * (pdf(Dn_,1)*pdf(0,2)+pdf(Str_,1)*pdf(0,2)+pdf(Bot_,1)*pdf(0,2) ) &
@@ -1051,7 +1056,7 @@ ELSEIF( CORRECTION.EQ.3 ) THEN
 
       call EvalIntDipoles_QGTTBQP((/MomExt(1:4,4),MomExt(1:4,3),MomExt(1:4,5),-MomExt(1:4,2),-MomExt(1:4,1)/),MomExt(1:4,6:11),xE,HOp(1:2,1:3))
       HOp(1:2,1:3) = HOp(1:2,1:3)*RunFactor**3 * PreFac
-      EvalCS_1L_ttbqqbp= EvalCS_1L_ttbqqbp  &
+      EvalCS_anomcoupl_1L_ttbqqbp= EvalCS_anomcoupl_1L_ttbqqbp  &
                         +HOp(1,1)    * (pdf(Up_,2)*pdf(0,1)+pdf(Chm_,2)*pdf(0,1) ) &
                         +HOp(1,2)/xE * (pdf_z(Up_,2)*pdf(0,1)+pdf_z(Chm_,2)*pdf(0,1) ) &
                         +HOp(1,3)/xE * (pdf(Up_,2)*pdf_z(0,1)+pdf(Chm_,2)*pdf_z(0,1) ) &
@@ -1063,7 +1068,7 @@ ELSEIF( CORRECTION.EQ.3 ) THEN
    ELSEIF( PROCESS.EQ.26 ) THEN
       call EvalIntDipoles_QBGTTBQBP((/MomExt(1:4,4),MomExt(1:4,3),MomExt(1:4,5),-MomExt(1:4,1),-MomExt(1:4,2)/),MomExt(1:4,6:11),xE,HOp(1:2,1:3))
       HOp(1:2,1:3) = HOp(1:2,1:3)*RunFactor**3 * PreFac
-      EvalCS_1L_ttbqqbp= HOp(1,1)    * (pdf(AUp_,1)*pdf(0,2)+pdf(AChm_,1)*pdf(0,2) ) &
+      EvalCS_anomcoupl_1L_ttbqqbp= HOp(1,1)    * (pdf(AUp_,1)*pdf(0,2)+pdf(AChm_,1)*pdf(0,2) ) &
                         +HOp(1,2)/xE * (pdf_z(AUp_,1)*pdf(0,2)+pdf_z(AChm_,1)*pdf(0,2) ) &
                         +HOp(1,3)/xE * (pdf(AUp_,1)*pdf_z(0,2)+pdf(AChm_,1)*pdf_z(0,2) ) &
                         +HOp(2,1)    * (pdf(ADn_,1)*pdf(0,2)+pdf(AStr_,1)*pdf(0,2)+pdf(ABot_,1)*pdf(0,2) ) &
@@ -1073,7 +1078,7 @@ ELSEIF( CORRECTION.EQ.3 ) THEN
 
       call EvalIntDipoles_QBGTTBQBP((/MomExt(1:4,4),MomExt(1:4,3),MomExt(1:4,5),-MomExt(1:4,2),-MomExt(1:4,1)/),MomExt(1:4,6:11),xE,HOp(1:2,1:3))
       HOp(1:2,1:3) = HOp(1:2,1:3)*RunFactor**3 * PreFac
-      EvalCS_1L_ttbqqbp= EvalCS_1L_ttbqqbp &
+      EvalCS_anomcoupl_1L_ttbqqbp= EvalCS_anomcoupl_1L_ttbqqbp &
                         +HOp(1,1)    * (pdf(AUp_,2)*pdf(0,1)+pdf(AChm_,2)*pdf(0,1) ) &
                         +HOp(1,2)/xE * (pdf_z(AUp_,2)*pdf(0,1)+pdf_z(AChm_,2)*pdf(0,1) ) &
                         +HOp(1,3)/xE * (pdf(AUp_,2)*pdf_z(0,1)+pdf(AChm_,2)*pdf_z(0,1) ) &
@@ -1083,8 +1088,8 @@ ELSEIF( CORRECTION.EQ.3 ) THEN
 
    ENDIF
 
-! print *, "real singularitites",EvalCS_1L_ttbqqbp
-! print *, "real singularitites",EvalCS_1L_ttbqqbp/(alpha_sOver2Pi*RunFactor*LO_Res_Unpol* PreFac)
+! print *, "real singularitites",EvalCS_anomcoupl_1L_ttbqqbp
+! print *, "real singularitites",EvalCS_anomcoupl_1L_ttbqqbp/(alpha_sOver2Pi*RunFactor*LO_Res_Unpol* PreFac)
 ! pause
 
 ENDIF
@@ -1106,8 +1111,8 @@ ENDIF
 !        pause
 
 
-   if( IsNan(EvalCS_1L_ttbqqbp) ) then
-        print *, "NAN:",EvalCS_1L_ttbqqbp
+   if( IsNan(EvalCS_anomcoupl_1L_ttbqqbp) ) then
+        print *, "NAN:",EvalCS_anomcoupl_1L_ttbqqbp
         print *, yRnd(:)
         print *, NLO_Res_UnPol(0),NLO_Res_UnPol(1),NLO_Res_UnPol_Ferm(0),NLO_Res_UnPol_Ferm(1)
         print *, PSWgt , VgsWgt , PDFFac_a,PDFFac_b, sHatJacobi
@@ -1115,18 +1120,18 @@ ENDIF
         print *, "Mom"
         print *, MomExt(1:4,:)
         print *, "SKIP EVENT!!!!!"
-        EvalCS_1L_ttbqqbp = 0d0
+        EvalCS_anomcoupl_1L_ttbqqbp = 0d0
         return
    endif
 
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbqqbp)
+      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_1L_ttbqqbp)
    enddo
 
 
 
-   EvalCS_1L_ttbqqbp = EvalCS_1L_ttbqqbp/VgsWgt
+   EvalCS_anomcoupl_1L_ttbqqbp = EvalCS_anomcoupl_1L_ttbqqbp/VgsWgt
 
 RETURN
 END FUNCTION
@@ -1138,7 +1143,7 @@ END FUNCTION
 
 
 
-FUNCTION EvalCS_Real_ttbgggp(yRnd,VgsWgt)
+FUNCTION EvalCS_anomcoupl_Real_ttbgggp(yRnd,VgsWgt)
 use ModParameters
 use ModKinematics
 use ModAmplitudes
@@ -1146,7 +1151,7 @@ use ModMisc
 use ModProcess
 use ModDipoles_GGTTBGP
 implicit none
-real(8) ::  EvalCS_Real_ttbgggp,yRnd(1:VegasMxDim),VgsWgt,DipoleResult
+real(8) ::  EvalCS_anomcoupl_Real_ttbgggp,yRnd(1:VegasMxDim),VgsWgt,DipoleResult
 complex(8) :: LO_Res_Pol,LO_Res_Unpol,PartAmp(1:4)
 integer :: iHel,jPrimAmp,iPrimAmp,NHisto,NBin(1:NumMaxHisto)
 real(8) :: EHat,PSWgt,PSWgt2,PSWgt3,ISFac,RunFactor,PreFac,sij
@@ -1159,10 +1164,10 @@ real(8),parameter :: PhotonCouplCorr=2d0
 include "vegas_common.f"
 
 
-  EvalCS_Real_ttbgggp= 0d0
+  EvalCS_anomcoupl_Real_ttbgggp= 0d0
   call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top+pT_pho_cut ) then
-      EvalCS_Real_ttbgggp = 0d0
+      EvalCS_anomcoupl_Real_ttbgggp = 0d0
       return
   endif
   FluxFac = 1d0/(2d0*EHat**2)
@@ -1184,7 +1189,7 @@ ENDIF
 
    call CheckSing(MomExt,applySingCut)
    if( applySingCut ) then
-       EvalCS_Real_ttbgggp = 0d0
+       EvalCS_anomcoupl_Real_ttbgggp = 0d0
        return
    endif
 
@@ -1196,7 +1201,7 @@ ENDIF
    RunFactor = RunAlphaS(NLOParam,MuRen)
 
    if( applyPSCut ) then
-       EvalCS_Real_ttbgggp = 0d0
+       EvalCS_anomcoupl_Real_ttbgggp = 0d0
    else
         LO_Res_Unpol = (0d0,0d0)
         do iHel=1,NumHelicities
@@ -1217,10 +1222,10 @@ ENDIF
         enddo!helicity loop
 
         LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi  *PhotonCouplCorr
-        EvalCS_Real_ttbgggp = LO_Res_Unpol * PreFac
+        EvalCS_anomcoupl_Real_ttbgggp = LO_Res_Unpol * PreFac
 
         do NHisto=1,NumHistograms
-               call intoHisto(NHisto,NBin(NHisto),EvalCS_Real_ttbgggp)
+               call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_Real_ttbgggp)
         enddo
 endif!applyPSCut
 
@@ -1230,7 +1235,7 @@ endif!applyPSCut
 
 !      sij = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,3))
 !      sij = MomExt(1,3)**2
-!      print *,  sij/EHat**2,EvalCS_Real_ttbgggp,DipoleResult,(1d0+EvalCS_Real_ttbgggp/(DipoleResult))
+!      print *,  sij/EHat**2,EvalCS_anomcoupl_Real_ttbgggp,DipoleResult,(1d0+EvalCS_anomcoupl_Real_ttbgggp/(DipoleResult))
 !      pause
 
 ! !      MADGRAPH CHECK: gg->tbtgp
@@ -1249,7 +1254,7 @@ endif!applyPSCut
 !        print *, "MG/ME ratios: ", MadGraph_tree/dble(LO_Res_Unpol)
 !        pause
 
-    EvalCS_Real_ttbgggp = (EvalCS_Real_ttbgggp + DipoleResult)/VgsWgt
+    EvalCS_anomcoupl_Real_ttbgggp = (EvalCS_anomcoupl_Real_ttbgggp + DipoleResult)/VgsWgt
 RETURN
 END FUNCTION
 
@@ -1259,7 +1264,7 @@ END FUNCTION
 
 
 
-FUNCTION EvalCS_Real_ttbqqbgp(yRnd,VgsWgt)
+FUNCTION EvalCS_anomcoupl_Real_ttbqqbgp(yRnd,VgsWgt)
 use ModParameters
 use ModKinematics
 use ModAmplitudes
@@ -1269,7 +1274,7 @@ use ModDipoles_QQBTTBGP
 use ModDipoles_QGTTBQP
 use ModDipoles_QBGTTBQBP
 implicit none
-real(8) ::  EvalCS_Real_ttbqqbgp,EvalCS_Dips_ttbqqbgp,yRnd(1:VegasMxDim),VgsWgt,DipoleResult(1:2)
+real(8) ::  EvalCS_anomcoupl_Real_ttbqqbgp,EvalCS_anomcoupl_Dips_ttbqqbgp,yRnd(1:VegasMxDim),VgsWgt,DipoleResult(1:2)
 complex(8) :: LO_Res_Pol,LO_Res_Unpol,PartAmp(1:4)
 integer :: iHel,jPrimAmp,iPrimAmp,NHisto,NBin(1:NumMaxHisto),NPDF
 real(8) :: EHat,PSWgt,PSWgt2,PSWgt3,ISFac,RunFactor,PreFac,PreFacDip
@@ -1283,12 +1288,12 @@ integer,parameter :: up=1, dn=2
 include "vegas_common.f"
 
 
-EvalCS_Real_ttbqqbgp= 0d0
-EvalCS_Dips_ttbqqbgp= 0d0
+EvalCS_anomcoupl_Real_ttbqqbgp= 0d0
+EvalCS_anomcoupl_Dips_ttbqqbgp= 0d0
 
    call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
    if( EHat.le.2d0*m_Top+pT_pho_cut ) then
-      EvalCS_Real_ttbqqbgp = 0d0
+      EvalCS_anomcoupl_Real_ttbqqbgp = 0d0
       return
    endif
    FluxFac = 1d0/(2d0*EHat**2)
@@ -1297,7 +1302,7 @@ EvalCS_Dips_ttbqqbgp= 0d0
    call boost2Lab(eta1,eta2,6,MomExt(1:4,1:6))
    call CheckSing(MomExt,applySingCut)
    if( applySingCut ) then
-       EvalCS_Real_ttbqqbgp = 0d0
+       EvalCS_anomcoupl_Real_ttbqqbgp = 0d0
        return
    endif
 
@@ -1353,7 +1358,7 @@ EvalCS_Dips_ttbqqbgp= 0d0
 
 
 if( applyPSCut ) then
-            EvalCS_Real_ttbqqbgp = 0d0
+            EvalCS_anomcoupl_Real_ttbqqbgp = 0d0
 else
         LO_Res_Unpol = (0d0,0d0)
         do iHel=1,NumHelicities
@@ -1397,7 +1402,7 @@ else
 
 
         LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi  *PhotonCouplCorr
-        EvalCS_Real_ttbqqbgp = EvalCS_Real_ttbqqbgp + dble(LO_Res_Unpol*PreFac)
+        EvalCS_anomcoupl_Real_ttbqqbgp = EvalCS_anomcoupl_Real_ttbqqbgp + dble(LO_Res_Unpol*PreFac)
 
         do NHisto=1,NumHistograms
                call intoHisto(NHisto,NBin(NHisto),dble(LO_Res_Unpol*PreFac))
@@ -1412,14 +1417,14 @@ endif!applyPSCut
     ELSEIF( PROCESS.EQ.26 ) THEN
         call EvalDipoles_QBGTTBQBP((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),MomExt(1:4,3),-MomExt(1:4,1),-MomExt(1:4,2)/),yRnd(11:18),(/PreFacDip*PDFFac(1),PreFacDip*PDFFac(2)/),DipoleResult)
     ENDIF
-    EvalCS_Dips_ttbqqbgp = EvalCS_Dips_ttbqqbgp + DipoleResult(1) + DipoleResult(2)
+    EvalCS_anomcoupl_Dips_ttbqqbgp = EvalCS_anomcoupl_Dips_ttbqqbgp + DipoleResult(1) + DipoleResult(2)
 
   ENDDO! loop over a<-->b pdfs
 
 
 !      sij = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,3))
 ! !      sij = MomExt(1,3)**2
-!      print *,  sij/EHat**2,EvalCS_Real_ttbqqbgp,EvalCS_Dips_ttbqqbgp,(1d0+EvalCS_Real_ttbqqbgp/EvalCS_Dips_ttbqqbgp)
+!      print *,  sij/EHat**2,EvalCS_anomcoupl_Real_ttbqqbgp,EvalCS_anomcoupl_Dips_ttbqqbgp,(1d0+EvalCS_anomcoupl_Real_ttbqqbgp/EvalCS_anomcoupl_Dips_ttbqqbgp)
 !      pause
 
 
@@ -1474,7 +1479,7 @@ endif!applyPSCut
 !        print *, "MG/ME ratio: ", MadGraph_tree/dble(LO_Res_Unpol)
 !        pause
 
-    EvalCS_Real_ttbqqbgp = (EvalCS_Real_ttbqqbgp + EvalCS_Dips_ttbqqbgp) /VgsWgt
+    EvalCS_anomcoupl_Real_ttbqqbgp = (EvalCS_anomcoupl_Real_ttbqqbgp + EvalCS_anomcoupl_Dips_ttbqqbgp) /VgsWgt
 
 END FUNCTION
 
@@ -1485,7 +1490,7 @@ END FUNCTION
 
 
 
-FUNCTION EvalCS_NLODK_ttbp(yRnd,VgsWgt)
+FUNCTION EvalCS_anomcoupl_NLODK_ttbp(yRnd,VgsWgt)
 use ModProcess
 use ModKinematics
 use ModAmplitudes
@@ -1493,7 +1498,7 @@ use ModMyRecurrence
 use ModParameters
 use ModHadrWDecay
 implicit none
-real(8) ::  EvalCS_NLODK_ttbp,yRnd(1:VegasMxDim),VgsWgt
+real(8) ::  EvalCS_anomcoupl_NLODK_ttbp,yRnd(1:VegasMxDim),VgsWgt
 complex(8) :: LO_Res_Pol,LO_Res_Unpol,Dip_Res_Unpol,NLO_Res_Pol,NLO_Res_UnPol
 complex(8) :: TreeResult(1:NumBornAmps),DKResult(1:NumBornAmps),LOPartAmp(1:2),NLOPartAmp(1:2)
 integer :: iHel,jHel,kHel,GluHel,iPrimAmp,jPrimAmp,ndip
@@ -1512,10 +1517,10 @@ include "vegas_common.f"
 
 
 
-  EvalCS_NLODK_ttbp = 0d0
+  EvalCS_anomcoupl_NLODK_ttbp = 0d0
   call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top+pT_pho_cut ) then
-      EvalCS_NLODK_ttbp = 0d0
+      EvalCS_anomcoupl_NLODK_ttbp = 0d0
       return
   endif
   FluxFac = 1d0/(2d0*EHat**2)
@@ -1545,7 +1550,7 @@ IF( CORRECTION.EQ.4 ) THEN
    call EvalPhasespace_TopDecay(MomExt(1:4,5),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
    call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
    if( applyPSCut ) then
-      EvalCS_NLODK_ttbp = 0d0
+      EvalCS_anomcoupl_NLODK_ttbp = 0d0
       return
    endif
 
@@ -1600,7 +1605,7 @@ do npdf=1,2
    enddo!helicity loop
 !  normalization
    NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * PreFac
-   EvalCS_NLODK_ttbp = EvalCS_NLODK_ttbp + dble(NLO_Res_Unpol)
+   EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + dble(NLO_Res_Unpol)
 
    do NHisto=1,NumHistograms
       call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
@@ -1670,7 +1675,7 @@ do npdf=1,2
    enddo!helicity loop
 !  normalization
    NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * PreFac
-   EvalCS_NLODK_ttbp = EvalCS_NLODK_ttbp + NLO_Res_Unpol
+   EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + NLO_Res_Unpol
 
 
    do NHisto=1,NumHistograms
@@ -1693,7 +1698,7 @@ if( DKRE_switch.eq.0 .or. DKRE_switch.eq.1 ) then
    call EvalPhasespace_TopDecay(MomExt(1:4,5),yRnd(15:18),.false.,MomExt(1:4,10:12),PSWgt3)
    call CheckSing(MomExt(1:4,6:9),applySingCut)
    if( applySingCut) then
-      EvalCS_NLODK_ttbp = 0d0
+      EvalCS_anomcoupl_NLODK_ttbp = 0d0
       goto 13
    endif
    PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt1*PSWgt2*PSWgt3 * VgsWgt
@@ -1744,7 +1749,7 @@ do npdf=1,2
 
 !  normalization
    LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * PreFac
-   EvalCS_NLODK_ttbp = EvalCS_NLODK_ttbp + dble(LO_Res_Unpol)
+   EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + dble(LO_Res_Unpol)
 
    do NHisto=1,NumHistograms
       call intoHisto(NHisto,NBin(NHisto),dble(LO_Res_Unpol))
@@ -1801,7 +1806,7 @@ do npdf=1,2
 
 !  normalization
    Dip_Res_Unpol = Dip_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Dipole * Q_top**2*alpha4Pi*PhotonCouplCorr * PreFac
-   EvalCS_NLODK_ttbp = EvalCS_NLODK_ttbp + Dip_Res_Unpol
+   EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + Dip_Res_Unpol
 
    do NHisto=1,NumHistograms
       call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol))
@@ -1810,9 +1815,9 @@ do npdf=1,2
 enddo! npdf loop
 call swapMom(MomExt(1:4,1),MomExt(1:4,2))! swap back
 
-!             print *, MomDK(1,4)/EHat,EvalCS_NLODK_ttbp/dble(Dip_Res_Unpol)
-!             print *, (MomDK(1:4,1).dot.MomDK(1:4,4))/EHat**2,EvalCS_NLODK_ttbp/dble(Dip_Res_Unpol)
-!             EvalCS_NLODK_ttbp=EvalCS_NLODK_ttbp/Vgswgt
+!             print *, MomDK(1,4)/EHat,EvalCS_anomcoupl_NLODK_ttbp/dble(Dip_Res_Unpol)
+!             print *, (MomDK(1:4,1).dot.MomDK(1:4,4))/EHat**2,EvalCS_anomcoupl_NLODK_ttbp/dble(Dip_Res_Unpol)
+!             EvalCS_anomcoupl_NLODK_ttbp=EvalCS_anomcoupl_NLODK_ttbp/Vgswgt
 !             pause
 !             return
 
@@ -1878,7 +1883,7 @@ do npdf=1,2
 
 !  normalization
    LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * PreFac
-   EvalCS_NLODK_ttbp = EvalCS_NLODK_ttbp + dble(LO_Res_Unpol)
+   EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + dble(LO_Res_Unpol)
 
    do NHisto=1,NumHistograms
       call intoHisto(NHisto,NBin(NHisto),dble(LO_Res_Unpol))
@@ -1932,9 +1937,9 @@ do npdf=1,2
 
 !  normalization
    Dip_Res_Unpol = Dip_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Dipole * Q_top**2*alpha4Pi*PhotonCouplCorr * PreFac
-   EvalCS_NLODK_ttbp = EvalCS_NLODK_ttbp + dble(Dip_Res_Unpol)
+   EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + dble(Dip_Res_Unpol)
 
-!             print *, MomDK(1,7)/EHat,pbDpg/EHat**2,EvalCS_NLODK_ttbp/dble(Dip_Res_Unpol)
+!             print *, MomDK(1,7)/EHat,pbDpg/EHat**2,EvalCS_anomcoupl_NLODK_ttbp/dble(Dip_Res_Unpol)
 !             print *, dble(LO_Res_Unpol),dble(Dip_Res_Unpol)
 !             pause
 
@@ -1951,7 +1956,7 @@ endif! DKRE_switch
 ENDIF
 
 
-   EvalCS_NLODK_ttbp = EvalCS_NLODK_ttbp/VgsWgt
+   EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp/VgsWgt
 return
 
 END FUNCTION
@@ -1961,7 +1966,7 @@ END FUNCTION
 
 
 
-FUNCTION EvalCS_NLODKP_ttb(yRnd,VgsWgt)
+FUNCTION EvalCS_anomcoupl_NLODKP_ttb(yRnd,VgsWgt)
 use ModProcess
 use ModKinematics
 use ModAmplitudes
@@ -1969,7 +1974,7 @@ use ModMyRecurrence
 use ModParameters
 use ModTTBP_NLODK
 implicit none
-real(8) ::  EvalCS_NLODKP_ttb,yRnd(1:VegasMxDim),VgsWgt
+real(8) ::  EvalCS_anomcoupl_NLODKP_ttb,yRnd(1:VegasMxDim),VgsWgt
 complex(8) :: LO_Res_Pol,LO_Res_Unpol,Dip_Res_Unpol,NLO_Res_Pol,NLO_Res_UnPol
 complex(8) :: TreeResult(1:NumBornAmps), DKResult(1:NumBornAmps)
 integer :: iHel,PhoHel,iPrimAmp,jPrimAmp, GluHel
@@ -1991,11 +1996,11 @@ logical :: nan_t
 real(8) :: pbDpg,ptDpg,ptDpb, omz, rsq,z,y
 
 
-EvalCS_NLODKP_ttb = 0d0
+EvalCS_anomcoupl_NLODKP_ttb = 0d0
 
   call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top) then
-      EvalCS_NLODKP_ttb = 0d0
+      EvalCS_anomcoupl_NLODKP_ttb = 0d0
       return
   endif
   FluxFac = 1d0/(2d0*EHat**2)
@@ -2101,7 +2106,7 @@ IF( CORRECTION.EQ.4 ) THEN
    NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac
 
 
-   EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(NLO_Res_Unpol)
+   EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
 
 !   galle =1.d0
 !   NBIn(1:NumHistoGrams) = 1
@@ -2110,8 +2115,8 @@ IF( CORRECTION.EQ.4 ) THEN
 !      call intoHisto(NHisto,NBin(NHisto),galle)
    enddo
 
-!   nan_t = IsNan(EvalCS_NLODKP_ttb  )
-!   write(*,*) "Hallo 1", EvalCS_NLODKP_ttb
+!   nan_t = IsNan(EvalCS_anomcoupl_NLODKP_ttb  )
+!   write(*,*) "Hallo 1", EvalCS_anomcoupl_NLODKP_ttb
 !   if(nan_t) then
 !      write(*,*) "1"
 !   endif
@@ -2129,7 +2134,7 @@ IF( CORRECTION.EQ.4 ) THEN
    NLO_Res_Unpol = (0d0,0d0)
    call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin)
    if( applyPSCut ) then
-!      EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb/VgsWgt
+!      EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb/VgsWgt
 !      return
       goto 6633
    endif
@@ -2182,13 +2187,13 @@ IF( CORRECTION.EQ.4 ) THEN
 !  normalization
    NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac
 
-   EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(NLO_Res_Unpol)
+   EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
    galle =1.d0
    do NHisto=1,NumHistograms
       call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
 !      call intoHisto(NHisto,NBin(NHisto),galle)
    enddo
-!   nan_t = IsNan(EvalCS_NLODKP_ttb  )
+!   nan_t = IsNan(EvalCS_anomcoupl_NLODKP_ttb  )
 !      write(*,*) "Halo 2"
 !   if(nan_t) then
 !      write(*,*) "2"
@@ -2266,7 +2271,7 @@ IF( CORRECTION.EQ.4 ) THEN
    !   nan_t = IsNan(NLO_Res_Unpol )
 
 
-   EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(NLO_Res_Unpol)
+   EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
 
 !   galle =1.d0
 !   NBIn(1:NumHistoGrams) = 1
@@ -2334,7 +2339,7 @@ IF( CORRECTION.EQ.4 ) THEN
 !  normalization
    NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac
 
-   EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(NLO_Res_Unpol)
+   EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
 
    do NHisto=1,NumHistograms
       call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
@@ -2437,7 +2442,7 @@ IF( CORRECTION.EQ.4 ) THEN
    !   nan_t = IsNan(NLO_Res_Unpol )
 
 
-   EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(NLO_Res_Unpol)
+   EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
 
 !   galle =1.d0
 !   NBIn(1:NumHistoGrams) = 1
@@ -2520,7 +2525,7 @@ enddo ! nPhorad
 !  normalization
    NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac
 
-   EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(NLO_Res_Unpol)
+   EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
 !   galle =1.d0
 
    do NHisto=1,NumHistograms
@@ -2593,7 +2598,7 @@ ELSEIF (CORRECTION .eq. 5) then
 
       NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac
 
-      EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(NLO_Res_Unpol)
+      EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
 
 
       do NHisto=1,NumHistograms
@@ -2654,7 +2659,7 @@ ELSEIF (CORRECTION .eq. 5) then
 
       Dip_Res_UnPol = Dip_Res_UnPol* ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac * (-dipole)
 
-      EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(Dip_Res_Unpol)
+      EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(Dip_Res_Unpol)
       do NHisto=1,NumHistograms
          call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol))
       enddo
@@ -2763,7 +2768,7 @@ ELSEIF (CORRECTION .eq. 5) then
       enddo
       NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac
 
-      EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(NLO_Res_Unpol)
+      EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
 
       do NHisto=1,NumHistograms
          call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
@@ -2783,7 +2788,7 @@ ELSEIF (CORRECTION .eq. 5) then
       call EvalTTBP_DIPOLDK(Top_Atop,MomExt(1:4,8:12),MomExtTilde(1:4,8:12),dipole)
       call Kinematics_TTBARPHOTON(0,MomExtTilde(1:4,1:12),(/3,4,12,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin)
       if (applyPScut) then
-!         EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb/VgsWgt
+!         EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb/VgsWgt
 !         return
          goto 1818
       endif
@@ -2818,7 +2823,7 @@ ELSEIF (CORRECTION .eq. 5) then
 
       Dip_Res_UnPol = Dip_Res_UnPol* ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac * (-dipole)
 
-      EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(Dip_Res_Unpol)
+      EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(Dip_Res_Unpol)
 
 
       do NHisto=1,NumHistograms
@@ -2930,7 +2935,7 @@ ELSEIF (CORRECTION .eq. 5) then
       enddo
 
       NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac
-      EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(NLO_Res_Unpol)
+      EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
 
       do NHisto=1,NumHistograms
          call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
@@ -2982,7 +2987,7 @@ ELSEIF (CORRECTION .eq. 5) then
       enddo
       Dip_Res_UnPol = Dip_Res_UnPol* ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac * (dipole)
 
-      EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(Dip_Res_Unpol)
+      EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(Dip_Res_Unpol)
 !      soft =  MomExt(1,9)/m_top
 !      coll = dsqrt(MomExt(1:4,9).dot.MomExt(1:4,5)/m_top**2)
 !      if(soft .lt. 1.d-3 .or. coll .lt. 1.d-3) then
@@ -2996,9 +3001,9 @@ ELSEIF (CORRECTION .eq. 5) then
          call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol))
       enddo
 
-   if( IsNan(EvalCS_NLODKP_ttb )) then
+   if( IsNan(EvalCS_anomcoupl_NLODKP_ttb )) then
         write(45,*) "ATOP-FacTest"
-        write(45,*) "NAN:",EvalCS_NLODKP_ttb
+        write(45,*) "NAN:",EvalCS_anomcoupl_NLODKP_ttb
          write(45,*) "yRnd(1) = ", yRnd(1)
          write(45,*) "yRnd(2) = ", yRnd(2)
          write(45,*) "yRnd(3) = ", yRnd(3)
@@ -3022,7 +3027,7 @@ ELSEIF (CORRECTION .eq. 5) then
         write(45,*) "Mom"
         write(45,*) MomExt(1:4,:)
         write(45,*) "SKIP EVENT!!!!!"
-        EvalCS_NLODKP_ttb = 0d0
+        EvalCS_anomcoupl_NLODKP_ttb = 0d0
         return
    endif
 
@@ -3086,7 +3091,7 @@ ELSEIF (CORRECTION .eq. 5) then
 !         write(*,*) "coll", (MomExt(1:4,12).dot.MomExt(1:4,8))/m_top**2
 !         pause
 !      endif
-      EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(NLO_Res_Unpol)
+      EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
 
 
       do NHisto=1,NumHistograms
@@ -3141,7 +3146,7 @@ ELSEIF (CORRECTION .eq. 5) then
       enddo
 
       Dip_Res_UnPol = Dip_Res_UnPol* ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac * (dipole)
-      EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(Dip_Res_Unpol)
+      EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(Dip_Res_Unpol)
 !      soft =  MomExt(1,12)/m_top
 !      coll = dsqrt(MomExt(1:4,12).dot.MomExt(1:4,8)/m_top**2)
 !      if(soft .lt. 1.d-3 .or. coll .lt. 1.d-3) then
@@ -3160,9 +3165,9 @@ ELSEIF (CORRECTION .eq. 5) then
          call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol))
       enddo
 
-      if( IsNan(EvalCS_NLODKP_ttb )) then
+      if( IsNan(EvalCS_anomcoupl_NLODKP_ttb )) then
         write(55,*) "TOP-FacTest"
-        write(55,*) "NAN:",EvalCS_NLODKP_ttb
+        write(55,*) "NAN:",EvalCS_anomcoupl_NLODKP_ttb
          write(55,*) "yRnd(1) = ", yRnd(1)
          write(55,*) "yRnd(2) = ", yRnd(2)
          write(55,*) "yRnd(3) = ", yRnd(3)
@@ -3186,7 +3191,7 @@ ELSEIF (CORRECTION .eq. 5) then
         write(55,*) "Mom"
         write(55,*) MomExt(1:4,:)
         write(55,*) "SKIP EVENT!!!!!"
-        EvalCS_NLODKP_ttb = 0d0
+        EvalCS_anomcoupl_NLODKP_ttb = 0d0
         return
    endif
 
@@ -3268,7 +3273,7 @@ ELSEIF (CORRECTION .eq. 5) then
 
 
       NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac
-      EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(NLO_Res_Unpol)
+      EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
 !      soft =  MomExt(1,8)/m_top
 !      coll = dsqrt(MomExt(1:4,8).dot.MomExt(1:4,5)/m_top**2)
 
@@ -3347,7 +3352,7 @@ ELSEIF (CORRECTION .eq. 5) then
       enddo
       Dip_Res_UnPol = Dip_Res_UnPol* ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac * (dipole)
 
-      EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(Dip_Res_Unpol)
+      EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(Dip_Res_Unpol)
       do NHisto=1,NumHistograms
          call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol))
       enddo
@@ -3378,7 +3383,7 @@ ELSEIF (CORRECTION .eq. 5) then
 7777 continue
 
 !goto 6789
-!   EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb/VgsWgt
+!   EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb/VgsWgt
 !return
 !4442 continue
 !----------------------------------
@@ -3395,11 +3400,11 @@ ELSEIF (CORRECTION .eq. 5) then
 
     call CheckSing(MomExt(1:4,5:8),applySingCut)
     if (applySingcut) then
-        EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb/VgsWgt
+        EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb/VgsWgt
         return
     endif
     if (PSWgt2 .eq. 0.d0 .or. PSWgt3 .eq. 0.d0) then
-        EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb/VgsWgt
+        EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb/VgsWgt
         return
     endif
 
@@ -3446,7 +3451,7 @@ ELSEIF (CORRECTION .eq. 5) then
          enddo
       enddo
       NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac
-      EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(NLO_Res_Unpol)
+      EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
 
 
       do NHisto=1,NumHistograms
@@ -3514,7 +3519,7 @@ ELSEIF (CORRECTION .eq. 5) then
       enddo
 
       Dip_Res_UnPol = Dip_Res_UnPol* ISFac * (alpha_s4Pi*RunFactor)**2 * PreFac * (dipole)
-      EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb + dble(Dip_Res_Unpol)
+      EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(Dip_Res_Unpol)
 
 
       do NHisto=1,NumHistograms
@@ -3566,7 +3571,7 @@ ELSEIF (CORRECTION .eq. 5) then
 ENDIF
 6789 continue
 
-   EvalCS_NLODKP_ttb = EvalCS_NLODKP_ttb/VgsWgt
+   EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb/VgsWgt
 RETURN
 END FUNCTION
 
@@ -3577,7 +3582,7 @@ END FUNCTION
 
 
 
-FUNCTION EvalCS_DKP_1L_ttbgg(yRnd,VgsWgt)
+FUNCTION EvalCS_anomcoupl_DKP_1L_ttbgg(yRnd,VgsWgt)
 use ModProcess
 use ModKinematics
 use ModUCuts
@@ -3588,7 +3593,7 @@ use ModMyRecurrence
 use ModParameters
 use ModIntDipoles_DKP_GGTTBG
 implicit none
-real(8) ::  EvalCS_DKP_1L_ttbgg,EvalCS_DKP_1L_ttbgg_1,EvalCS_DKP_1L_ttbgg_2
+real(8) ::  EvalCS_anomcoupl_DKP_1L_ttbgg,EvalCS_anomcoupl_DKP_1L_ttbgg_1,EvalCS_anomcoupl_DKP_1L_ttbgg_2
 real(8) ::  yRnd(1:VegasMxDim),VgsWgt,IOp(-2:0),HOp(1:3)
 complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1),FermionLoopPartAmp(7:8,-2:1)
 integer :: iHel,jHel,kHel,iPrimAmp,jPrimAmp,nPhoRad,PhoHel
@@ -3602,13 +3607,13 @@ include 'misc/global_import'
 include 'vegas_common.f'
 
   ParityFlip=1
-  EvalCS_DKP_1L_ttbgg = 0d0
-  EvalCS_DKP_1L_ttbgg_1 = 0d0
-  EvalCS_DKP_1L_ttbgg_2 = 0d0
+  EvalCS_anomcoupl_DKP_1L_ttbgg = 0d0
+  EvalCS_anomcoupl_DKP_1L_ttbgg_1 = 0d0
+  EvalCS_anomcoupl_DKP_1L_ttbgg_2 = 0d0
 
   call PDFMapping(2,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top ) then
-      EvalCS_DKP_1L_ttbgg = 0d0
+      EvalCS_anomcoupl_DKP_1L_ttbgg = 0d0
       return
   endif
   FluxFac = 1d0/(2d0*EHat**2)
@@ -3722,7 +3727,7 @@ ELSEIF( Correction.EQ.1 ) THEN
               if( AccPoles.gt.1d-3 ) then
                   print *, "SKIP",AccPoles
 !                  call WritePrimAmpResult(PrimAmps(iPrimAmp),BornAmps(iPrimAmp),rdiv,(/EHat/))
-                  EvalCS_DKP_1L_ttbgg = 0d0
+                  EvalCS_anomcoupl_DKP_1L_ttbgg = 0d0
                   SkipCounter = SkipCounter + 1
                   return
               endif
@@ -3772,7 +3777,7 @@ ENDIF
 IF( Correction.EQ.0 ) THEN
 !  normalization
    LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * WidthExpansion
-   EvalCS_DKP_1L_ttbgg = LO_Res_Unpol * PreFac
+   EvalCS_anomcoupl_DKP_1L_ttbgg = LO_Res_Unpol * PreFac
 
 ELSEIF( Correction.EQ.1 ) THEN
 !  overall normalization: (4*Pi)^eps/Gamma(1-eps)
@@ -3795,7 +3800,7 @@ ELSEIF( Correction.EQ.1 ) THEN
    NLO_Res_UnPol(-2:1) = NLO_Res_UnPol(-2:1)           * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha_sOver2Pi*RunFactor
    NLO_Res_UnPol_Ferm(-2:1) = NLO_Res_UnPol_Ferm(-2:1) * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha_sOver2Pi*RunFactor
 
-   EvalCS_DKP_1L_ttbgg = ( NLO_Res_UnPol(0)+NLO_Res_UnPol(1) + NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1) ) * PreFac
+   EvalCS_anomcoupl_DKP_1L_ttbgg = ( NLO_Res_UnPol(0)+NLO_Res_UnPol(1) + NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1) ) * PreFac
 
 
 ELSEIF( Correction.EQ.3 ) THEN
@@ -3817,23 +3822,23 @@ ELSEIF( Correction.EQ.3 ) THEN
    call EvalIntDipoles_DKP_GGTTBG(MomP(1:4,1:4),MomExt(1:4,5:11),ATop_,nPhoRad,xE,HOp(1:3))
    HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
 
-   EvalCS_DKP_1L_ttbgg = HOp(1)    * pdf(0,1)  * pdf(0,2)   &
+   EvalCS_anomcoupl_DKP_1L_ttbgg = HOp(1)    * pdf(0,1)  * pdf(0,2)   &
                       + HOp(2)/xE * pdf_z(0,1)* pdf(0,2)   &
                       + HOp(3)/xE * pdf(0,1)  * pdf_z(0,2)
 ENDIF
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_DKP_1L_ttbgg)
+      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbgg)
    enddo
 
-EvalCS_DKP_1L_ttbgg_1 = EvalCS_DKP_1L_ttbgg_1 + EvalCS_DKP_1L_ttbgg
+EvalCS_anomcoupl_DKP_1L_ttbgg_1 = EvalCS_anomcoupl_DKP_1L_ttbgg_1 + EvalCS_anomcoupl_DKP_1L_ttbgg
 
-! print *,EvalCS_DKP_1L_ttbgg
+! print *,EvalCS_anomcoupl_DKP_1L_ttbgg
 ! pause
 enddo! nPhoRad loop
 
 
-! EvalCS_DKP_1L_ttbgg = (EvalCS_DKP_1L_ttbgg_1)/VgsWgt
+! EvalCS_anomcoupl_DKP_1L_ttbgg = (EvalCS_anomcoupl_DKP_1L_ttbgg_1)/VgsWgt
 ! return
 ! -----------------------------------------------------------------------------
 
@@ -3937,7 +3942,7 @@ ELSEIF( Correction.EQ.1 ) THEN
               if( AccPoles.gt.1d-3 ) then
                   print *, "SKIP",AccPoles
 !                  call WritePrimAmpResult(PrimAmps(iPrimAmp),BornAmps(iPrimAmp),rdiv,(/EHat/))
-                  EvalCS_DKP_1L_ttbgg = 0d0
+                  EvalCS_anomcoupl_DKP_1L_ttbgg = 0d0
                   SkipCounter = SkipCounter + 1
                   return
               endif
@@ -3987,7 +3992,7 @@ ENDIF
 IF( Correction.EQ.0 ) THEN
 !  normalization
    LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * WidthExpansion
-   EvalCS_DKP_1L_ttbgg = LO_Res_Unpol * PreFac
+   EvalCS_anomcoupl_DKP_1L_ttbgg = LO_Res_Unpol * PreFac
 
 ELSEIF( Correction.EQ.1 ) THEN
 !  overall normalization: (4*Pi)^eps/Gamma(1-eps)
@@ -4010,7 +4015,7 @@ ELSEIF( Correction.EQ.1 ) THEN
    NLO_Res_UnPol(-2:1) = NLO_Res_UnPol(-2:1)           * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha_sOver2Pi*RunFactor
    NLO_Res_UnPol_Ferm(-2:1) = NLO_Res_UnPol_Ferm(-2:1) * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha_sOver2Pi*RunFactor
 
-   EvalCS_DKP_1L_ttbgg = ( NLO_Res_UnPol(0)+NLO_Res_UnPol(1) + NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1) ) * PreFac
+   EvalCS_anomcoupl_DKP_1L_ttbgg = ( NLO_Res_UnPol(0)+NLO_Res_UnPol(1) + NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1) ) * PreFac
 
 
 ELSEIF( Correction.EQ.3 ) THEN
@@ -4033,25 +4038,25 @@ ELSEIF( Correction.EQ.3 ) THEN
    call EvalIntDipoles_DKP_GGTTBG(MomP(1:4,1:4),MomExt(1:4,5:11),Top_,nPhoRad,xE,HOp(1:3))
    HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
 
-   EvalCS_DKP_1L_ttbgg = HOp(1)    * pdf(0,1)  * pdf(0,2)   &
+   EvalCS_anomcoupl_DKP_1L_ttbgg = HOp(1)    * pdf(0,1)  * pdf(0,2)   &
                       + HOp(2)/xE * pdf_z(0,1)* pdf(0,2)   &
                       + HOp(3)/xE * pdf(0,1)  * pdf_z(0,2)
 ENDIF
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_DKP_1L_ttbgg)
+      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbgg)
    enddo
 
-   EvalCS_DKP_1L_ttbgg_2 = EvalCS_DKP_1L_ttbgg_2 + EvalCS_DKP_1L_ttbgg
+   EvalCS_anomcoupl_DKP_1L_ttbgg_2 = EvalCS_anomcoupl_DKP_1L_ttbgg_2 + EvalCS_anomcoupl_DKP_1L_ttbgg
 
-! print *,EvalCS_DKP_1L_ttbgg
+! print *,EvalCS_anomcoupl_DKP_1L_ttbgg
 ! pause
 
 enddo! nPhoRad loop
 
 
 
-   EvalCS_DKP_1L_ttbgg = (EvalCS_DKP_1L_ttbgg_1+EvalCS_DKP_1L_ttbgg_2)/VgsWgt
+   EvalCS_anomcoupl_DKP_1L_ttbgg = (EvalCS_anomcoupl_DKP_1L_ttbgg_1+EvalCS_anomcoupl_DKP_1L_ttbgg_2)/VgsWgt
 return
 END FUNCTION
 
@@ -4060,7 +4065,7 @@ END FUNCTION
 
 
 
-FUNCTION EvalCS_DKP_1L_ttbqqb(yRnd,VgsWgt)
+FUNCTION EvalCS_anomcoupl_DKP_1L_ttbqqb(yRnd,VgsWgt)
 use ModProcess
 use ModKinematics
 use ModUCuts
@@ -4072,7 +4077,7 @@ use ModParameters
 use ModIntDipoles_DKP_QQBTTBG
 use ModIntDipoles_DKP_QGTTBQ
 implicit none
-real(8) :: EvalCS_DKP_1L_ttbqqb,EvalCS_DKP_1L_ttbqqb_1,EvalCS_DKP_1L_ttbqqb_2
+real(8) :: EvalCS_anomcoupl_DKP_1L_ttbqqb,EvalCS_anomcoupl_DKP_1L_ttbqqb_1,EvalCS_anomcoupl_DKP_1L_ttbqqb_2
 real(8) :: yRnd(1:VegasMxDim),VgsWgt,xE,HOp(1:3)
 complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1)
 complex(8) :: BosonicPartAmp(1:2,-2:1),FermionPartAmp(1:2,-2:1)
@@ -4089,13 +4094,13 @@ include "vegas_common.f"
 
 
   ParityFlip=1
-  EvalCS_DKP_1L_ttbqqb = 0d0
-  EvalCS_DKP_1L_ttbqqb_1 = 0d0
-  EvalCS_DKP_1L_ttbqqb_2 = 0d0
+  EvalCS_anomcoupl_DKP_1L_ttbqqb = 0d0
+  EvalCS_anomcoupl_DKP_1L_ttbqqb_1 = 0d0
+  EvalCS_anomcoupl_DKP_1L_ttbqqb_2 = 0d0
 
   call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top ) then
-      EvalCS_DKP_1L_ttbqqb = 0d0
+      EvalCS_anomcoupl_DKP_1L_ttbqqb = 0d0
       return
   endif
   FluxFac = 1d0/(2d0*EHat**2)
@@ -4273,7 +4278,7 @@ ENDIF
 IF( CORRECTION.EQ.0 ) THEN
 !  normalization
    LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * WidthExpansion
-   EvalCS_DKP_1L_ttbqqb = LO_Res_Unpol * PreFac
+   EvalCS_anomcoupl_DKP_1L_ttbqqb = LO_Res_Unpol * PreFac
 
 ELSEIF( CORRECTION.EQ.1 ) THEN
 !  overall normalization: (4*Pi)^eps/Gamma(1-eps)
@@ -4297,7 +4302,7 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
    NLO_Res_UnPol(-2:1) = NLO_Res_UnPol(-2:1)           * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha_sOver2Pi*RunFactor
    NLO_Res_UnPol_Ferm(-2:1) = NLO_Res_UnPol_Ferm(-2:1) * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha_sOver2Pi*RunFactor
 
-   EvalCS_DKP_1L_ttbqqb = ( NLO_Res_UnPol(0)+NLO_Res_UnPol(1) + NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1) ) * PreFac
+   EvalCS_anomcoupl_DKP_1L_ttbqqb = ( NLO_Res_UnPol(0)+NLO_Res_UnPol(1) + NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1) ) * PreFac
 
 ELSEIF( CORRECTION.EQ.3 ) THEN
 
@@ -4321,14 +4326,14 @@ IF( PROCESS.EQ.31 ) THEN
 
       call EvalIntDipoles_DKP_QQBTTBG(MomP(1:4,1:4),MomExt(1:4,5:11),ATop_,nPhoRad,xE,HOp(1:3))
       HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
-      EvalCS_DKP_1L_ttbqqb = HOp(1) * (pdf(Up_,1)*pdf(AUp_,2)+pdf(Dn_,1)*pdf(ADn_,2)+pdf(Chm_,1)*pdf(AChm_,2)+pdf(Str_,1)*pdf(AStr_,2)+pdf(Bot_,1)*pdf(ABot_,2) ) &
+      EvalCS_anomcoupl_DKP_1L_ttbqqb = HOp(1) * (pdf(Up_,1)*pdf(AUp_,2)+pdf(Dn_,1)*pdf(ADn_,2)+pdf(Chm_,1)*pdf(AChm_,2)+pdf(Str_,1)*pdf(AStr_,2)+pdf(Bot_,1)*pdf(ABot_,2) ) &
                           + HOp(2)/xE * (pdf_z(Up_,1)*pdf(AUp_,2)+pdf_z(Dn_,1)*pdf(ADn_,2)+pdf_z(Chm_,1)*pdf(AChm_,2)+pdf_z(Str_,1)*pdf(AStr_,2)+pdf_z(Bot_,1)*pdf(ABot_,2) ) &
                           + HOp(3)/xE * (pdf(Up_,1)*pdf_z(AUp_,2)+pdf(Dn_,1)*pdf_z(ADn_,2)+pdf(Chm_,1)*pdf_z(AChm_,2)+pdf(Str_,1)*pdf_z(AStr_,2)+pdf(Bot_,1)*pdf_z(ABot_,2) )
 
       call swapMom(MomP(1:4,3),MomP(1:4,4))
       call EvalIntDipoles_DKP_QQBTTBG(MomP(1:4,1:4),MomExt(1:4,5:11),ATop_,nPhoRad,xE,HOp(1:3))
       HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
-      EvalCS_DKP_1L_ttbqqb = EvalCS_DKP_1L_ttbqqb &
+      EvalCS_anomcoupl_DKP_1L_ttbqqb = EvalCS_anomcoupl_DKP_1L_ttbqqb &
                            + HOp(1)    * (pdf(Up_,2)*pdf(AUp_,1)+pdf(Dn_,2)*pdf(ADn_,1)+pdf(Chm_,2)*pdf(AChm_,1)+pdf(Str_,2)*pdf(AStr_,1)+pdf(Bot_,2)*pdf(ABot_,1) ) &
                            + HOp(2)/xE * (pdf_z(Up_,2)*pdf(AUp_,1)+pdf_z(Dn_,2)*pdf(ADn_,1)+pdf_z(Chm_,2)*pdf(AChm_,1)+pdf_z(Str_,2)*pdf(AStr_,1)+pdf_z(Bot_,2)*pdf(ABot_,1) ) &
                            + HOp(3)/xE * (pdf(Up_,2)*pdf_z(AUp_,1)+pdf(Dn_,2)*pdf_z(ADn_,1)+pdf(Chm_,2)*pdf_z(AChm_,1)+pdf(Str_,2)*pdf_z(AStr_,1)+pdf(Bot_,2)*pdf_z(ABot_,1) )
@@ -4339,14 +4344,14 @@ ELSEIF( PROCESS.EQ.25 ) THEN
 
    call EvalIntDipoles_DKP_QGTTBQ(MomP(1:4,1:4),MomExt(1:4,5:11),ATop_,nPhoRad,xE,HOp(1:3))
    HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
-   EvalCS_DKP_1L_ttbqqb = HOp(1) * (pdf(Up_,1)*pdf(0,2)+pdf(Dn_,1)*pdf(0,2)+pdf(Chm_,1)*pdf(0,2)+pdf(Str_,1)*pdf(0,2)+pdf(Bot_,1)*pdf(0,2) ) &
+   EvalCS_anomcoupl_DKP_1L_ttbqqb = HOp(1) * (pdf(Up_,1)*pdf(0,2)+pdf(Dn_,1)*pdf(0,2)+pdf(Chm_,1)*pdf(0,2)+pdf(Str_,1)*pdf(0,2)+pdf(Bot_,1)*pdf(0,2) ) &
                        + HOp(2)/xE * (pdf_z(Up_,1)*pdf(0,2)+pdf_z(Dn_,1)*pdf(0,2)+pdf_z(Chm_,1)*pdf(0,2)+pdf_z(Str_,1)*pdf(0,2)+pdf_z(Bot_,1)*pdf(0,2) ) &
                        + HOp(3)/xE * (pdf(Up_,1)*pdf_z(0,2)+pdf(Dn_,1)*pdf_z(0,2)+pdf(Chm_,1)*pdf_z(0,2)+pdf(Str_,1)*pdf_z(0,2)+pdf(Bot_,1)*pdf_z(0,2) )
 
    call swapMom(MomP(1:4,3),MomP(1:4,4))
    call EvalIntDipoles_DKP_QGTTBQ(MomP(1:4,1:4),MomExt(1:4,5:11),ATop_,nPhoRad,xE,HOp(1:3))
    HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
-   EvalCS_DKP_1L_ttbqqb = EvalCS_DKP_1L_ttbqqb &
+   EvalCS_anomcoupl_DKP_1L_ttbqqb = EvalCS_anomcoupl_DKP_1L_ttbqqb &
                        + HOp(1)    * (pdf(Up_,2)*pdf(0,1)+pdf(Dn_,2)*pdf(0,1)+pdf(Chm_,2)*pdf(0,1)+pdf(Str_,2)*pdf(0,1)+pdf(Bot_,2)*pdf(0,1) ) &
                        + HOp(2)/xE * (pdf_z(Up_,2)*pdf(0,1)+pdf_z(Dn_,2)*pdf(0,1)+pdf_z(Chm_,2)*pdf(0,1)+pdf_z(Str_,2)*pdf(0,1)+pdf_z(Bot_,2)*pdf(0,1) ) &
                        + HOp(3)/xE * (pdf(Up_,2)*pdf_z(0,1)+pdf(Dn_,2)*pdf_z(0,1)+pdf(Chm_,2)*pdf_z(0,1)+pdf(Str_,2)*pdf_z(0,1)+pdf(Bot_,2)*pdf_z(0,1) )
@@ -4357,14 +4362,14 @@ ELSEIF( PROCESS.EQ.27 ) THEN
 
    call EvalIntDipoles_DKP_QGTTBQ(MomP(1:4,1:4),MomExt(1:4,5:11),ATop_,nPhoRad,xE,HOp(1:3))
    HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
-   EvalCS_DKP_1L_ttbqqb = HOp(1) * (pdf(AUp_,1)*pdf(0,2)+pdf(ADn_,1)*pdf(0,2)+pdf(AChm_,1)*pdf(0,2)+pdf(AStr_,1)*pdf(0,2)+pdf(ABot_,1)*pdf(0,2) ) &
+   EvalCS_anomcoupl_DKP_1L_ttbqqb = HOp(1) * (pdf(AUp_,1)*pdf(0,2)+pdf(ADn_,1)*pdf(0,2)+pdf(AChm_,1)*pdf(0,2)+pdf(AStr_,1)*pdf(0,2)+pdf(ABot_,1)*pdf(0,2) ) &
                        + HOp(2)/xE * (pdf_z(AUp_,1)*pdf(0,2)+pdf_z(ADn_,1)*pdf(0,2)+pdf_z(AChm_,1)*pdf(0,2)+pdf_z(AStr_,1)*pdf(0,2)+pdf_z(ABot_,1)*pdf(0,2) ) &
                        + HOp(3)/xE * (pdf(AUp_,1)*pdf_z(0,2)+pdf(ADn_,1)*pdf_z(0,2)+pdf(AChm_,1)*pdf_z(0,2)+pdf(AStr_,1)*pdf_z(0,2)+pdf(ABot_,1)*pdf_z(0,2) )
 
    call swapMom(MomP(1:4,3),MomP(1:4,4))
    call EvalIntDipoles_DKP_QGTTBQ(MomP(1:4,1:4),MomExt(1:4,5:11),ATop_,nPhoRad,xE,HOp(1:3))
    HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
-   EvalCS_DKP_1L_ttbqqb = EvalCS_DKP_1L_ttbqqb &
+   EvalCS_anomcoupl_DKP_1L_ttbqqb = EvalCS_anomcoupl_DKP_1L_ttbqqb &
                        + HOp(1)    * (pdf(AUp_,2)*pdf(0,1)+pdf(ADn_,2)*pdf(0,1)+pdf(AChm_,2)*pdf(0,1)+pdf(AStr_,2)*pdf(0,1)+pdf(ABot_,2)*pdf(0,1) ) &
                        + HOp(2)/xE * (pdf_z(AUp_,2)*pdf(0,1)+pdf_z(ADn_,2)*pdf(0,1)+pdf_z(AChm_,2)*pdf(0,1)+pdf_z(AStr_,2)*pdf(0,1)+pdf_z(ABot_,2)*pdf(0,1) ) &
                        + HOp(3)/xE * (pdf(AUp_,2)*pdf_z(0,1)+pdf(ADn_,2)*pdf_z(0,1)+pdf(AChm_,2)*pdf_z(0,1)+pdf(AStr_,2)*pdf_z(0,1)+pdf(ABot_,2)*pdf_z(0,1) )
@@ -4374,14 +4379,14 @@ ENDIF
 ENDIF
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_DKP_1L_ttbqqb)
+      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbqqb)
    enddo
 
-EvalCS_DKP_1L_ttbqqb_1 = EvalCS_DKP_1L_ttbqqb_1 + EvalCS_DKP_1L_ttbqqb
+EvalCS_anomcoupl_DKP_1L_ttbqqb_1 = EvalCS_anomcoupl_DKP_1L_ttbqqb_1 + EvalCS_anomcoupl_DKP_1L_ttbqqb
 enddo! nPhoRad loop
 
 
-!    EvalCS_DKP_1L_ttbqqb = (EvalCS_DKP_1L_ttbqqb_1)/VgsWgt
+!    EvalCS_anomcoupl_DKP_1L_ttbqqb = (EvalCS_anomcoupl_DKP_1L_ttbqqb_1)/VgsWgt
 !    return
 !-----------------------------------------------------------------------------
 
@@ -4546,7 +4551,7 @@ ENDIF
 IF( CORRECTION.EQ.0 ) THEN
 !  normalization
    LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * WidthExpansion
-   EvalCS_DKP_1L_ttbqqb = LO_Res_Unpol * PreFac
+   EvalCS_anomcoupl_DKP_1L_ttbqqb = LO_Res_Unpol * PreFac
 
 ELSEIF( CORRECTION.EQ.1 ) THEN
 !  overall normalization: (4*Pi)^eps/Gamma(1-eps)
@@ -4570,7 +4575,7 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
    NLO_Res_UnPol(-2:1) = NLO_Res_UnPol(-2:1)           * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha_sOver2Pi*RunFactor
    NLO_Res_UnPol_Ferm(-2:1) = NLO_Res_UnPol_Ferm(-2:1) * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha_sOver2Pi*RunFactor
 
-   EvalCS_DKP_1L_ttbqqb = ( NLO_Res_UnPol(0)+NLO_Res_UnPol(1) + NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1) ) * PreFac
+   EvalCS_anomcoupl_DKP_1L_ttbqqb = ( NLO_Res_UnPol(0)+NLO_Res_UnPol(1) + NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1) ) * PreFac
 
 
 ELSEIF( CORRECTION.EQ.3 ) THEN
@@ -4592,14 +4597,14 @@ IF( PROCESS.EQ.31 ) THEN
 
       call EvalIntDipoles_DKP_QQBTTBG(MomP(1:4,1:4),MomExt(1:4,5:11),Top_,nPhoRad,xE,HOp(1:3))
       HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
-      EvalCS_DKP_1L_ttbqqb = HOp(1) * (pdf(Up_,1)*pdf(AUp_,2)+pdf(Dn_,1)*pdf(ADn_,2)+pdf(Chm_,1)*pdf(AChm_,2)+pdf(Str_,1)*pdf(AStr_,2)+pdf(Bot_,1)*pdf(ABot_,2) ) &
+      EvalCS_anomcoupl_DKP_1L_ttbqqb = HOp(1) * (pdf(Up_,1)*pdf(AUp_,2)+pdf(Dn_,1)*pdf(ADn_,2)+pdf(Chm_,1)*pdf(AChm_,2)+pdf(Str_,1)*pdf(AStr_,2)+pdf(Bot_,1)*pdf(ABot_,2) ) &
                           + HOp(2)/xE * (pdf_z(Up_,1)*pdf(AUp_,2)+pdf_z(Dn_,1)*pdf(ADn_,2)+pdf_z(Chm_,1)*pdf(AChm_,2)+pdf_z(Str_,1)*pdf(AStr_,2)+pdf_z(Bot_,1)*pdf(ABot_,2) ) &
                           + HOp(3)/xE * (pdf(Up_,1)*pdf_z(AUp_,2)+pdf(Dn_,1)*pdf_z(ADn_,2)+pdf(Chm_,1)*pdf_z(AChm_,2)+pdf(Str_,1)*pdf_z(AStr_,2)+pdf(Bot_,1)*pdf_z(ABot_,2) )
 
       call swapMom(MomP(1:4,3),MomP(1:4,4))
       call EvalIntDipoles_DKP_QQBTTBG(MomP(1:4,1:4),MomExt(1:4,5:11),Top_,nPhoRad,xE,HOp(1:3))
       HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
-      EvalCS_DKP_1L_ttbqqb = EvalCS_DKP_1L_ttbqqb &
+      EvalCS_anomcoupl_DKP_1L_ttbqqb = EvalCS_anomcoupl_DKP_1L_ttbqqb &
                            + HOp(1)    * (pdf(Up_,2)*pdf(AUp_,1)+pdf(Dn_,2)*pdf(ADn_,1)+pdf(Chm_,2)*pdf(AChm_,1)+pdf(Str_,2)*pdf(AStr_,1)+pdf(Bot_,2)*pdf(ABot_,1) ) &
                            + HOp(2)/xE * (pdf_z(Up_,2)*pdf(AUp_,1)+pdf_z(Dn_,2)*pdf(ADn_,1)+pdf_z(Chm_,2)*pdf(AChm_,1)+pdf_z(Str_,2)*pdf(AStr_,1)+pdf_z(Bot_,2)*pdf(ABot_,1) ) &
                            + HOp(3)/xE * (pdf(Up_,2)*pdf_z(AUp_,1)+pdf(Dn_,2)*pdf_z(ADn_,1)+pdf(Chm_,2)*pdf_z(AChm_,1)+pdf(Str_,2)*pdf_z(AStr_,1)+pdf(Bot_,2)*pdf_z(ABot_,1) )
@@ -4610,14 +4615,14 @@ ELSEIF( PROCESS.EQ.25 ) THEN
 
       call EvalIntDipoles_DKP_QGTTBQ(MomP(1:4,1:4),MomExt(1:4,5:11),Top_,nPhoRad,xE,HOp(1:3))
       HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
-      EvalCS_DKP_1L_ttbqqb = HOp(1) * (pdf(Up_,1)*pdf(0,2)+pdf(Dn_,1)*pdf(0,2)+pdf(Chm_,1)*pdf(0,2)+pdf(Str_,1)*pdf(0,2)+pdf(Bot_,1)*pdf(0,2) ) &
+      EvalCS_anomcoupl_DKP_1L_ttbqqb = HOp(1) * (pdf(Up_,1)*pdf(0,2)+pdf(Dn_,1)*pdf(0,2)+pdf(Chm_,1)*pdf(0,2)+pdf(Str_,1)*pdf(0,2)+pdf(Bot_,1)*pdf(0,2) ) &
                           + HOp(2)/xE * (pdf_z(Up_,1)*pdf(0,2)+pdf_z(Dn_,1)*pdf(0,2)+pdf_z(Chm_,1)*pdf(0,2)+pdf_z(Str_,1)*pdf(0,2)+pdf_z(Bot_,1)*pdf(0,2) ) &
                           + HOp(3)/xE * (pdf(Up_,1)*pdf_z(0,2)+pdf(Dn_,1)*pdf_z(0,2)+pdf(Chm_,1)*pdf_z(0,2)+pdf(Str_,1)*pdf_z(0,2)+pdf(Bot_,1)*pdf_z(0,2) )
 
       call swapMom(MomP(1:4,3),MomP(1:4,4))
       call EvalIntDipoles_DKP_QGTTBQ(MomP(1:4,1:4),MomExt(1:4,5:11),Top_,nPhoRad,xE,HOp(1:3))
       HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
-      EvalCS_DKP_1L_ttbqqb = EvalCS_DKP_1L_ttbqqb &
+      EvalCS_anomcoupl_DKP_1L_ttbqqb = EvalCS_anomcoupl_DKP_1L_ttbqqb &
                           + HOp(1)    * (pdf(Up_,2)*pdf(0,1)+pdf(Dn_,2)*pdf(0,1)+pdf(Chm_,2)*pdf(0,1)+pdf(Str_,2)*pdf(0,1)+pdf(Bot_,2)*pdf(0,1) ) &
                           + HOp(2)/xE * (pdf_z(Up_,2)*pdf(0,1)+pdf_z(Dn_,2)*pdf(0,1)+pdf_z(Chm_,2)*pdf(0,1)+pdf_z(Str_,2)*pdf(0,1)+pdf_z(Bot_,2)*pdf(0,1) ) &
                           + HOp(3)/xE * (pdf(Up_,2)*pdf_z(0,1)+pdf(Dn_,2)*pdf_z(0,1)+pdf(Chm_,2)*pdf_z(0,1)+pdf(Str_,2)*pdf_z(0,1)+pdf(Bot_,2)*pdf_z(0,1) )
@@ -4628,14 +4633,14 @@ ELSEIF( PROCESS.EQ.27 ) THEN
 
       call EvalIntDipoles_DKP_QGTTBQ(MomP(1:4,1:4),MomExt(1:4,5:11),Top_,nPhoRad,xE,HOp(1:3))
       HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
-      EvalCS_DKP_1L_ttbqqb = HOp(1) * (pdf(AUp_,1)*pdf(0,2)+pdf(ADn_,1)*pdf(0,2)+pdf(AChm_,1)*pdf(0,2)+pdf(AStr_,1)*pdf(0,2)+pdf(ABot_,1)*pdf(0,2) ) &
+      EvalCS_anomcoupl_DKP_1L_ttbqqb = HOp(1) * (pdf(AUp_,1)*pdf(0,2)+pdf(ADn_,1)*pdf(0,2)+pdf(AChm_,1)*pdf(0,2)+pdf(AStr_,1)*pdf(0,2)+pdf(ABot_,1)*pdf(0,2) ) &
                           + HOp(2)/xE * (pdf_z(AUp_,1)*pdf(0,2)+pdf_z(ADn_,1)*pdf(0,2)+pdf_z(AChm_,1)*pdf(0,2)+pdf_z(AStr_,1)*pdf(0,2)+pdf_z(ABot_,1)*pdf(0,2) ) &
                           + HOp(3)/xE * (pdf(AUp_,1)*pdf_z(0,2)+pdf(ADn_,1)*pdf_z(0,2)+pdf(AChm_,1)*pdf_z(0,2)+pdf(AStr_,1)*pdf_z(0,2)+pdf(ABot_,1)*pdf_z(0,2) )
 
       call swapMom(MomP(1:4,3),MomP(1:4,4))
       call EvalIntDipoles_DKP_QGTTBQ(MomP(1:4,1:4),MomExt(1:4,5:11),Top_,nPhoRad,xE,HOp(1:3))
       HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
-      EvalCS_DKP_1L_ttbqqb = EvalCS_DKP_1L_ttbqqb &
+      EvalCS_anomcoupl_DKP_1L_ttbqqb = EvalCS_anomcoupl_DKP_1L_ttbqqb &
                           + HOp(1)    * (pdf(AUp_,2)*pdf(0,1)+pdf(ADn_,2)*pdf(0,1)+pdf(AChm_,2)*pdf(0,1)+pdf(AStr_,2)*pdf(0,1)+pdf(ABot_,2)*pdf(0,1) ) &
                           + HOp(2)/xE * (pdf_z(AUp_,2)*pdf(0,1)+pdf_z(ADn_,2)*pdf(0,1)+pdf_z(AChm_,2)*pdf(0,1)+pdf_z(AStr_,2)*pdf(0,1)+pdf_z(ABot_,2)*pdf(0,1) ) &
                           + HOp(3)/xE * (pdf(AUp_,2)*pdf_z(0,1)+pdf(ADn_,2)*pdf_z(0,1)+pdf(AChm_,2)*pdf_z(0,1)+pdf(AStr_,2)*pdf_z(0,1)+pdf(ABot_,2)*pdf_z(0,1) )
@@ -4645,13 +4650,13 @@ ENDIF
 ENDIF
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_DKP_1L_ttbqqb)
+      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbqqb)
    enddo
 
-   EvalCS_DKP_1L_ttbqqb_2 = EvalCS_DKP_1L_ttbqqb_2 + EvalCS_DKP_1L_ttbqqb
+   EvalCS_anomcoupl_DKP_1L_ttbqqb_2 = EvalCS_anomcoupl_DKP_1L_ttbqqb_2 + EvalCS_anomcoupl_DKP_1L_ttbqqb
 enddo! nPhoRad loop
 
-   EvalCS_DKP_1L_ttbqqb = (EvalCS_DKP_1L_ttbqqb_1+EvalCS_DKP_1L_ttbqqb_2)/VgsWgt
+   EvalCS_anomcoupl_DKP_1L_ttbqqb = (EvalCS_anomcoupl_DKP_1L_ttbqqb_1+EvalCS_anomcoupl_DKP_1L_ttbqqb_2)/VgsWgt
 
 return
 END FUNCTION
@@ -4663,7 +4668,7 @@ END FUNCTION
 
 
 
-FUNCTION EvalCS_DKP_Real_ttbggg(yRnd,VgsWgt)
+FUNCTION EvalCS_anomcoupl_DKP_Real_ttbggg(yRnd,VgsWgt)
 use ModProcess
 use ModKinematics
 use ModDipoles_DKP_GGTTBG
@@ -4672,7 +4677,7 @@ use ModMyRecurrence
 use ModParameters
 use ModJPsiFrag
 implicit none
-real(8) :: EvalCS_DKP_Real_ttbggg,EvalCS_DKP_Real_ttbggg_1,EvalCS_DKP_Real_ttbggg_2
+real(8) :: EvalCS_anomcoupl_DKP_Real_ttbggg,EvalCS_anomcoupl_DKP_Real_ttbggg_1,EvalCS_anomcoupl_DKP_Real_ttbggg_2
 real(8) :: yRnd(1:VegasMxDim),VgsWgt
 complex(8) :: LO_Res_Pol,LO_Res_Unpol
 integer :: iHel,iPrimAmp,jPrimAmp,nPhoRad,PhoHel
@@ -4708,13 +4713,13 @@ include "vegas_common.f"
 
 
   ParityFlip=1
-  EvalCS_DKP_Real_ttbggg = 0d0
-  EvalCS_DKP_Real_ttbggg_1 = 0d0
-  EvalCS_DKP_Real_ttbggg_2 = 0d0
+  EvalCS_anomcoupl_DKP_Real_ttbggg = 0d0
+  EvalCS_anomcoupl_DKP_Real_ttbggg_1 = 0d0
+  EvalCS_anomcoupl_DKP_Real_ttbggg_2 = 0d0
 
   call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top ) then
-      EvalCS_DKP_Real_ttbggg = 0d0
+      EvalCS_anomcoupl_DKP_Real_ttbggg = 0d0
       return
   endif
   FluxFac = 1d0/(2d0*EHat**2)
@@ -4726,7 +4731,7 @@ include "vegas_common.f"
 
    call CheckSing(MomExt,applySingCut)
    if( applySingCut ) then
-       EvalCS_DKP_Real_ttbggg = 0d0
+       EvalCS_anomcoupl_DKP_Real_ttbggg = 0d0
        return
    endif
 
@@ -4738,7 +4743,7 @@ include "vegas_common.f"
 !----------------------------------
 ! photon emission off anti-top    |
 !----------------------------------
-   EvalCS_DKP_Real_ttbggg = 0d0
+   EvalCS_anomcoupl_DKP_Real_ttbggg = 0d0
 do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W,nPhoRad=2: photon radiation off W/lep
    if( nPhoRad.eq.1 ) then
       call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(8:14),.true.,MomExt(1:4,6:9),PSWgt2)
@@ -4750,7 +4755,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W,nPhoRa
 
    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,9,1,2,3,6,7,8,10,11,12/),applyPSCut,NBin)
    if( applyPSCut ) then
-      EvalCS_DKP_Real_ttbggg = 0d0
+      EvalCS_anomcoupl_DKP_Real_ttbggg = 0d0
       goto 50
    endif
 
@@ -4778,10 +4783,10 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W,nPhoRa
           LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
       enddo!helicity loop
       enddo!helicity loop
-      EvalCS_DKP_Real_ttbggg = LO_Res_UnPol * PreFac * (alpha_s4Pi*RunFactor)**3 * ISFac
+      EvalCS_anomcoupl_DKP_Real_ttbggg = LO_Res_UnPol * PreFac * (alpha_s4Pi*RunFactor)**3 * ISFac
 
       do NHisto=1,NumHistograms
-          call intoHisto(NHisto,NBin(NHisto),EvalCS_DKP_Real_ttbggg)
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_Real_ttbggg)
       enddo
 
 
@@ -4789,13 +4794,13 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W,nPhoRa
 
 
       call EvalDipoles_DKP_GGTTBG((/MomExt(1:4,1),MomExt(1:4,2),MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,3)/),(/0d0,0d0,m_Top**2,m_Top**2,0d0/),yRnd(8:18),PreFac,ATop_,nPhoRad,DipoleResult)
-      EvalCS_DKP_Real_ttbggg_1 = EvalCS_DKP_Real_ttbggg_1 + (EvalCS_DKP_Real_ttbggg+DipoleResult)
+      EvalCS_anomcoupl_DKP_Real_ttbggg_1 = EvalCS_anomcoupl_DKP_Real_ttbggg_1 + (EvalCS_anomcoupl_DKP_Real_ttbggg+DipoleResult)
 
 
 ! ! print *, yrnd(1:18)
 !   s12 = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,2))
 !   s13 = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,3))
-!   print *, s13/s12,EvalCS_DKP_Real_ttbggg,DipoleResult,EvalCS_DKP_Real_ttbggg/DipoleResult+1d0
+!   print *, s13/s12,EvalCS_anomcoupl_DKP_Real_ttbggg,DipoleResult,EvalCS_anomcoupl_DKP_Real_ttbggg/DipoleResult+1d0
 !   pause
 enddo! nPhoRad loop
 
@@ -4806,7 +4811,7 @@ enddo! nPhoRad loop
 !----------------------------------
 ! photon emission off top    |
 !----------------------------------
-   EvalCS_DKP_Real_ttbggg = 0d0
+   EvalCS_anomcoupl_DKP_Real_ttbggg = 0d0
 do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoRad=2: photon radiation off W/lep
    call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(8:11),.false.,MomExt(1:4,6:8),PSWgt2)
    if( nPhoRad.eq.1 ) then
@@ -4818,7 +4823,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
 
    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,12,1,2,3,6,7,8,9,10,11/),applyPSCut,NBin)
    if( applyPSCut ) then
-      EvalCS_DKP_Real_ttbggg = 0d0
+      EvalCS_anomcoupl_DKP_Real_ttbggg = 0d0
       goto 51
    endif
 
@@ -4847,10 +4852,10 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
           LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
       enddo!helicity loop
       enddo!helicity loop
-      EvalCS_DKP_Real_ttbggg = LO_Res_UnPol * PreFac * (alpha_s4Pi*RunFactor)**3 * ISFac
+      EvalCS_anomcoupl_DKP_Real_ttbggg = LO_Res_UnPol * PreFac * (alpha_s4Pi*RunFactor)**3 * ISFac
 
       do NHisto=1,NumHistograms
-          call intoHisto(NHisto,NBin(NHisto),EvalCS_DKP_Real_ttbggg)
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_Real_ttbggg)
       enddo
 
 
@@ -4858,12 +4863,12 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
 
 
     call EvalDipoles_DKP_GGTTBG((/MomExt(1:4,1),MomExt(1:4,2),MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,3)/),(/0d0,0d0,m_Top**2,m_Top**2,0d0/),yRnd(8:18),PreFac,Top_,nPhoRad,DipoleResult)
-    EvalCS_DKP_Real_ttbggg_2 = EvalCS_DKP_Real_ttbggg_2 + (EvalCS_DKP_Real_ttbggg+DipoleResult)
+    EvalCS_anomcoupl_DKP_Real_ttbggg_2 = EvalCS_anomcoupl_DKP_Real_ttbggg_2 + (EvalCS_anomcoupl_DKP_Real_ttbggg+DipoleResult)
 
 ! ! print *, yrnd(1:18)
 !   s12 = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,2))
 !   s13 = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,3))
-!   print *, s13/s12,EvalCS_DKP_Real_ttbggg,DipoleResult,EvalCS_DKP_Real_ttbggg/DipoleResult+1d0
+!   print *, s13/s12,EvalCS_anomcoupl_DKP_Real_ttbggg,DipoleResult,EvalCS_anomcoupl_DKP_Real_ttbggg/DipoleResult+1d0
 !   pause
 
 enddo! nPhoRad loop
@@ -4871,14 +4876,14 @@ enddo! nPhoRad loop
 
 
 
-EvalCS_DKP_Real_ttbggg = (EvalCS_DKP_Real_ttbggg_1+EvalCS_DKP_Real_ttbggg_2)/VgsWgt
-if( isNaN(EvalCS_DKP_Real_ttbggg) ) then
+EvalCS_anomcoupl_DKP_Real_ttbggg = (EvalCS_anomcoupl_DKP_Real_ttbggg_1+EvalCS_anomcoupl_DKP_Real_ttbggg_2)/VgsWgt
+if( isNaN(EvalCS_anomcoupl_DKP_Real_ttbggg) ) then
     print *, "NaN event"
-    print *,  EvalCS_DKP_Real_ttbggg
-    print *, EvalCS_DKP_Real_ttbggg_1,EvalCS_DKP_Real_ttbggg_2,VgsWgt
+    print *,  EvalCS_anomcoupl_DKP_Real_ttbggg
+    print *, EvalCS_anomcoupl_DKP_Real_ttbggg_1,EvalCS_anomcoupl_DKP_Real_ttbggg_2,VgsWgt
     print *, yRnd(:)
     print *, ""
-    EvalCS_DKP_Real_ttbggg = 0d0
+    EvalCS_anomcoupl_DKP_Real_ttbggg = 0d0
 endif
 
 
@@ -4893,7 +4898,7 @@ END FUNCTION
 
 
 
-FUNCTION EvalCS_DKP_Real_ttbqqbg(yRnd,VgsWgt)
+FUNCTION EvalCS_anomcoupl_DKP_Real_ttbqqbg(yRnd,VgsWgt)
 use ModProcess
 use ModKinematics
 use ModDipoles_DKP_QQBTTBG
@@ -4903,8 +4908,8 @@ use ModMyRecurrence
 use ModParameters
 use ModJPsiFrag
 implicit none
-real(8) ::  EvalCS_DKP_Real_ttbqqbg,EvalCS_DKP_Real_ttbqqbg_1,EvalCS_DKP_Real_ttbqqbg_2
-real(8) ::  EvalCS_DK_Dips_ttbqqbg,EvalCS_DK_Dips_ttbqqbg_1,EvalCS_DK_Dips_ttbqqbg_2
+real(8) ::  EvalCS_anomcoupl_DKP_Real_ttbqqbg,EvalCS_anomcoupl_DKP_Real_ttbqqbg_1,EvalCS_anomcoupl_DKP_Real_ttbqqbg_2
+real(8) ::  EvalCS_anomcoupl_DK_Dips_ttbqqbg,EvalCS_anomcoupl_DK_Dips_ttbqqbg_1,EvalCS_anomcoupl_DK_Dips_ttbqqbg_2
 real(8) ::  yRnd(1:VegasMxDim),VgsWgt,DipoleResult
 complex(8) :: LO_Res_Pol,LO_Res_Unpol
 integer :: iHel,iPrimAmp,jPrimAmp,nPhoRad,PhoHel
@@ -4916,16 +4921,16 @@ logical :: applyPSCut,applySingCut
 include "vegas_common.f"
 
   ParityFlip=1
-  EvalCS_DKP_Real_ttbqqbg = 0d0
-  EvalCS_DKP_Real_ttbqqbg_1 = 0d0
-  EvalCS_DKP_Real_ttbqqbg_2 = 0d0
-  EvalCS_DK_Dips_ttbqqbg = 0d0
-  EvalCS_DK_Dips_ttbqqbg_1 = 0d0
-  EvalCS_DK_Dips_ttbqqbg_2 = 0d0
+  EvalCS_anomcoupl_DKP_Real_ttbqqbg = 0d0
+  EvalCS_anomcoupl_DKP_Real_ttbqqbg_1 = 0d0
+  EvalCS_anomcoupl_DKP_Real_ttbqqbg_2 = 0d0
+  EvalCS_anomcoupl_DK_Dips_ttbqqbg = 0d0
+  EvalCS_anomcoupl_DK_Dips_ttbqqbg_1 = 0d0
+  EvalCS_anomcoupl_DK_Dips_ttbqqbg_2 = 0d0
 
   call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top ) then
-      EvalCS_DKP_Real_ttbqqbg = 0d0
+      EvalCS_anomcoupl_DKP_Real_ttbqqbg = 0d0
       return
   endif
   FluxFac = 1d0/(2d0*EHat**2)
@@ -4935,7 +4940,7 @@ include "vegas_common.f"
 
    call CheckSing(MomExt,applySingCut)
    if( applySingCut ) then
-      EvalCS_DKP_Real_ttbqqbg = 0d0
+      EvalCS_anomcoupl_DKP_Real_ttbqqbg = 0d0
       return
    endif
 
@@ -4969,7 +4974,7 @@ ENDIF
 !----------------------------------
 ! photon emission off anti-top    |
 !----------------------------------
-EvalCS_DKP_Real_ttbqqbg_1 = 0d0
+EvalCS_anomcoupl_DKP_Real_ttbqqbg_1 = 0d0
 do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoRad=2: photon radiation off W/lep
    if( nPhoRad.eq.1 ) then
       call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(8:14),.true.,MomExt(1:4,6:9),PSWgt2)
@@ -4990,7 +4995,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
 
         call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,9,1,2,3,6,7,8,10,11,12/),applyPSCut,NBin)
         if( applyPSCut ) then
-            EvalCS_DKP_Real_ttbqqbg = 0d0
+            EvalCS_anomcoupl_DKP_Real_ttbqqbg = 0d0
             goto 60
         endif
 
@@ -5019,10 +5024,10 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
           LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
       enddo!helicity loop
       enddo!helicity loop
-      EvalCS_DKP_Real_ttbqqbg = LO_Res_UnPol * PreFac * (alpha_s4Pi*RunFactor)**3 * ISFac
+      EvalCS_anomcoupl_DKP_Real_ttbqqbg = LO_Res_UnPol * PreFac * (alpha_s4Pi*RunFactor)**3 * ISFac
 
       do NHisto=1,NumHistograms
-          call intoHisto(NHisto,NBin(NHisto),EvalCS_DKP_Real_ttbqqbg)
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_Real_ttbqqbg)
       enddo
 
 
@@ -5037,12 +5042,12 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
           call EvalDipoles_DKP_QGTTBQ((/MomExt(1:4,1),MomExt(1:4,2),MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,3)/),(/0d0,0d0,m_Top**2,m_Top**2,0d0/),yRnd(8:18),PreFac,ATop_,nPhoRad,DipoleResult)
       ENDIF
 
-      EvalCS_DKP_Real_ttbqqbg_1 = EvalCS_DKP_Real_ttbqqbg_1 + (EvalCS_DKP_Real_ttbqqbg + DipoleResult)
+      EvalCS_anomcoupl_DKP_Real_ttbqqbg_1 = EvalCS_anomcoupl_DKP_Real_ttbqqbg_1 + (EvalCS_anomcoupl_DKP_Real_ttbqqbg + DipoleResult)
 
 !   print *, nPdf,nPhoRad
 !   s12 = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,2))
 !   s13 = 2d0*(MomExt(1:4,2).dot.MomExt(1:4,3))
-!   print *, s13/s12,EvalCS_DKP_Real_ttbqqbg,DipoleResult,EvalCS_DKP_Real_ttbqqbg/DipoleResult+1d0
+!   print *, s13/s12,EvalCS_anomcoupl_DKP_Real_ttbqqbg,DipoleResult,EvalCS_anomcoupl_DKP_Real_ttbqqbg/DipoleResult+1d0
 !   pause
 
 enddo! nPdf loop
@@ -5055,7 +5060,7 @@ enddo! nPhoRad loop
 !----------------------------------
 ! photon emission off top         |
 !----------------------------------
-  EvalCS_DKP_Real_ttbqqbg_2 = 0d0
+  EvalCS_anomcoupl_DKP_Real_ttbqqbg_2 = 0d0
 do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoRad=2: photon radiation off W/lep
    call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(8:11),.false.,MomExt(1:4,6:8),PSWgt2)
    if( nPhoRad.eq.1 ) then
@@ -5075,7 +5080,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
 
         call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,12,1,2,3,6,7,8,9,10,11/),applyPSCut,NBin)
         if( applyPSCut ) then
-            EvalCS_DKP_Real_ttbqqbg = 0d0
+            EvalCS_anomcoupl_DKP_Real_ttbqqbg = 0d0
             goto 61
         endif
 
@@ -5103,10 +5108,10 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
           LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
       enddo!helicity loop
       enddo!helicity loop
-      EvalCS_DKP_Real_ttbqqbg = LO_Res_UnPol * PreFac * (alpha_s4Pi*RunFactor)**3 * ISFac
+      EvalCS_anomcoupl_DKP_Real_ttbqqbg = LO_Res_UnPol * PreFac * (alpha_s4Pi*RunFactor)**3 * ISFac
 
       do NHisto=1,NumHistograms
-          call intoHisto(NHisto,NBin(NHisto),EvalCS_DKP_Real_ttbqqbg)
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_Real_ttbqqbg)
       enddo
 
 
@@ -5124,25 +5129,25 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
 !       print *, nPdf,nPhoRad
 !       s12 = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,2))
 !       s13 = 2d0*(MomExt(1:4,2).dot.MomExt(1:4,3))
-!       print *, s13/s12,EvalCS_DKP_Real_ttbqqbg,DipoleResult,EvalCS_DKP_Real_ttbqqbg/DipoleResult+1d0
+!       print *, s13/s12,EvalCS_anomcoupl_DKP_Real_ttbqqbg,DipoleResult,EvalCS_anomcoupl_DKP_Real_ttbqqbg/DipoleResult+1d0
 !       pause
 
-      EvalCS_DKP_Real_ttbqqbg_2 = EvalCS_DKP_Real_ttbqqbg_2 + (EvalCS_DKP_Real_ttbqqbg + DipoleResult)
+      EvalCS_anomcoupl_DKP_Real_ttbqqbg_2 = EvalCS_anomcoupl_DKP_Real_ttbqqbg_2 + (EvalCS_anomcoupl_DKP_Real_ttbqqbg + DipoleResult)
 
 enddo! nPdf loop
 call swapMom(MomExt(1:4,1),MomExt(1:4,2))! swap back
 enddo! nPhoRad loop
 
 
-EvalCS_DKP_Real_ttbqqbg = (EvalCS_DKP_Real_ttbqqbg_1+EvalCS_DKP_Real_ttbqqbg_2)/VgsWgt
+EvalCS_anomcoupl_DKP_Real_ttbqqbg = (EvalCS_anomcoupl_DKP_Real_ttbqqbg_1+EvalCS_anomcoupl_DKP_Real_ttbqqbg_2)/VgsWgt
 
-if( isNaN(EvalCS_DKP_Real_ttbqqbg) ) then
+if( isNaN(EvalCS_anomcoupl_DKP_Real_ttbqqbg) ) then
     print *, "NaN event"
-    print *, EvalCS_DKP_Real_ttbqqbg
-    print *, EvalCS_DKP_Real_ttbqqbg_1,EvalCS_DKP_Real_ttbqqbg_2,VgsWgt
+    print *, EvalCS_anomcoupl_DKP_Real_ttbqqbg
+    print *, EvalCS_anomcoupl_DKP_Real_ttbqqbg_1,EvalCS_anomcoupl_DKP_Real_ttbqqbg_2,VgsWgt
     print *, yRnd(:)
     print *, ""
-    EvalCS_DKP_Real_ttbqqbg = 0d0
+    EvalCS_anomcoupl_DKP_Real_ttbqqbg = 0d0
 endif
 RETURN
 END FUNCTION
@@ -5151,6 +5156,6 @@ END FUNCTION
 
 
 
-END MODULE ModCrossSection_TTBP
+END MODULE ModCrossSection_TTBP_anomcoupl
 
 

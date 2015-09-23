@@ -59,9 +59,9 @@ endif
  
 
 ifeq ($(Opt),Yes)
-   IfortOpts   = -O2 -fpp -vec-report0 -opt-report -opt-report-file$(OptReport) -I$(Here)/colors -I$(VegasDir) -module $(ModuleDir) $(LHAPDFflags) $(Flags)
+   IfortOpts   = -O2 -fpp -opt-report -opt-report-file$(OptReport) -I$(Here)/colors -I$(VegasDir) -module $(ModuleDir) $(LHAPDFflags) $(Flags)
 else
-   IfortOpts   = -O0 -fpp -implicitnone -zero -check bounds -check pointer -warn interfaces -ftrapuv -I$(Here)/colors -I$(VegasDir) -module $(ModuleDir) $(LHAPDFflags) $(Flags)
+   IfortOpts   = -O0 -fpp -implicitnone -check bounds -check pointer -warn interfaces -ftrapuv  -debug extended -g -traceback -fpe0 -check uninit -I$(Here)/colors -I$(VegasDir) -module $(ModuleDir) $(LHAPDFflags) $(Flags)
 endif
 fcomp = $(F95compiler) $(IfortOpts) @$(ConfigFile)
 
@@ -275,7 +275,25 @@ DipoleObjTTBH = $(ObjectDir)/mod_Dipoles_GGTTBGH.o \
                 $(ObjectDir)/mod_IntDipoles_QGTTBQH.o \
                 $(ObjectDir)/mod_IntDipoles_QBGTTBQBH.o
 
+DipoleDepTTBP_anom = $(Here)/dipoles/mod_Dipoles_GGTTBGP_anom.f90 \
+            $(Here)/dipoles/mod_Dipoles_QQBTTBGP_anom.f90 \
+            $(Here)/dipoles/mod_Dipoles_QGTTBQP_anom.f90 \
+            $(Here)/dipoles/mod_Dipoles_QBGTTBQBP_anom.f90 \
+            $(Here)/dipoles/mod_IntDipoles_GGTTBGP_anom.f90 \
+            $(Here)/dipoles/mod_IntDipoles_QQBTTBGP_anom.f90 \
+            $(Here)/dipoles/mod_IntDipoles_QGTTBQP_anom.f90 \
+            $(Here)/dipoles/mod_IntDipoles_QBGTTBQBP_anom.f90
 
+DipoleObjTTBP_anom = $(ObjectDir)/mod_Dipoles_GGTTBGP_anom.o \
+                $(ObjectDir)/mod_Dipoles_QQBTTBGP_anom.o \
+                $(ObjectDir)/mod_Dipoles_QGTTBQP_anom.o \
+                $(ObjectDir)/mod_Dipoles_QBGTTBQBP_anom.o \
+                $(ObjectDir)/mod_IntDipoles_GGTTBGP_anom.o \
+                $(ObjectDir)/mod_IntDipoles_QQBTTBGP_anom.o \
+                $(ObjectDir)/mod_IntDipoles_QGTTBQP_anom.o \
+                $(ObjectDir)/mod_IntDipoles_QBGTTBQBP_anom.o
+
+                
 DipoleDepSTSTB = $(Here)/dipoles/mod_Dipoles_GGSTSTBG.f90 \
 		 $(Here)/dipoles/mod_IntDipoles_GGSTSTBG.f90 \
 		 $(Here)/dipoles/mod_Dipoles_QQBSTSTBG.f90  \
@@ -435,6 +453,7 @@ allObjects =   				$(ObjectDir)/mod_Misc.o \
 					$(ObjectDir)/mod_MyRecurrence.o \
 					$(ObjectDir)/mod_MyWeylRecurrence.o \
 					$(ObjectDir)/mod_Amplitudes.o \
+					$(ObjectDir)/mod_SingleTopHAmps.o \
 					$(ObjectDir)/mod_Amplitudes_Zprime.o \
 					$(ObjectDir)/mod_Amplitudes_eeTTB.o \
 					$(OPPObj) \
@@ -462,6 +481,7 @@ allObjects =   				$(ObjectDir)/mod_Misc.o \
 					$(DipoleObjTTBP) \
 					$(DipoleObjTTBZ) \
 					$(DipoleObjTTBH) \
+					$(DipoleObjTTBP_anom) \
 					$(DipoleObjSTSTB) \
 					$(DipoleObjHTHTB) \
 					$(DipoleObjZprime) \
@@ -470,11 +490,13 @@ allObjects =   				$(ObjectDir)/mod_Misc.o \
 					$(ObjectDir)/mod_CrossSection_TTB.o \
 					$(ObjectDir)/mod_CrossSection_TTBJ.o \
 					$(ObjectDir)/mod_CrossSection_TTBP.o \
+					$(ObjectDir)/mod_CrossSection_TTBP_anomcoupl.o \
 					$(ObjectDir)/mod_CrossSection_TTBETmiss.o \
 					$(ObjectDir)/mod_CrossSection_ZprimeTTB.o \
 					$(ObjectDir)/mod_CrossSection_eeTTB.o \
 					$(ObjectDir)/mod_CrossSection_TTBZ.o \
 					$(ObjectDir)/mod_CrossSection_TTBH.o \
+					$(ObjectDir)/mod_CrossSection_TH.o \
 					$(ObjectDir)/main.o
 
 
@@ -557,6 +579,11 @@ $(ObjectDir)/mod_Amplitudes.o: mod_Amplitudes.f90 $(makeDep)
 	@echo " compiling" $<
 	$(fcomp) -c $< -o $@
 
+$(ObjectDir)/mod_SingleTopHAmps.o: mod_SingleTopHAmps.f90 $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -c $< -o $@
+
+
 $(ObjectDir)/mod_Amplitudes_Zprime.o: mod_Amplitudes_Zprime.f90 $(makeDep)
 	@echo " compiling" $<
 	$(fcomp) -c $< -o $@
@@ -585,6 +612,10 @@ $(ObjectDir)/mod_CrossSection_TTBP.o: mod_CrossSection_TTBP.f90 $(makeDep)
 	@echo " compiling" $<
 	$(fcomp) -c $< -o $@
 
+$(ObjectDir)/mod_CrossSection_TTBP_anomcoupl.o: mod_CrossSection_TTBP_anomcoupl.f90 $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -c $< -o $@
+
 
 $(ObjectDir)/mod_CrossSection_TTBETmiss.o: mod_CrossSection_TTBETmiss.f90 $(makeDep)
 	@echo " compiling" $<
@@ -602,6 +633,10 @@ $(ObjectDir)/mod_CrossSection_TTBZ.o: mod_CrossSection_TTBZ.f90 $(makeDep)
 
 
 $(ObjectDir)/mod_CrossSection_TTBH.o: mod_CrossSection_TTBH.f90 $(makeDep)
+	@echo " compiling" $<
+	$(fcomp) -c $< -o $@
+
+$(ObjectDir)/mod_CrossSection_TH.o: mod_CrossSection_TH.f90 $(makeDep)
 	@echo " compiling" $<
 	$(fcomp) -c $< -o $@
 

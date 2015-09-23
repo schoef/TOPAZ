@@ -118,16 +118,22 @@ logical :: dirresult
    DKRE_switch=0
    iDipAlpha(1:5)=0
    DipAlpha2=1d0
-! default for BSM top-Z  couplings
+! default for BSM top-Z couplings
    AbsDelF1A=0d0
    AbsDelF1V=0d0
    RelDelF1A=0d0
    RelDelF1V=0d0
    RelDelF2A=0d0
    RelDelF2V=0d0
+! default for BSM top-photon couplings   
    DelGam2V=0d0
    DelGam2A=0d0
+! default for BSM top-Higgs couplings
+   kappaTTBH=1d0
+   kappaTTBH_tilde=0d0
 
+   
+   
    NumArgs = NArgs()-1
    do NArg=1,NumArgs
     call GetArg(NArg,arg)
@@ -230,7 +236,10 @@ logical :: dirresult
         read(arg(10:16),*) DelGam2V
     elseif( arg(1:9) .eq. "DelGam2A=" ) then
         read(arg(10:16),*) DelGam2A
-
+     elseif( arg(1:6) .eq. "kappa=") then
+        read(arg(7:13),*) kappaTTBH
+     elseif( arg(1:12) .eq. "kappa_tilde=") then
+        read(arg(13:18),*) kappaTTBH_tilde
     elseif( arg(1:9).eq."DipAlpha=" ) then
         read(arg(10:10),*) iDipAlpha(1)
         read(arg(11:11),*) iDipAlpha(2)
@@ -549,10 +558,11 @@ integer TheUnit
        write(TheUnit,'(A,F8.5)') '# BSM ttbZ vector2=',DeltaF2V
        write(TheUnit,'(A,F8.5)') '# BSM ttbZ axial2= ',DeltaF2A
     endif
-    if ( (ObsSet.ge.80 .and. ObsSet.le.89)  ) then
+    if ( (ObsSet.ge.80 .and. ObsSet.le.89) .or. (ObsSet .ge. 91 .and. ObsSet .le.99)  ) then
        write(TheUnit,'(A,F10.5,A)') "# m(H)=",m_H*100d0, " GeV"
        write(TheUnit,'(A,F10.5,A)') "# Gamma(H)=",Ga_H*100d0, " GeV"    
        write(TheUnit,"(A,I2)") "# H Decays=",HDecays
+       write(TheUnit,'(A,F10.5,A)') "# vev=",Vev*100d0, " GeV"
        write(TheUnit,"(A,F10.5)") "# kappa=",kappaTTBH  
        write(TheUnit,"(A,F10.5)") "# kappa_tilde=",kappaTTBH_tilde
        
@@ -655,8 +665,10 @@ use ModMisc
 use ModCrossSection_TTB
 use ModCrossSection_TTBJ
 use ModCrossSection_TTBP
+use ModCrossSection_TTBP_anomcoupl
 use ModCrossSection_TTBZ
 use ModCrossSection_TTBH
+use ModCrossSection_TH
 use ModCrossSection_TTBETmiss
 use ModCrossSection_ZprimeTTB
 use ModCrossSection_eeTTB
@@ -1172,36 +1184,68 @@ ENDIF
 
 IF( MASTERPROCESS.EQ.8 ) THEN
 IF( CORRECTION   .LE.1 ) THEN
-  call vegas(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  else 
+      call vegas(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ELSEIF( CORRECTION.EQ.3 ) THEN
-  call vegas(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ELSEIF( CORRECTION.EQ.4 ) THEN
-  call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ELSEIF( CORRECTION.EQ.5 ) THEN
-  call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+     call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+     call vegas(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ELSE
   call Error("this correction is not available")
@@ -1211,36 +1255,68 @@ ENDIF
 
 IF( MASTERPROCESS.EQ.9 ) THEN
 IF( CORRECTION   .LE.1 ) THEN
-  call vegas(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ELSEIF( CORRECTION.EQ.3 ) THEN
-  call vegas(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ELSEIF( CORRECTION.EQ.4 ) THEN
-  call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ELSEIF( CORRECTION.EQ.5 ) THEN
-  call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ENDIF
 ENDIF
@@ -1249,12 +1325,20 @@ ENDIF
 
 IF( MASTERPROCESS.EQ.10 ) THEN
 IF( CORRECTION.EQ.2 ) THEN
-  call vegas(EvalCS_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ENDIF
 ENDIF
@@ -1264,12 +1348,20 @@ ENDIF
 
 IF( MASTERPROCESS.EQ.11 ) THEN
 IF( CORRECTION.EQ.2 ) THEN
-  call vegas(EvalCS_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas1(EvalCS_anomcoupl_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 ENDIF
 ENDIF
@@ -2002,6 +2094,34 @@ ENDIF
 
 
 
+IF( MASTERPROCESS.EQ.73 ) THEN
+IF( CORRECTION   .EQ.0 ) THEN
+  call vegas(EvalCS_LO_tdubH,VG_Result,VG_Error,VG_Chi2)
+  if( warmup ) then
+   itmx = VegasIt1
+   ncall= VegasNc1
+   call InitHisto()
+   call vegas1(EvalCS_LO_tdubH,VG_Result,VG_Error,VG_Chi2)
+  endif
+ENDIF
+ENDIF
+
+IF( MASTERPROCESS.EQ.74 ) THEN
+IF( CORRECTION   .EQ.0 ) THEN
+  call vegas(EvalCS_LO_tbardubbarH,VG_Result,VG_Error,VG_Chi2)
+  if( warmup ) then
+   itmx = VegasIt1
+   ncall= VegasNc1
+   call InitHisto()
+   call vegas1(EvalCS_LO_tbardubbarH,VG_Result,VG_Error,VG_Chi2)
+  endif
+ENDIF
+ENDIF
+
+
+
+
+
 return
 END SUBROUTINE
 !DEC$ ENDIF
@@ -2015,8 +2135,10 @@ use ModMisc
 use ModCrossSection_TTB
 use ModCrossSection_TTBJ
 use ModCrossSection_TTBP
+use ModCrossSection_TTBP_anomcoupl
 use ModCrossSection_TTBZ
 use ModCrossSection_TTBH
+use ModCrossSection_TH
 use ModCrossSection_TTBETmiss
 use ModCrossSection_ZprimeTTB
 use ModCrossSection_eeTTB
@@ -2745,6 +2867,40 @@ ENDIF
 
 
 
+IF( MASTERPROCESS.EQ.73 ) THEN
+IF( CORRECTION.EQ.0 .OR. CORRECTION.EQ.3 ) THEN
+  init=0
+  call ClearRedHisto()
+  call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_LO_tdubH_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  if( warmup ) then
+    init=1
+    itmx = VegasIt1
+    ncall= VegasNc1
+    call InitHisto()
+    call ClearRedHisto()
+    call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_LO_tdubH_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  endif
+ENDIF
+ENDIF
+
+IF( MASTERPROCESS.EQ.74 ) THEN
+IF( CORRECTION.EQ.0 .OR. CORRECTION.EQ.3 ) THEN
+  init=0
+  call ClearRedHisto()
+  call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_LO_tbardubbarH_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  if( warmup ) then
+    init=1
+    itmx = VegasIt1
+    ncall= VegasNc1
+    call InitHisto()
+    call ClearRedHisto()
+    call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_LO_tbardubbarH_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  endif
+ENDIF
+ENDIF
+
+
+
 
 return
 END SUBROUTINE
@@ -2930,7 +3086,7 @@ logical, save :: FirstTime=.true.
   write(TheUnit,"(A,2X,1F20.10)") "# EvalCounter  =",dble(EvalCounter)
   write(TheUnit,"(A,2X,1F20.10)") "# PSCutCounter =",dble(PSCutCounter)
   write(TheUnit,"(A,2X,1F20.10)") "# SkipCounter  =",dble(SkipCounter)
-  if( dble(SkipCounter)/dble(EvalCounter) .gt. 0.02d0 ) write(TheUnit,"(A,2X)") "# **** WARNING  ****: SkipCounter is larger than 2%"
+  if( EvalCounter.gt.0 .and. dble(SkipCounter)/dble(EvalCounter) .gt. 0.02d0 ) write(TheUnit,"(A,2X)") "# **** WARNING  ****: SkipCounter is larger than 2%"
   write(TheUnit,"(A,2X,1PE20.10,2X,1PE20.5)") "#TotCS[fb]=",VG_Result,VG_Error
   do NHisto=1,NumHistograms
 !     print *, NHisto

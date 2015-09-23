@@ -3049,7 +3049,45 @@ ELSEIF( PROCESS.EQ.106 ) THEN !   3_Str  + 4_AStr --> 5_Glu  + 1_ATop + 2_Top + 
       call Error("Correction to this process is not available")
   ENDIF
   
+
+!! RR added for single top + H -- LO only
+ELSEIF( PROCESS.EQ.111 ) THEN !   3_Up  + 4_Bot  --> 1_Top + 5_Hig + 2_Dn                                                                                            
+  IF( CORRECTION.EQ.0 ) THEN
+      NumExtParticles = 5
+      allocate(Crossing(1:NumExtParticles))
+      allocate(ExtParticle(1:NumExtParticles))
+      Crossing(:) = (/4,5,-1,-2,3/)
+      MasterProcess=73
+      NDim = NDim + 5    ! PS integration                                                                                                                                  
+      AvgFactor = SpinAvg * QuarkColAvg**2
+      NDim = NDim + 2    ! shat integration                                                                                                                                 
+      VegasNc0_default = 100000
+      VegasNc1_default = 100000
+      print *, "done InitProcess"
+  ELSE
+      call Error("Correction to this process is not available")
+  ENDIF
   
+
+ELSEIF( PROCESS.EQ.112 ) THEN !   3_Up  + 4_ABot  --> 1_ATop + 5_Hig + 2_Dn                                                                                                       
+  IF( CORRECTION.EQ.0 ) THEN
+      NumExtParticles = 5
+      allocate(Crossing(1:NumExtParticles))
+      allocate(ExtParticle(1:NumExtParticles))
+      Crossing(:) = (/4,5,-1,-2,3/)
+      MasterProcess=74
+      NDim = NDim + 5    ! PS integration
+
+      AvgFactor = SpinAvg * QuarkColAvg**2
+      NDim = NDim + 2    ! shat integration                                                                                                                                
+ 
+     VegasNc0_default = 100000
+      VegasNc1_default = 100000
+      print *, "done InitProcess"
+  ELSE
+      call Error("Correction to this process is not available")
+  ENDIF
+
   
 
 ELSE
@@ -5298,6 +5336,104 @@ ELSEIF( MASTERPROCESS.EQ.63 ) THEN
        ENDIF
 
     ENDIF
+
+
+ELSEIF( MASTERPROCESS.EQ.73 ) THEN    ! t+H
+    ExtParticle(1)%PartType = Top_
+    ExtParticle(2)%PartType = Dn_
+    ExtParticle(3)%PartType = Up_
+    ExtParticle(4)%PartType = Bot_
+    ExtParticle(5)%PartType = Hig_
+
+    IF( Correction.EQ.0 ) THEN
+      NumPrimAmps = 1
+      NumBornAmps = 1
+    ENDIF
+    allocate(PrimAmps(1:NumPrimAmps))
+    allocate(BornAmps(1:NumPrimAmps))
+    do NAmp=1,NumPrimAmps
+        allocate(BornAmps(NAmp)%ExtLine(1:NumExtParticles))
+        allocate(PrimAmps(NAmp)%ExtLine(1:NumExtParticles))
+        allocate(PrimAmps(NAmp)%IntPart(1:NumExtParticles))
+    enddo
+
+    IF( TOPDECAYS.GE.1 ) THEN
+        NumHelicities = 1
+        allocate(Helicities(1:NumHelicities,1:NumExtParticles))
+        Helicities( 1,1:5) = (/0,-1,-1,-1,0/)
+    ELSE
+        NumHelicities = 2
+        allocate(Helicities(1:NumHelicities,1:NumExtParticles))
+        sig_t =+1;
+        Helicities( 1,1:5) = (/sig_t,-1,-1,-1,0/)
+        Helicities( 2,1:5) = (/sig_t,-1,-1,-1,0/)
+                
+    ENDIF
+!    print *, "initialized in MasterProcess"
+
+ ELSEIF( MASTERPROCESS.EQ.74 ) THEN    ! tb+H                                                                                                                         
+    ExtParticle(1)%PartType = ATop_
+    ExtParticle(2)%PartType = Dn_
+    ExtParticle(3)%PartType = Up_
+    ExtParticle(4)%PartType = ABot_
+    ExtParticle(5)%PartType = Hig_
+
+    IF( Correction.EQ.0 ) THEN
+      NumPrimAmps = 1
+      NumBornAmps = 1
+    ENDIF
+    allocate(PrimAmps(1:NumPrimAmps))
+    allocate(BornAmps(1:NumPrimAmps))
+    do NAmp=1,NumPrimAmps
+        allocate(BornAmps(NAmp)%ExtLine(1:NumExtParticles))
+        allocate(PrimAmps(NAmp)%ExtLine(1:NumExtParticles))
+        allocate(PrimAmps(NAmp)%IntPart(1:NumExtParticles))
+    enddo
+
+    IF( TOPDECAYS.GE.1 ) THEN
+        NumHelicities = 4
+        allocate(Helicities(1:NumHelicities,1:NumExtParticles))
+        Helicities(1,1:5) = (/0,0,+1,+1, 0/)
+        Helicities(2,1:5) = (/0,0,+1,-1, 0/)
+        Helicities(3,1:5) = (/0,0,-1,+1, 0/)
+        Helicities(4,1:5) = (/0,0,-1,-1, 0/)
+    ELSE
+        NumHelicities = 16
+        allocate(Helicities(1:NumHelicities,1:NumExtParticles))
+        sig_tb=+1; sig_t =+1;
+        Helicities( 1,1:5) = (/sig_tb,sig_t,+1,+1, 0/)
+        Helicities( 2,1:5) = (/sig_tb,sig_t,+1,-1, 0/)
+        sig_tb=+1; sig_t =-1;
+        Helicities( 3,1:5) = (/sig_tb,sig_t,+1,+1, 0/)
+        Helicities( 4,1:5) = (/sig_tb,sig_t,+1,-1, 0/)
+        sig_tb=-1; sig_t =+1;
+        Helicities( 5,1:5) = (/sig_tb,sig_t,+1,+1, 0/)
+        Helicities( 6,1:5) = (/sig_tb,sig_t,+1,-1, 0/)
+        sig_tb=-1; sig_t =-1;
+        Helicities( 7,1:5) = (/sig_tb,sig_t,+1,+1, 0/)
+        Helicities( 8,1:5) = (/sig_tb,sig_t,+1,-1, 0/)
+
+    !   additional helicities when parity inversion is not applied:                                                                                                        
+                                                                                                                                                                   
+        sig_tb=-1; sig_t =-1;
+        Helicities( 9,1:5) = (/sig_tb,sig_t,-1,-1, 0/)
+        Helicities(10,1:5) = (/sig_tb,sig_t,-1,+1, 0/)
+        sig_tb=-1; sig_t =+1;
+        Helicities(11,1:5) = (/sig_tb,sig_t,-1,-1, 0/)
+        Helicities(12,1:5) = (/sig_tb,sig_t,-1,+1, 0/)
+        sig_tb=+1; sig_t =-1;
+        Helicities(13,1:5) = (/sig_tb,sig_t,-1,-1, 0/)
+        Helicities(14,1:5) = (/sig_tb,sig_t,-1,+1, 0/)
+        sig_tb=+1; sig_t =+1;
+        Helicities(15,1:5) = (/sig_tb,sig_t,-1,-1, 0/)
+        Helicities(16,1:5) = (/sig_tb,sig_t,-1,+1, 0/)
+
+    ENDIF
+
+
+
+
+
 
 
 
@@ -7763,7 +7899,18 @@ ELSEIF( MasterProcess.EQ.63) THEN
 
 
 
+ELSEIF( MasterProcess.EQ.73 ) THEN ! t+H
 
+   IF( Correction.EQ.0 .OR. Correction.EQ.4 .OR.Correction.EQ.5 ) THEN
+      BornAmps(1)%ExtLine = (/1,5,2,3,4/)
+      PrimAmps(1)%ExtLine = (/1,5,2,3,4/)
+   ENDIF
+
+ELSEIF( MasterProcess.EQ.74 ) THEN ! tb+H                                                                                                                                 
+   IF( Correction.EQ.0 .OR. Correction.EQ.4 .OR.Correction.EQ.5 ) THEN
+      BornAmps(1)%ExtLine = (/1,5,2,3,4/)
+      PrimAmps(1)%ExtLine = (/1,5,2,3,4/)
+   ENDIF
 
 
 ELSE
