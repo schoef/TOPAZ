@@ -113,7 +113,7 @@ int p_size;                  /* stores result of MPI_Comm_size()             */
 double result_buf[(2*FNMX+(2*MXDIM*NDMX))];  /* buffer to send results  */
 int kgl_buf[MXDIM-1];        /* buffer for sending the chunk of hypercubes   */
 
-#define NUMHISTO 30          /* MARKUS: number of histograms, has to match fortran code */
+#define NUMHISTO 40          /* MARKUS: number of histograms, has to match fortran code */
 #define MXHISTOBINS 500      /* MARKUS: this is the max. number of bins, has to match the ones in fortran code */
 typedef struct {             /* MARKUS: struct for single histogram, matches "type,BIND(C)::ReducedHistogram" in fortran   */
       double Value[MXHISTOBINS];

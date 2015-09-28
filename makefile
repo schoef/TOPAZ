@@ -27,7 +27,7 @@ LHAPDFDir=/afs/cern.ch/user/m/maschulz/lib/LHAPDF-6.1.5/lib/
 
 
 # interface to JHUGenMELA (requires UseLHAPDF=Yes)
-useJHUGenMELA = No
+useJHUGenMELA = Yes
 
 
 ifeq ($(useMPI),Yes)

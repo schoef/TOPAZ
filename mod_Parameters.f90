@@ -58,7 +58,7 @@ real(8), public, parameter :: m_Str   = 0d0
 real(8), public, parameter :: m_Up    = 0d0
 real(8), public, parameter :: m_Dn    = 0d0
 real(8), public, parameter :: m_Z     = 91.1876*GeV
-real(8), public, parameter :: m_W     = 80.385d0*GeV
+real(8), public, parameter :: m_W     = 80.399d0*GeV
 real(8), public, parameter :: m_H     = 125.0d0*GeV
 real(8), public, parameter :: m_e     = 0d0
 real(8), public, parameter :: m_nu    = 0d0
@@ -89,7 +89,7 @@ real(8), public            :: Ga_Stop_ChiTop(0:1)
 real(8), public, parameter :: m_A0    = 50d0*GeV! (scalar)
 real(8), public, parameter :: m_BH    = 50d0*GeV! (vector)
 real(8), public, parameter :: m_Chi   = 25d0*GeV! (Majorana)
-real(8), public, parameter :: Vev  = 246d0*GeV
+real(8), public, parameter :: Vev  = 246.218458102d0*GeV!  =1.0d0/sqrt(Gf*sqrt(2.0d0))
 !real(8), public, parameter :: Vev  = 250.618249228543d0*GeV   ! MadGraph value
 
 ! BSM top-Z couplings

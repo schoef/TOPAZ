@@ -27,7 +27,7 @@
       common /nnpdf/nfl,nx,nq2,mem,rep,hasphoton,alphas,xgrid,logxgrid,
      1     q2grid,logq2grid,pdfgrid
 
-      character*100 gridfilename
+      character*32 gridfilename!  MARKUS: adjusted for "./PDFS/NNPDF30_lo_as_0130.LHgrid"
 *
       nfl = 13
       nx = 100
@@ -72,7 +72,7 @@
       implicit none
       
       integer i,ix,iq,fl,imem
-      character*100 gridfilename
+      character*32 gridfilename
       character*100 line
 *
       integer nfl,nx,nq2,mem,rep

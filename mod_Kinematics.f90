@@ -99,6 +99,7 @@ use ModParameters
 implicit none
 type(ReducedHistogram) :: TheHisto
 integer NHisto,NBin
+transferHisto=0
 
   if( NHisto.gt.NumHistograms ) return! this is required because in pvegas we loop until max.number of histograms (NUMHISTO)
   do NBin=1,Histo(NHisto)%NBins
@@ -107,7 +108,6 @@ integer NHisto,NBin
     Histo(NHisto)%Hits(NBin)   = TheHisto%Hits(NBin)
   enddo
 
-transferHisto=0
 RETURN
 END FUNCTION
 
@@ -853,14 +853,14 @@ ELSEIF( ObsSet.EQ.82 ) THEN! set of observables for ttb+H (di-leptonic tops)
 ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops)
 
 
-    Rsep_jet    = 0.4d0             
-    pT_bjet_cut = 20d0*GeV      !*0d0
-    pT_jet_cut  = 20d0*GeV      !*0d0
-    eta_bjet_cut= 2.5d0         !*1d2
-    eta_jet_cut = 2.5d0         !*1d2
-    pT_lep_cut  = 20d0*GeV      !*0d0
-    pT_miss_cut = 20d0*GeV      !*0d0
-    eta_lep_cut = 2.5d0         !*1d2
+    Rsep_jet    = 0.4d0         !*0d0     
+    pT_bjet_cut = 20d0*GeV      *0d0
+    pT_jet_cut  = 20d0*GeV      *0d0
+    eta_bjet_cut= 2.5d0         *1d2
+    eta_jet_cut = 2.5d0         *1d2
+    pT_lep_cut  = 20d0*GeV      *0d0
+    pT_miss_cut = 20d0*GeV      *0d0
+    eta_lep_cut = 2.5d0         *1d2
 
 
 ELSEIF( ObsSet.EQ.91 ) THEN! set of observables for t+H (stable tops)
@@ -5150,7 +5150,7 @@ ELSEIF( ObsSet.EQ.82 ) THEN! set of observables for ttb+H (di-leptonic tops)
 ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops, stable Higgs)
           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
 !          if(TopDecays.ne.1 .and. TopDecays.ne.3 .and. TopDecays.ne.4)  call Error("TopDecays needs to be 1 or 3 or 4")
-          if(TopDecays.ne.3 .and. TopDecays.ne.4 )  call Error("TopDecays needs to be 3 or 4")
+!           if(TopDecays.ne.3 .and. TopDecays.ne.4 )  call Error("TopDecays needs to be 3 or 4")
           NumHistograms = 12
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
@@ -10104,7 +10104,7 @@ integer :: NBin(:),PartList(1:7),JetList(1:7),NJet,NObsJet,k,NObsJet_Tree,i,j
 real(8),optional :: PObs(:)
 real(8) :: pT_lep(4),ET_miss,PT_miss,pT_ATop,pT_Top,pT_Higgs,HT,ET_bjet,eta_Higgs
 real(8) :: eta_ATop,eta_Top,eta_lep(1:4),m_ttbar,delta_eta_T,delta_eta_B,cos_thetaLL
-real(8) :: pT_jet(1:7),eta_jet(1:7)
+real(8) :: pT_jet(1:7),eta_jet(1:7),MELA_rescale
 integer :: tbar,t,Hig,inLeft,inRight,realp,bbar,lepM,nubar,b,lepP,nu,qdn,qbup,qbdn,qup,L,N,HDK1,HDK2
 real(8) :: pT_ll,HT_jet,RLept,CosTheta1,CosTheta2,CosThetaStar,delta_eta_L,cos_thetaBB
 integer :: iLept,jLept,jJet
@@ -10350,17 +10350,13 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
          applyPSCut = .true.
          RETURN
      endif
-!    if( .not.( any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
-!        applyPSCut = .true.
-!        RETURN
-!    endif
 
     pT_ATop = get_PT(Mom(1:4,tbar))
     pT_Top  = get_PT(Mom(1:4,t))
-    eta_top = get_PseudoETA(Mom(1:4,t))
-    eta_Atop = get_PseudoETA(Mom(1:4,tbar))
+    eta_top = get_ETA(Mom(1:4,t))
+    eta_Atop = get_ETA(Mom(1:4,tbar))
     pT_Higgs= get_PT(Mom(1:4,Hig))
-    eta_Higgs = get_PseudoETA(Mom(1:4,Hig))
+    eta_Higgs = get_ETA(Mom(1:4,Hig))
 
     pT_jet(1) = get_PT(MomJet(1:4,1))
     pT_jet(2) = get_PT(MomJet(1:4,2))
@@ -10401,11 +10397,14 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
       MomRest(1:4)= Mom(1:4,tbar) + Mom(1:4,t) + Mom(1:4,Hig)
       MomBoost(1)   = +MomRest(1)
       MomBoost(2:4) = -MomRest(2:4)
+      
       MomAux1(1:4) = Mom(1:4,Hig)
       MomAux2(1:4) = (/0d0,0d0,0d0,1d0/) ! z-axis
+      
       M_Aux = dabs( get_MInv(MomRest(1:4)) + 1d-12 )
       call boost(MomAux1(1:4),MomBoost(1:4),M_Aux)
       call boost(MomAux2(1:4),MomBoost(1:4),M_Aux)
+      
       CosThetaStar = Get_CosAlpha( MomAux1(1:4),MomAux2(1:4) )
 
       
@@ -10414,15 +10413,18 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
       MomRest(1:4)  = Mom(1:4,t)+Mom(1:4,tbar)
       MomBoost(1)   = +MomRest(1)
       MomBoost(2:4) = -MomRest(2:4)
-      MomAux1(1:4) = Mom(1:4,Hig)
-      MomAux2(1:4) = Mom(1:4,t)
-      MomAux2(1:4) = (/0d0,0d0,0d0,1d0/) ! z-axis
+      
+!       MomAux1(1:4) = Mom(1:4,Hig)
+      MomAux1(1:4) = Mom(1:4,t)
+!       MomAux2(1:4) = (/0d0,0d0,0d0,1d0/) ! z-axis
+      MomAux2(1:4) = Mom(1:4,Hig)
 
 
       M_Aux = dabs( get_MInv(MomRest(1:4)) + 1d-12 )
       call boost(MomAux1(1:4),MomBoost(1:4),M_Aux)
       call boost(MomAux2(1:4),MomBoost(1:4),M_Aux)
-      CosTheta2 = Get_CosAlpha( MomAux1(1:4),MomAux2(1:4) )
+      
+      CosTheta2 = -Get_CosAlpha( MomAux1(1:4),MomAux2(1:4) )
 
 
 
@@ -10467,8 +10469,8 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
 #if _UseJHUGenMELA==1
    
     if( FirstTime ) then
-!       call NNPDFDriver("./pdfs/NNPDF30_lo_as_0130.LHgrid",33)
-!       call NNinitPDF(0)
+      call NNPDFDriver("./PDFS/NNPDF30_lo_as_0130.LHgrid")
+      call NNinitPDF(0)
       call InitProcess_TTBH(m_H,m_top)
       FirstTime = .false.
     endif
@@ -10487,7 +10489,10 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
     
     call EvalXSec_PP_TTBH(MomMELA(1:4,1:13),(/(1d0,0d0),(0d0,0d0)/),TopDecays,2,MatElSq_H0)
     call EvalXSec_PP_TTBH(MomMELA(1:4,1:13),(/(0d0,0d0),(1d0,0d0)/),TopDecays,2,MatElSq_H1)
-    D_0minus = MatElSq_H0/(MatElSq_H0 + 2d0*MatElSq_H1 )
+    
+    MELA_rescale = 2.537649d0
+    
+    D_0minus = MatElSq_H0/(MatElSq_H0 + MELA_rescale*MatElSq_H1 )
 
 #endif    
     
@@ -15072,9 +15077,44 @@ implicit none
 real(8) :: x1,x2,PDFScale,MuFac
 real(8) :: upv(1:2),dnv(1:2),usea(1:2),dsea(1:2),str(1:2),sbar(1:2),chm(1:2),cbar(1:2),bot(1:2),bbar(1:2),glu(1:2),phot
 integer,parameter :: swPDF_u=1, swPDF_d=1, swPDF_c=1, swPDF_s=1, swPDF_b=1, swPDF_g=1
-real(8) :: pdf(-6:6,1:2)
+real(8) :: pdf(-6:6,1:2),NNpdf(1:2,-6:7)
 
         PDFScale=MuFac*100d0
+
+
+#if _UseLHAPDF==1
+
+        call evolvePDF(x1,PDFScale,NNpdf(1,-6:7))
+        call evolvePDF(x2,PDFScale,NNpdf(2,-6:7))
+        NNpdf(1,-6:7) = NNpdf(1,-6:7)/x1
+        NNpdf(2,-6:7) = NNpdf(2,-6:7)/x2
+        
+        pdf(Up_,1)   = NNpdf(1,+2)         * swPDF_u
+        pdf(AUp_,1)  = NNpdf(1,-2)         * swPDF_u
+        pdf(Dn_,1)   = NNpdf(1,+1)         * swPDF_d
+        pdf(ADn_,1)  = NNpdf(1,-1)         * swPDF_d
+        pdf(Chm_,1)  = NNpdf(1,+4)         * swPDF_c
+        pdf(AChm_,1) = NNpdf(1,-4)         * swPDF_c
+        pdf(Str_,1)  = NNpdf(1,+3)         * swPDF_s
+        pdf(AStr_,1) = NNpdf(1,-3)         * swPDF_s
+        pdf(Bot_,1)  = NNpdf(1,+5)         * swPDF_b
+        pdf(ABot_,1) = NNpdf(1,-5)         * swPDF_b
+        pdf(0,1)     = NNpdf(1,+0)         * swPDF_g            
+            
+        pdf(Up_,2)   = NNpdf(2,+2)         * swPDF_u
+        pdf(AUp_,2)  = NNpdf(2,-2)         * swPDF_u
+        pdf(Dn_,2)   = NNpdf(2,+1)         * swPDF_d
+        pdf(ADn_,2)  = NNpdf(2,-1)         * swPDF_d
+        pdf(Chm_,2)  = NNpdf(2,+4)         * swPDF_c
+        pdf(AChm_,2) = NNpdf(2,-4)         * swPDF_c
+        pdf(Str_,2)  = NNpdf(2,+3)         * swPDF_s
+        pdf(AStr_,2) = NNpdf(2,-3)         * swPDF_s
+        pdf(Bot_,2)  = NNpdf(2,+5)         * swPDF_b
+        pdf(ABot_,2) = NNpdf(2,-5)         * swPDF_b
+        pdf(0,2)     = NNpdf(2,+0)         * swPDF_g            
+
+#else
+
 
 
 !   MRSW PDFS
@@ -15267,6 +15307,8 @@ ELSEIF( COLLIDER.EQ.2 ) THEN
         pdf(ABot_,2) = bbar(2)             * swPDF_b / x2
         pdf(0,2)     = glu(2)              * swPDF_g / x2
 ENDIF
+
+#endif
 
 
 RETURN
