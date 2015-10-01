@@ -15,7 +15,7 @@ Flags =
 Opt = Yes
 
 # MPI features, Yes/No. run with: mpiexec -n 4 ./TOPAZ_MPI ...
-useMPI = Yes
+useMPI = No
 
 # link pdfs via LHA library ('Yes' or 'No')
 UseLHAPDF=Yes

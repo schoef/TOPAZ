@@ -236,9 +236,9 @@ logical :: dirresult
         read(arg(10:16),*) DelGam2V
     elseif( arg(1:9) .eq. "DelGam2A=" ) then
         read(arg(10:16),*) DelGam2A
-     elseif( arg(1:6) .eq. "kappa=") then
+     elseif( arg(1:6) .eq. "Kappa=") then
         read(arg(7:13),*) kappaTTBH
-     elseif( arg(1:12) .eq. "kappa_tilde=") then
+     elseif( arg(1:12) .eq. "Kappa_tilde=") then
         read(arg(13:18),*) kappaTTBH_tilde
     elseif( arg(1:9).eq."DipAlpha=" ) then
         read(arg(10:10),*) iDipAlpha(1)

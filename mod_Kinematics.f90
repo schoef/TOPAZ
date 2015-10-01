@@ -5150,7 +5150,7 @@ ELSEIF( ObsSet.EQ.82 ) THEN! set of observables for ttb+H (di-leptonic tops)
 ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops, stable Higgs)
           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
 !          if(TopDecays.ne.1 .and. TopDecays.ne.3 .and. TopDecays.ne.4)  call Error("TopDecays needs to be 1 or 3 or 4")
-!           if(TopDecays.ne.3 .and. TopDecays.ne.4 )  call Error("TopDecays needs to be 3 or 4")
+          if(TopDecays.ne.3 .and. TopDecays.ne.4 )  call Error("TopDecays needs to be 3 or 4")
           NumHistograms = 12
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
