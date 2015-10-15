@@ -2050,84 +2050,84 @@ call swapMom(MomExt(1:4,1),MomExt(1:4,2))! swap back
 
 
 
-! !-------------------------------------
-! ! one loop correction to top-decay   |
-! !-------------------------------------
-!    PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt1*PSWgt2*PSWgt3*PSWgt4 * VgsWgt
-!    RunFactor = RunAlphaS(2,MuRen)
-! 
-! do npdf=1,2
-!     if(npdf.eq.1) then
-!         PDFFac(1:2) = PDFFac_a(1:2)
-!     elseif(npdf.eq.2) then
-!         call swapMom(MomExt(1:4,1),MomExt(1:4,2))
-!         PDFFac(1:2) = PDFFac_b(1:2)
-!         if( Process.eq.101 ) cycle
-!     endif
-!     ISFac = MomCrossing(MomExt)
-! 
-!    LO_Res_Unpol = (0d0,0d0)
-!    NLO_Res_UnPol= (0d0,0d0)
-!    do iHel=1,NumHelicities
-!       call HelCrossing(Helicities(iHel,1:NumExtParticles))
-!       call SetPolarizations()
-!       call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8))
-!       call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11))
-! 
-!       do iPrimAmp=1,NumBornAmps
-!           call EvalTree(BornAmps(iPrimAmp))
-!           TreeResult(iPrimAmp) = BornAmps(iPrimAmp)%Result
-!       enddo
-! 
-!       call TopDecay(ExtParticle(2),DK_1L_T,MomExt(1:4,9:11))
-!       do iPrimAmp=1,NumBornAmps
-!           call EvalTree(BornAmps(iPrimAmp))
-!           DKResult(iPrimAmp) = BornAmps(iPrimAmp)%Result
-!       enddo
-!       if(PROCESS.EQ.101) then
-!           NLO_Res_Pol = (0d0,0d0)
-!           do jPrimAmp=1,NumBornAmps
-!           do iPrimAmp=1,NumBornAmps
-!               NLO_Res_Pol = NLO_Res_Pol + ColLO_ttbgg(iPrimAmp,jPrimAmp) * dreal( TreeResult(iPrimAmp)*dconjg(DKResult(jPrimAmp)) )*PDFFac(glu)
-!           enddo
-!           enddo
-!       elseif(PROCESS.EQ.102) then
-!           NLO_Res_Pol = ColLO_ttbqqb(1,1) * dreal( TreeResult(1)*dconjg(DKResult(1)) ) * ( PDFFac(up)+PDFFac(dn) )
-!       endif
-!       NLO_Res_UnPol = NLO_Res_UnPol + NLO_Res_Pol
-! 
-! 
-!       if( TOPDECAYS.eq.2 .or. TOPDECAYS.eq.3 ) then  !  virt.corr. to hadronic W decay
-!         call TopDecay(ExtParticle(2),DK_1L_Q,MomExt(1:4,9:11))
-!         do iPrimAmp=1,NumBornAmps
-!             call EvalTree(BornAmps(iPrimAmp))
-!             DKResult(iPrimAmp) = BornAmps(iPrimAmp)%Result
-!         enddo
-!         if(PROCESS.EQ.101) then
-!             NLO_Res_Pol = (0d0,0d0)
-!             do jPrimAmp=1,NumBornAmps
-!             do iPrimAmp=1,NumBornAmps
-!                 NLO_Res_Pol = NLO_Res_Pol + ColLO_ttbgg(iPrimAmp,jPrimAmp) * dreal( TreeResult(iPrimAmp)*dconjg(DKResult(jPrimAmp)) )*PDFFac(glu)
-!             enddo
-!             enddo
-!         elseif(PROCESS.EQ.102) then
-!             NLO_Res_Pol = ColLO_ttbqqb(1,1) * dreal( TreeResult(1)*dconjg(DKResult(1)) ) * ( PDFFac(up)+PDFFac(dn) )
-!         endif
-!         NLO_Res_UnPol = NLO_Res_UnPol + NLO_Res_Pol
-!       endif!  virt.corr. to hadronic W decay
-! 
-!    enddo!helicity loop
-! 
-! !  normalization
-!    NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2  * PreFac
-!    EvalCS_NLODK_ttbH = EvalCS_NLODK_ttbH + dble(NLO_Res_Unpol)
-! 
-!    do NHisto=1,NumHistograms
-!       call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol),BinValue=PObs(NHisto))
-!    enddo
-! 
-! enddo! npdf loop
-! call swapMom(MomExt(1:4,1),MomExt(1:4,2))! swap back
+!-------------------------------------
+! one loop correction to top-decay   |
+!-------------------------------------
+   PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt1*PSWgt2*PSWgt3*PSWgt4 * VgsWgt
+   RunFactor = RunAlphaS(2,MuRen)
+
+do npdf=1,2
+    if(npdf.eq.1) then
+        PDFFac(1:2) = PDFFac_a(1:2)
+    elseif(npdf.eq.2) then
+        call swapMom(MomExt(1:4,1),MomExt(1:4,2))
+        PDFFac(1:2) = PDFFac_b(1:2)
+        if( Process.eq.101 ) cycle
+    endif
+    ISFac = MomCrossing(MomExt)
+
+   LO_Res_Unpol = (0d0,0d0)
+   NLO_Res_UnPol= (0d0,0d0)
+   do iHel=1,NumHelicities
+      call HelCrossing(Helicities(iHel,1:NumExtParticles))
+      call SetPolarizations()
+      call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8))
+      call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11))
+
+      do iPrimAmp=1,NumBornAmps
+          call EvalTree(BornAmps(iPrimAmp))
+          TreeResult(iPrimAmp) = BornAmps(iPrimAmp)%Result
+      enddo
+
+      call TopDecay(ExtParticle(2),DK_1L_T,MomExt(1:4,9:11))
+      do iPrimAmp=1,NumBornAmps
+          call EvalTree(BornAmps(iPrimAmp))
+          DKResult(iPrimAmp) = BornAmps(iPrimAmp)%Result
+      enddo
+      if(PROCESS.EQ.101) then
+          NLO_Res_Pol = (0d0,0d0)
+          do jPrimAmp=1,NumBornAmps
+          do iPrimAmp=1,NumBornAmps
+              NLO_Res_Pol = NLO_Res_Pol + ColLO_ttbgg(iPrimAmp,jPrimAmp) * dreal( TreeResult(iPrimAmp)*dconjg(DKResult(jPrimAmp)) )*PDFFac(glu)
+          enddo
+          enddo
+      elseif(PROCESS.EQ.102) then
+          NLO_Res_Pol = ColLO_ttbqqb(1,1) * dreal( TreeResult(1)*dconjg(DKResult(1)) ) * ( PDFFac(up)+PDFFac(dn) )
+      endif
+      NLO_Res_UnPol = NLO_Res_UnPol + NLO_Res_Pol
+
+
+      if( TOPDECAYS.eq.2 .or. TOPDECAYS.eq.3 ) then  !  virt.corr. to hadronic W decay
+        call TopDecay(ExtParticle(2),DK_1L_Q,MomExt(1:4,9:11))
+        do iPrimAmp=1,NumBornAmps
+            call EvalTree(BornAmps(iPrimAmp))
+            DKResult(iPrimAmp) = BornAmps(iPrimAmp)%Result
+        enddo
+        if(PROCESS.EQ.101) then
+            NLO_Res_Pol = (0d0,0d0)
+            do jPrimAmp=1,NumBornAmps
+            do iPrimAmp=1,NumBornAmps
+                NLO_Res_Pol = NLO_Res_Pol + ColLO_ttbgg(iPrimAmp,jPrimAmp) * dreal( TreeResult(iPrimAmp)*dconjg(DKResult(jPrimAmp)) )*PDFFac(glu)
+            enddo
+            enddo
+        elseif(PROCESS.EQ.102) then
+            NLO_Res_Pol = ColLO_ttbqqb(1,1) * dreal( TreeResult(1)*dconjg(DKResult(1)) ) * ( PDFFac(up)+PDFFac(dn) )
+        endif
+        NLO_Res_UnPol = NLO_Res_UnPol + NLO_Res_Pol
+      endif!  virt.corr. to hadronic W decay
+
+   enddo!helicity loop
+
+!  normalization
+   NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2  * PreFac
+   EvalCS_NLODK_ttbH = EvalCS_NLODK_ttbH + dble(NLO_Res_Unpol)
+
+   do NHisto=1,NumHistograms
+      call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol),BinValue=PObs(NHisto))
+   enddo
+
+enddo! npdf loop
+call swapMom(MomExt(1:4,1),MomExt(1:4,2))! swap back
 
 
 

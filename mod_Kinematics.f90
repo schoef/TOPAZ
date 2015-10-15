@@ -10345,11 +10345,11 @@ elseif( ObsSet.eq.82) then! ttb+H production with di-leptonic tops
 !------------------------ cuts and binning --------------------------------
 elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
 
-     NObsJet_Tree = 4
-     if( .not.(NJet.ge.NObsJet_Tree .and. any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
-         applyPSCut = .true.
-         RETURN
-     endif
+!      NObsJet_Tree = 4
+!      if( .not.(NJet.ge.NObsJet_Tree .and. any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
+!          applyPSCut = .true.
+!          RETURN
+!      endif
 
     pT_ATop = get_PT(Mom(1:4,tbar))
     pT_Top  = get_PT(Mom(1:4,t))
