@@ -68,7 +68,8 @@
 
       sum_dip = zero
 
-        do n=1,ndip
+!         do n=1,ndip
+        do n=7,9; print *, "restricting dipoles"
 
           i=dip(n,1)  ! emitted
           j=dip(n,2)  ! emittor
@@ -87,10 +88,12 @@
 
           if ( (k.ne.in1.and.k.ne.in2).and.(j.eq.in1.or.j.eq.in2)) then
             call dipif(n,i,j,k,mass(i),mass(j),mass(k),fl(i),fl(j),p,res)
+            print *, "here",n,res
           endif
 
           if ( (j.eq.in1.and.k.eq.in2).or.(j.eq.in2.and.k.eq.in1)) then
             call dipii(n,i,j,k,mass(i),mass(j),mass(k),fl(i),fl(j),p,res)
+            print *, "here",n ,res           
           endif
 
           sum_dip = sum_dip + res

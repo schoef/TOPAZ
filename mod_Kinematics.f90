@@ -854,13 +854,13 @@ ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops)
 
 
     Rsep_jet    = 0.4d0         !*0d0     
-    pT_bjet_cut = 20d0*GeV      *0d0
-    pT_jet_cut  = 20d0*GeV      *0d0
-    eta_bjet_cut= 2.5d0         *1d2
-    eta_jet_cut = 2.5d0         *1d2
-    pT_lep_cut  = 20d0*GeV      *0d0
-    pT_miss_cut = 20d0*GeV      *0d0
-    eta_lep_cut = 2.5d0         *1d2
+    pT_bjet_cut = 20d0*GeV      !*0d0
+    pT_jet_cut  = 20d0*GeV      !*0d0
+    eta_bjet_cut= 2.5d0         !*1d2
+    eta_jet_cut = 2.5d0         !*1d2
+    pT_lep_cut  = 20d0*GeV      !*0d0
+    pT_miss_cut = 20d0*GeV      !*0d0
+    eta_lep_cut = 2.5d0         !*1d2
 
 
 ELSEIF( ObsSet.EQ.91 ) THEN! set of observables for t+H (stable tops)
@@ -7137,12 +7137,12 @@ real(8),parameter :: NPr=4, PiWgtPr = (2d0*Pi)**(4-NPr*3) * (4d0*Pi)**(NPr-1)
   call genps(4,Ehat,xRndPS(1:8),Masses(1:4),Mom(1:4,3:6),PSWgt)
   PSWgt = PSWgt*PiWgtPr
 
-!    Pcol1= 1 -1
-!    Pcol2= 3 -1
-!    SingDepth = 1d-16
-!    Steps = 20
-!    PSWgt = 1d0
-!    call gensing(4,EHat,Masses(1:4),Mom(1:4,3:6),Pcol1,Pcol2,SingDepth,Steps); print *, "gensing"
+   Pcol1= 1 -1
+   Pcol2= 3 -1
+   SingDepth = 1d-16
+   Steps = 20
+   PSWgt = 1d0
+   call gensing(4,EHat,Masses(1:4),Mom(1:4,3:6),Pcol1,Pcol2,SingDepth,Steps); print *, "gensing"
 
 
 !  particles on the beam axis:
@@ -10151,6 +10151,19 @@ applyPSCut = .false.
          print *,k, Mom(1:4,k)
       enddo
    endif
+   
+   if(TopDecays.ne.0 .and. Correction.ne.5) then
+      zeros(1:4) = Mom(1:4,tbar) - Mom(1:4,bbar)-Mom(1:4,lepM)-Mom(1:4,nubar)
+      zeros(5:8) = Mom(1:4,t) - Mom(1:4,b)-Mom(1:4,lepP)-Mom(1:4,nu)
+   endif
+   if( any(abs(zeros(1:8)/Mom(1,inLeft)).gt.1d-8) ) then
+      print *, "ERROR: energy-momentum violation in SUBROUTINE Kinematics_TTBARZ(): ",NPlus1PS,zeros(1:8)
+      print *, "momenta dump:"
+      do k=1,12
+         print *,k, Mom(1:4,k)
+      enddo
+   endif
+      
    zeros(1) = (Mom(1:4,tbar).dot.Mom(1:4,tbar)) - m_Top**2
    zeros(2) = (Mom(1:4,t).dot.Mom(1:4,t)) - m_Top**2
    zeros(3) = 0d0
@@ -10347,9 +10360,10 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
 
 !      NObsJet_Tree = 4
 !      if( .not.(NJet.ge.NObsJet_Tree .and. any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
+! !     if( .not.(NJet.ge.NObsJet_Tree ) ) then
 !          applyPSCut = .true.
 !          RETURN
-!      endif
+!     endif
 
     pT_ATop = get_PT(Mom(1:4,tbar))
     pT_Top  = get_PT(Mom(1:4,t))
@@ -10358,21 +10372,44 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
     pT_Higgs= get_PT(Mom(1:4,Hig))
     eta_Higgs = get_ETA(Mom(1:4,Hig))
 
-    pT_jet(1) = get_PT(MomJet(1:4,1))
-    pT_jet(2) = get_PT(MomJet(1:4,2))
-    pT_jet(3) = get_PT(MomJet(1:4,3))
-    pT_jet(4) = get_PT(MomJet(1:4,4))
-       
-    eta_jet(1) = get_ETA(MomJet(1:4,1))
-    eta_jet(2) = get_ETA(MomJet(1:4,2))
-    eta_jet(3) = get_ETA(MomJet(1:4,3))
-    eta_jet(4) = get_ETA(MomJet(1:4,4))
+    do j = 1,NJet
+      pT_jet(j)  = get_PT(MomJet(1:4,j))
+      eta_jet(j) = get_ETA(MomJet(1:4,j))
+    enddo
+    
+    
+    
+    
+    
+!   check if b-jets pass cuts
+    if(  pT_jet(1).lt.pT_bjet_cut .or. abs(eta_jet(1)).gt.eta_bjet_cut ) then
+        applyPSCut = .true.
+        RETURN
+    endif
+    if( pT_jet(2).lt.pT_bjet_cut .or. abs(eta_jet(2)).gt.eta_bjet_cut ) then
+        applyPSCut = .true.
+        RETURN
+    endif
 
+!   determine observable light jets
+    NObsJet = 2! these are the b-jets
+    do k=3,NJet
+        if( pT_jet(k).gt.pT_jet_cut .and. abs(eta_jet(k)).lt.eta_jet_cut ) then! count jets outside beam pipe
+            NObsJet = NObsJet +1
+            if( k.ne.NObsJet ) MomJet(1:4,NObsJet) = MomJet(1:4,k)
+        endif
+    enddo
+
+    NObsJet_Tree = 4! request two b-jets and at least two light jets
+    if( NObsJet.lt.NObsJet_Tree ) then
+        applyPSCut = .true.
+        RETURN
+    endif
+    
+    
     pT_lep(1) = get_PT(Mom(1:4,L))
     eta_lep(1) = get_ETA(Mom(1:4,L))
-
     pT_miss   = get_PT(Mom(1:4,N))
-
     delta_eta_T = abs( eta_top - eta_Atop )
     delta_eta_B = abs( eta_jet(1) - eta_jet(2) )
     delta_eta_L = 0d0
@@ -10429,25 +10466,25 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
 
 
 ! check cuts
-    if( pT_jet(1).lt.pT_bjet_cut .OR. pT_jet(2).lt.pT_bjet_cut ) then
-        applyPSCut = .true.
-        RETURN
-    endif
-
-    if( abs(eta_jet(1)).gt.eta_bjet_cut .OR. abs(eta_jet(2)).gt.eta_bjet_cut) then
-        applyPSCut = .true.
-        RETURN
-    endif
-
-    if( pT_jet(3).lt.pT_jet_cut .OR. pT_jet(4).lt.pT_jet_cut ) then
-        applyPSCut = .true.
-        RETURN
-    endif
-
-    if( abs(eta_jet(3)).gt.eta_jet_cut .OR. abs(eta_jet(4)).gt.eta_jet_cut) then
-        applyPSCut = .true.
-        RETURN
-    endif
+!     if( pT_jet(1).lt.pT_bjet_cut .OR. pT_jet(2).lt.pT_bjet_cut ) then
+!         applyPSCut = .true.
+!         RETURN
+!     endif
+! 
+!     if( abs(eta_jet(1)).gt.eta_bjet_cut .OR. abs(eta_jet(2)).gt.eta_bjet_cut) then
+!         applyPSCut = .true.
+!         RETURN
+!     endif
+! 
+!     if( pT_jet(3).lt.pT_jet_cut .OR. pT_jet(4).lt.pT_jet_cut ) then
+!         applyPSCut = .true.
+!         RETURN
+!     endif
+! 
+!     if( abs(eta_jet(3)).gt.eta_jet_cut .OR. abs(eta_jet(4)).gt.eta_jet_cut) then
+!         applyPSCut = .true.
+!         RETURN
+!     endif
 
     if( pT_lep(1).lt.pT_lep_cut ) then
         applyPSCut = .true.
