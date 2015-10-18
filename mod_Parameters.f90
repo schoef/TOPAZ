@@ -37,8 +37,8 @@ real(8), public      :: opp_err
 real(8),public,save :: maxWgt=0d0
 integer, allocatable :: Crossing(:)
 real(8), public :: MuRen, MuFac, MuFrag, AvgFactor
-character, public :: HistoFile*(100)
-character, public :: GridFile*(100)
+character, public :: HistoFile*(200)
+character, public :: GridFile*(200)
 integer, public :: GridIO
 real(8), public :: AvgValue=0d0,MinValue=1d13,MaxValue=-1d13
 real(8), public :: time_start,time_end

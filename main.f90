@@ -3013,7 +3013,7 @@ END SUBROUTINE
 SUBROUTINE OpenFiles()
 use ModParameters
 implicit none
-character :: filename*(100)
+character :: filename*(200)
 
 !    filename = trim(HistoFile)//'.dat'
 !    open(unit=14,file=trim(filename),form='formatted',access= 'sequential',status='replace')            ! Histogram file
@@ -3052,7 +3052,7 @@ real(8) :: BinSize,LowVal,BinVal,Value,Error,Integral
 real(8) :: BinSize2,BinSize3,LowVal2,LowVal3,BinVal2,BinVal3
 real(8),parameter :: ToGeV=1d2, ToPb=1d-3
 real(8) :: VG_Result,VG_Error,RunTime,VG_CurrResult,VG_CurrError,Chi2
-character :: filename*(100),arg*(500)
+character :: filename*(200),arg*(500)
 logical, save :: FirstTime=.true.
 
 
@@ -3186,7 +3186,7 @@ integer :: NBin,Hits,NHisto
 real(8) :: BinSize,LowVal,BinVal,Value,Error,Integral
 real(8),parameter :: ToGeV=1d2, ToPb=1d-3
 real(8) :: VG_Result,VG_Error,RunTime
-character :: filename*(100)
+character :: filename*(200)
 
   filename = trim(HistoFile)//'.tmp_histo'
   open(unit=16,file=trim(filename),form='formatted',access= 'sequential',status='replace')         ! Histo status file
@@ -3227,7 +3227,7 @@ use ModParameters
 use ifport
 implicit none
 include "vegas_common.f"
-character :: filename*(100),istr*(2)
+character :: filename*(200),istr*(2)
 integer :: res
 
     filename = trim(HistoFile)

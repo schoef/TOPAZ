@@ -1529,18 +1529,18 @@ real(8) :: MadGraph_tree
 logical :: applyPSCut,applySingCut
 include "vegas_common.f"
 
-yRnd( 1)=  0.3385585941088194d0
-yRnd( 2)=  0.2799513116385563d0
-yRnd( 3)=  0.012473622342792d0
-yRnd( 4)=  0.2879364093709448d0
-yRnd( 5)=  0.1334328211068331d0
-yRnd( 6)=  0.7829718273519412d0
-yRnd( 7)=  0.3479862101366653d0
-yRnd( 8)=  0.1332233664734401d0
-yRnd( 9)=  0.2332185946559626d0
-yRnd(10)=  0.7471774192280964d0
-print *, "fixing yrnds"
-print *, yRnd
+!yRnd( 1)=  0.3385585941088194d0
+!yRnd( 2)=  0.2799513116385563d0
+!yRnd( 3)=  0.012473622342792d0
+!yRnd( 4)=  0.2879364093709448d0
+!yRnd( 5)=  0.1334328211068331d0
+!yRnd( 6)=  0.7829718273519412d0
+!yRnd( 7)=  0.3479862101366653d0
+!yRnd( 8)=  0.1332233664734401d0
+!yRnd( 9)=  0.2332185946559626d0
+!yRnd(10)=  0.7471774192280964d0
+!print *, "fixing yrnds"
+!print *, yRnd
 
 
    EvalCS_Real_ttbgggH= 0d0
@@ -1622,10 +1622,10 @@ endif!applyPSCut
 
      
      
-     sij = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,3))                            ! collinear
-!       sij = MomExt(1,3)**2                                                ! soft
-     print *,  sij/EHat**2,EvalCS_Real_ttbgggH,DipoleResult,(1d0+EvalCS_Real_ttbgggH/DipoleResult)
-     pause
+!     sij = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,3))                            ! collinear
+!!       sij = MomExt(1,3)**2                                                ! soft
+!     print *,  sij/EHat**2,EvalCS_Real_ttbgggH,DipoleResult,(1d0+EvalCS_Real_ttbgggH/DipoleResult)
+!     pause
 
 
 

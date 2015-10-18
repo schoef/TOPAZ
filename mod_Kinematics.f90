@@ -7137,12 +7137,12 @@ real(8),parameter :: NPr=4, PiWgtPr = (2d0*Pi)**(4-NPr*3) * (4d0*Pi)**(NPr-1)
   call genps(4,Ehat,xRndPS(1:8),Masses(1:4),Mom(1:4,3:6),PSWgt)
   PSWgt = PSWgt*PiWgtPr
 
-   Pcol1= 1 -1
-   Pcol2= 3 -1
-   SingDepth = 1d-16
-   Steps = 20
-   PSWgt = 1d0
-   call gensing(4,EHat,Masses(1:4),Mom(1:4,3:6),Pcol1,Pcol2,SingDepth,Steps); print *, "gensing"
+!   Pcol1= 1 -1
+!   Pcol2= 3 -1
+!   SingDepth = 1d-16
+!   Steps = 20
+!   PSWgt = 1d0
+!   call gensing(4,EHat,Masses(1:4),Mom(1:4,3:6),Pcol1,Pcol2,SingDepth,Steps); print *, "gensing"
 
 
 !  particles on the beam axis:
@@ -10264,9 +10264,10 @@ ENDIF
     NJet=0
     MomJet(1:4,1:7) = MomHadr(1:4,1:7)
     call JetAlgo_kt(Rsep_jet,PartList(1:NumHadr),MomHadr(1:4,1:NumHadr),NJet,JetList(1:NumHadr),MomJet(1:4,1:NumHadr)) ! hard protojets in beam pipe are counted as jets
-    call pT_order(2,MomJet(1:4,1:2))
-    call pT_order(NumHadr-2,MomJet(1:4,3:NumHadr))
-
+    if( ObsSet.ne.83 ) then
+        call pT_order(2,MomJet(1:4,1:2))
+        call pT_order(NumHadr-2,MomJet(1:4,3:NumHadr))  ! remove this for Obsset=83 due to MELA momenta assignment (should be unordered)
+    endif
 
 ! call SwitchEnergyComponent(MomHadr(1:4,1:NumHadr))
 ! call fastjetppgenkt(MomHadr(1:4,1:NumHadr),NumHadr,Rsep_jet,-1d0,MomJet(1:4,1:NumHadr),NJet)! 4th argument:  +1d0=kT,  -1d0=anti-kT,   0d0=CA
@@ -10358,12 +10359,10 @@ elseif( ObsSet.eq.82) then! ttb+H production with di-leptonic tops
 !------------------------ cuts and binning --------------------------------
 elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
 
-!      NObsJet_Tree = 4
-!      if( .not.(NJet.ge.NObsJet_Tree .and. any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
-! !     if( .not.(NJet.ge.NObsJet_Tree ) ) then
-!          applyPSCut = .true.
-!          RETURN
-!     endif
+      if( .not.( any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
+          applyPSCut = .true.
+          RETURN
+     endif
 
     pT_ATop = get_PT(Mom(1:4,tbar))
     pT_Top  = get_PT(Mom(1:4,t))
@@ -10516,10 +10515,10 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
     MomMELA(1:4,3) = Mom(1:4,Hig)
     MomMELA(1:4,4) = Mom(1:4,tbar)
     MomMELA(1:4,5) = Mom(1:4,t)
-    MomMELA(1:4,6) = Mom(1:4,bbar)
-    MomMELA(1:4,7) = Mom(1:4,lepM)
-    MomMELA(1:4,8) = Mom(1:4,nubar)
-    MomMELA(1:4,9) = Mom(1:4,b)
+    MomMELA(1:4,6) = MomJet(1:4,1)! bbar
+    MomMELA(1:4,9) = MomJet(1:4,2)! b
+    MomMELA(1:4,7) = MomJet(1:4,4)! this ordering co-incides with the exact LO choice
+    MomMELA(1:4,8) = MomJet(1:4,3)
     MomMELA(1:4,10)= Mom(1:4,lepP)
     MomMELA(1:4,11)= Mom(1:4,nu)
     MomMELA(1:4,12:13) = 0d0
