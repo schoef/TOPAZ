@@ -246,15 +246,15 @@ logical :: silent
 
     if( op.eq.2 ) then
         do NArg=1,NumArgs-2
-            SumError = SumError + (SumValue-Value(NArg))**2 /n /(n-1d0)
+            SumError = SumError + (SumValue-Value(NArg))**2/(n-1d0)
         enddo
     endif
+    SumError = dsqrt(SumError)
 
     if(dummy(1:1).eq."#") cycle
     if(.not. all(NHisto(1:NumArgs-2).eq.NHisto(1))) print *, "Error: unequal values for NHisto in row ",row
     if(.not. all(BinVal(1:NumArgs-2).eq.BinVal(1))) print *, "Error: unequal values for BinVal in row ",row
 
-    SumError = dsqrt(SumError)
 
     if(abs(SumHits).gt.99999999) SumHits=99999999
     if( .not.silent ) write(* ,fmt1) NHisto(1),"|",BinVal(1),"|",SumValue,"|",SumError,"|",SumHits,"|"

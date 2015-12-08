@@ -3018,7 +3018,7 @@ ELSEIF( ObsSet.EQ.27 ) THEN! set of observables for ttbgamma production semi-lep
           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
           if(TopDecays.ne.4 .and. TopDecays.ne.3) call Error("TopDecays needs to be 3 (for Qt=-4/3) or 4 (for Qt=Qup)")
           if( Q_top.ne.Q_up .and. TopDecays.ne.3 ) call Error("TopDecays needs to be 3 for Qt=-4/3")
-          NumHistograms = 15
+          NumHistograms = 19
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
@@ -3114,6 +3114,30 @@ ELSEIF( ObsSet.EQ.27 ) THEN! set of observables for ttbgamma production semi-lep
           Histo(15)%LowVal = 0d0
           Histo(15)%SetScale= 1d0
 
+          Histo(16)%Info   = "mjjb"
+          Histo(16)%NBins  = 50
+          Histo(16)%BinSize= 4d0*GeV
+          Histo(16)%LowVal = 70d0*GeV
+          Histo(16)%SetScale= 100d0
+
+          Histo(17)%Info   = "mjj"
+          Histo(17)%NBins  = 50
+          Histo(17)%BinSize= 4d0*GeV
+          Histo(17)%LowVal = 50d0*GeV
+          Histo(17)%SetScale= 100d0
+
+          Histo(18)%Info   = "mTbP"
+          Histo(18)%NBins  = 50
+          Histo(18)%BinSize= 4d0*GeV
+          Histo(18)%LowVal = 70d0*GeV
+          Histo(18)%SetScale= 100d0
+
+          Histo(19)%Info   = "mTlp"
+          Histo(19)%NBins  = 50
+          Histo(19)%BinSize= 4d0*GeV
+          Histo(19)%LowVal = 70d0*GeV
+          Histo(19)%SetScale= 100d0
+          
 ELSEIF( ObsSet.EQ.28 ) THEN! set of observables for ttbgamma production semi-lept. decays at the LHC for Q_top measurement
           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
           if(TopDecays.ne.4 .and. TopDecays.ne.3) call Error("TopDecays needs to be 3 (for Qt=-4/3) or 4 (for Qt=Qup)")
@@ -5151,7 +5175,7 @@ ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops, s
           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
 !          if(TopDecays.ne.1 .and. TopDecays.ne.3 .and. TopDecays.ne.4)  call Error("TopDecays needs to be 1 or 3 or 4")
           if(TopDecays.ne.3 .and. TopDecays.ne.4 )  call Error("TopDecays needs to be 3 or 4")
-          NumHistograms = 12
+          NumHistograms = 14
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
@@ -5228,8 +5252,18 @@ ELSEIF( ObsSet.EQ.83 ) THEN! set of observables for ttb+H (semi-leptonic tops, s
           Histo(12)%BinSize= 0.05d0
           Histo(12)%LowVal = 0d0
           Histo(12)%SetScale= 1d0
-          
-     
+
+          Histo(13)%Info   = "pT(jet)"
+          Histo(13)%NBins  = 50
+          Histo(13)%BinSize= 10d0*GeV
+          Histo(13)%LowVal =  0d0*GeV
+          Histo(13)%SetScale= 100d0
+
+          Histo(14)%Info   = "N(jets)"
+          Histo(14)%NBins  = 6
+          Histo(14)%BinSize= 1d0
+          Histo(14)%LowVal =  0d0
+          Histo(14)%SetScale= 1d0     
 
 
 
@@ -9064,6 +9098,7 @@ elseif( ObsSet.eq.26 .or. ObsSet.eq.27 .or. ObsSet.eq.28 ) then! set of observab
 
 
     m_lb = get_Minv(Mom(1:4,L)+MomJet(1:4,1))    ! these are the pT-hardest b-jets
+    mT = get_MT(Mom(1:4,L),MomMiss(1:4))
     Rphobjet = get_R(Mom(1:4,pho),MomJet(1:4,1))
 
 
@@ -9127,9 +9162,20 @@ IF( OBSSET.NE.28 ) THEN!   these are the cuts to suppress photon radiation from 
     if( dabs(get_Minv(Mom(1:4,L)+MomJet(1:4,1))).lt.dabs(get_Minv(Mom(1:4,L)+MomJet(1:4,2))) ) then
         mTblP = get_MT(MomJet(1:4,1)+Mom(1:4,pho)+Mom(1:4,L),MomMiss(1:4))
         m_jjb = get_mInv(MomJet(1:4,2)+MomJet(1:4,3)+MomJet(1:4,4))
+        
+        if( get_Minv(MomJet(1:4,1)+Mom(1:4,L)+MomMiss(1:4)+Mom(1:4,pho)) .lt. get_Minv(MomJet(1:4,1)+MomJet(1:4,3)+MomJet(1:4,4)+Mom(1:4,pho))  ) then
+            R_Pj(1) = get_R(MomJet(1:4,1),Mom(1:4,pho))
+        else
+            R_Pj(1) = get_R(MomJet(1:4,2),Mom(1:4,pho))
+        endif
     else
         mTblP = get_MT(MomJet(1:4,2)+Mom(1:4,pho)+Mom(1:4,L),MomMiss(1:4))
         m_jjb = get_mInv(MomJet(1:4,1)+MomJet(1:4,3)+MomJet(1:4,4))
+        if( get_Minv(MomJet(1:4,2)+Mom(1:4,L)+MomMiss(1:4)+Mom(1:4,pho)) .lt. get_Minv(MomJet(1:4,1)+MomJet(1:4,3)+MomJet(1:4,4)+Mom(1:4,pho))  ) then
+            R_Pj(1) = get_R(MomJet(1:4,2),Mom(1:4,pho))
+        else
+            R_Pj(1) = get_R(MomJet(1:4,1),Mom(1:4,pho))
+        endif
     endif
 
     if(NObsJet.eq.5) then
@@ -9150,25 +9196,39 @@ IF( OBSSET.NE.28 ) THEN!   these are the cuts to suppress photon radiation from 
               endif
          endif
     endif
-    if( m_jjb.lt.160d0*GeV .or. m_jjb.gt.180d0*GeV) then
+    
+    
+!     if( m_jjb.lt.160d0*GeV .or. m_jjb.gt.180d0*GeV) then
+!          applyPSCut = .true.
+!         RETURN
+!     endif
+!     if( (mTblP.lt.180d0*GeV) ) then
+!         applyPSCut = .true.
+!         RETURN
+!     endif
+! 
+! 
+     if( m_jj.lt.75d0*GeV .or. m_jj.gt.86d0*GeV) then
+             applyPSCut = .true.
+             RETURN
+     endif
+
+     m_jj = get_Minv(Mom(1:4,L)+MomMiss(1:4))
+     if( m_jj.lt.75d0*GeV .or. m_jj.gt.86d0*GeV) then
+             applyPSCut = .true.
+             RETURN
+     endif
+
+!    mT_lp = get_MT(Mom(1:4,pho)+Mom(1:4,L),MomMiss(1:4))
+    
+    
+    
+    
+    
+     if( mTblP.gt.175d0*GeV ) then!   this is to enhance the decay contribution
          applyPSCut = .true.
-        RETURN
-    endif
-    if( (mTblP.lt.180d0*GeV) ) then
-        applyPSCut = .true.
-        RETURN
-    endif
-
-
-    if( m_jj.lt.70d0*GeV .or. m_jj.gt.90d0*GeV) then
-            applyPSCut = .true.
-            RETURN
-    endif
-    mT_lp = get_MT(Mom(1:4,pho)+Mom(1:4,L),MomMiss(1:4))
-    if( mT_lp.lt.90d0*GeV ) then
-        applyPSCut = .true.
-        RETURN
-    endif
+         RETURN
+     endif
 
 ENDIF
 
@@ -9189,9 +9249,13 @@ ENDIF
     NBin(10)= WhichBin(10,eta_lepP)
     NBin(11) = WhichBin(11,ET_miss)
     NBin(12) = WhichBin(12,HT)
-    NBin(13) = WhichBin(13,Rphobjet)
+    NBin(13) = WhichBin(13,R_Pj(1)) !Rphobjet)
     NBin(14) = WhichBin(14,m_lb)
     NBin(15) = WhichBin(15,Phi_LP)
+    NBin(16) = WhichBin(16,m_jjb)
+    NBin(17) = WhichBin(17,m_jj)
+    NBin(18) = WhichBin(18,mTblP)
+    NBin(19) = WhichBin(19,mT)
 
 
 elseif( ObsSet.eq.29) then! ttb+photon production without top decays at Tevatron & LHC
@@ -10546,6 +10610,14 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
     NBin(10)= WhichBin(10,CosThetaStar)
     NBin(11)= WhichBin(11,CosTheta2)
     NBin(12)= WhichBin(12,D_0minus)
+    if( NObsJet.eq.5 ) then 
+!        NBin(13)= WhichBin(13,get_PT(MomJet(1:4,5)))! if 5 jets then plot softest
+        NBin(13)= WhichBin(13,get_PT(MomJet(1:4,1)))! if 5 jets then plot hardest
+    else
+        NBin(13)= 0
+    endif
+    NBin(14)= WhichBin(14,dble(NObsJet))
+
     if( present(PObs) ) then
       PObs(1) = pT_Top
       PObs(2) = eta_Top
@@ -10559,6 +10631,13 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
       PObs(10)= CosThetaStar
       PObs(11)= CosTheta2
       PObs(12)= D_0minus
+      if( NObsJet.eq.5 ) then 
+!        PObs(13)= get_PT(MomJet(1:4,5))! if 5 jets then plot softest
+        PObs(13)= get_PT(MomJet(1:4,1))! if 5 jets then plot hardest
+      else
+        PObs(13)= 0d0
+      endif
+      PObs(14)= dble(NObsJet)
    endif
 
 
