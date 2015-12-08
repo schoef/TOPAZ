@@ -9026,17 +9026,19 @@ elseif( ObsSet.eq.24 .or. ObsSet.eq.25 ) then! set of observables for ttb+gamma 
 elseif( ObsSet.eq.26 .or. ObsSet.eq.27 .or. ObsSet.eq.28 ) then! set of observables for ttb+gamma production with semi-lept. decays(hadr.Atop, lept.top decay) at the Tevatron/LHC
                                                                ! ObsSet 26,27 include suppression cuts for photon radiation from top decay
 
-   do k=1,NJet
-      pt_jet(k)  = get_PT(MomJet(1:4,k))
-      eta_jet(k) = get_eta(MomJet(1:4,k))
-      R_Pj(k)    = get_R(MomJet(1:4,k),Mom(1:4,pho))
-   enddo
-
 !   request two separated b-jets
     if( .not.(any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
         applyPSCut = .true.
         RETURN
     endif
+    
+    do k=1,NJet
+      pt_jet(k)  = get_PT(MomJet(1:4,k))
+      eta_jet(k) = get_eta(MomJet(1:4,k))
+      R_Pj(k)    = get_R(MomJet(1:4,k),Mom(1:4,pho))
+    enddo
+    
+    
 
 !   request b-jets to be outside the Frixione cone
     if( R_Pj(1).lt.Rsep_Pj .or. R_Pj(2).lt.Rsep_Pj ) then

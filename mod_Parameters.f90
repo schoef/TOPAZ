@@ -104,6 +104,9 @@ logical, parameter :: TTBPhoton_SMonly = .true.  ! true: no anomalous ttb+gamma 
 real(8), public :: kappaTTBH      
 real(8), public :: kappaTTBH_tilde
 
+! top EFT operators
+real(8),parameter    :: Lambda_BSM=1000d0*GeV
+complex(8) :: EFTOP_C333_phiq, EFTOP_C33_phiphi, EFTOP_C33_dW, EFTOP_C33_uW,EFTOP_C33_uBphi
 
 ! Zprime couplings
 real(8), public :: m_Zpr
@@ -158,6 +161,7 @@ complex(8), public :: couplZDD_left_dyn,couplZDD_right_dyn
 complex(8), public :: couplZQQ_left_dyn,couplZQQ_right_dyn
 complex(8), public :: couplZTT_left2,couplZTT_right2,couplZTT_V2,couplZTT_A2,couplZTT_left2_dyn,couplZTT_right2_dyn
 complex(8), public :: couplPTT_left2,couplPTT_right2,couplPTT_left2_dyn,couplPTT_right2_dyn
+complex(8), public :: couplWTB_left,couplWTB_right,couplWTB_left2,couplWTB_right2
 real(8), public, parameter :: TTBZ_MassScale= 1d0*m_Z
 
 
@@ -398,6 +402,8 @@ real(8) :: cL,cR,omegasq,f,z
 real(8) :: beta,omega,P0,P3,W0,Ppl,Pmi,Wpl,Wmi,Yp,Yw
 real(8) :: term4,term7,term9,alphasPDF
 
+real(8) :: Ga_Top_BSM(0:1)
+complex(8) :: f1L,f1R,f2L,f2R
 !--- Zprime section
 real(8) :: myCos2thw, cot2thH, g_Zpr, f1, f2, Ga_Zpr_pref
 real(8) :: ratio, gamma, rhoplus, rhominus, phi, chi, c0, d0, c1, d1
@@ -494,6 +500,40 @@ Ga_Top(1) = Ga_Top(0) * ( - RUNALPHAS(2,MuRen)*alpha_sOver2Pi*4d0/3d0*(   &   ! 
                          +2d0*dlog(r2)*dlog(1d0-r2) - 4d0/3d0/(1d0-r2) + (22d0-34d0*r2)/9d0/(1d0-r2)**2*dlog(r2)  &
                          +(3d0+27d0*dlog(1d0-r2)-4d0*dlog(r2))/9d0/(1d0+2d0*r2)  &
                         ))   ! taken from eq.(26), hep-ph/0408158
+         
+! ! LO top width with anomalous couplings hep-ph/0503040               
+! f1L = 1d0
+! f1R = 0d0
+! f2L = 0d0
+! f2R = 0d0
+! Ga_Top_BSM(0) = g2_weak*m_top/(64d0*DblPi*r2)*(r2-1d0)**2  &
+!               *( 6d0*f1R*f2L*dsqrt(r2) + 6d0*f1L*f2R*dsqrt(r2) + (f2L**2 + f2R**2)*(2d0+r2) + f1L**2*(1d0+2d0*r2) + f1R**2*(1d0+2d0*r2) )
+! Ga_Top_BSM(1)=0d0
+
+
+! LO top width with anomalous couplings hep-ph/0605190       
+  couplWTB_left  =1d0
+  couplWTB_right =0d0
+  couplWTB_left2 =0.0d0
+  couplWTB_right2=0.0d0
+Ga_Top_BSM(0) = g2_weak*m_top/(64d0*DblPi*r2)*(1d0-r2)  &
+              *( (2d0-r2-r2**2)*(cdabs(couplWTB_left2)**2+cdabs(couplWTB_right2)**2) + (1d0+r2-2d0*r2**2)*(cdabs(couplWTB_left)**2+cdabs(couplWTB_right)**2) &
+                 - 6d0*dsqrt(r2)*(1d0-r2)*dreal(couplWTB_right*dconjg(couplWTB_left2) + couplWTB_left*dconjg(couplWTB_right2)) )
+Ga_Top_BSM(1)=0d0
+print *, "chekcer",Ga_Top_BSM(0)/Ga_top(0)
+
+! definitions according to 0811.3842
+EFTOP_C333_phiq  = Lambda_BSM**2/vev**2*dconjg(couplWTB_left-1d0)
+EFTOP_C33_phiphi = 2d0*Lambda_BSM**2/vev**2*couplWTB_right
+EFTOP_C33_dW     = 1d0/dsqrt(2d0)*Lambda_BSM**2/vev**2*dconjg(couplWTB_left2)
+EFTOP_C33_uW     = 1d0/dsqrt(2d0)*Lambda_BSM**2/vev**2*couplWTB_right2
+
+! print *, "W width"
+! print *, "EFTOP_C333_phiq",EFTOP_C333_phiq
+! print *, "EFTOP_C33_phiphi",EFTOP_C33_phiphi
+! print *, "EFTOP_C33_dW",EFTOP_C33_dW
+! print *, "EFTOP_C33_uW",EFTOP_C33_uW
+! pause
 
 WWidthChoice = 1!          0=experimental W width,    1=calculated W width
 IF( WWidthChoice.eq. 1 ) THEN
@@ -561,6 +601,13 @@ ENDIF
 
    couplZTT_left2_dyn =couplZTT_left2
    couplZTT_right2_dyn=couplZTT_right2
+   
+   EFTOP_C33_uBphi = couplGaTT_V2/dsqrt(2d0)*Lambda_BSM**2/vev/m_top*dsqrt(alpha4Pi)/cw - sw/cw * EFTOP_C33_uW
+! print *, "ttb+gamma"
+! print *,"EFTOP_C33_uBphi",EFTOP_C33_uBphi
+! pause
+
+   
    
    r2 = (M_Z/(2*4.6d0*GeV))**2! mass correction for bottom quark
    ZWidth = alpha/12d0*M_Z * (  +((couplZUU_left+couplZUU_right)**2 + (couplZUU_left-couplZUU_right)**2 *1d0 )*3d0 &! up
