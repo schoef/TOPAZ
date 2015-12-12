@@ -2897,6 +2897,7 @@ END SUBROUTINE
       complex(8) :: vbqV_Weyl(size(sp)),ubarqslZsl(size(sp)),ubarZslqsl(size(sp)),ubarsig(size(sp))
       integer,parameter :: Ds=4, ColorlessParticle=2
 
+
           if (ColorlessParticle .eq. 1) then 
             vbqV_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.false.,spb2_Weyl(sp,e1)) + coupl_right*Chir_Weyl(.true.,spb2_Weyl(sp,e1)) )
             
@@ -2907,8 +2908,8 @@ END SUBROUTINE
                 ubarqslZsl=spb2_Weyl(spb2_Weyl(sp,q),e1)                 ! ubar qslash Zslash  = ubar q_mu gamma^mu Z_nu gamma^nu
                 ubarsig=-(ubarZslqsl-ubarqslZsl)/2d0                     ! i*sigma_{mu,nu}Z^{mu}q^{nu} = -[Zsl,qsl]/2
                 vbqV_Weyl = vbqV_Weyl -(0d0,1d0) *(   &
-                  & + HDcoupl_left*( iChir_Weyl(.false.,ubarsig) ) &
-                  & + HDcoupl_right*(iChir_Weyl(.true.,ubarsig)) )
+                  & + HDcoupl_left*( Chir_Weyl(.false.,ubarsig) ) &    ! NOTE THAT HERE ICHIR --> CHIR
+                  & + HDcoupl_right*(Chir_Weyl(.true.,ubarsig)) )    ! NOTE THAT HERE ICHIR --> CHIR
             endif
                   
           elseif (ColorlessParticle .eq. 3) then              ! this is for a scalar, e.g. Higgs
@@ -2941,8 +2942,8 @@ END SUBROUTINE
                 qslZslv=spi2_Weyl(q,spi2_Weyl(e1,sp))
                 sigv=-(Zslqslv-qslZslv)/2d0                        ! i*sigma_{mu,nu}Z^{mu}q^{nu} = -[Zsl,qsl]/2
                 vVq_Weyl = vVq_Weyl -(0d0,1d0) *( & 
-                  & + HDcoupl_left*(iChir_Weyl(.false.,sigv)) &
-                  & + HDcoupl_right*(iChir_Weyl(.true.,sigv)) )
+                  & + HDcoupl_left*(Chir_Weyl(.false.,sigv)) &     ! NOTE THAT HERE ICHIR --> CHIR
+                  & + HDcoupl_right*(Chir_Weyl(.true.,sigv)) )    ! NOTE THAT HERE ICHIR --> CHIR
             endif
           
           elseif (ColorlessParticle .eq. 3) then           ! this is for a scalar, e.g. Higgs
@@ -4211,7 +4212,7 @@ END SUBROUTINE
             vSpi(3)=(0d0,0d0)
             vSpi(4)=(0d0,0d0)
          else
-            call Error("wrong helicity setting in vSpi_Weyl")
+            call Error("wrong helicity setting in vSpi_Weyl",i)
          endif
 
          else
@@ -4227,7 +4228,7 @@ END SUBROUTINE
             vSpi(3)=(0d0,0d0)
             vSpi(4)=(0d0,0d0)
          else
-            call Error("wrong helicity setting in vSpi_Weyl")
+            call Error("wrong helicity setting in vSpi_Weyl",i)
          endif
 
          endif

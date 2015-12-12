@@ -175,12 +175,12 @@ ELSEIF( ObsSet.EQ.2 ) THEN! set of observables for ttb production as signal proc
     eta_lep_cut = 2.5d0         !*1d2
 
 ELSEIF( ObsSet.EQ.3 ) THEN! set of observables for ttb production as signal process at LHC (di-lept. decay)
-    Rsep_jet    = 0.4d0         !*0d0
-    pT_bjet_cut = 25d0*GeV      !*0d0
-    eta_bjet_cut= 2.5d0         !*1d2
-    pT_lep_cut  = 25d0*GeV      !*0d0
-    pT_miss_cut = 50d0*GeV      !*0d0
-    eta_lep_cut = 2.5d0         !*1d2
+    Rsep_jet    = 0.4d0         *0d0
+    pT_bjet_cut = 25d0*GeV      *0d0
+    eta_bjet_cut= 2.5d0         *1d2
+    pT_lep_cut  = 25d0*GeV      *0d0
+    pT_miss_cut = 50d0*GeV      *0d0
+    eta_lep_cut = 2.5d0         *1d2
 
 ELSEIF( ObsSet.EQ.4 ) THEN! ! set of observables for ttb production with hadr. Atop, lept. top decay
     Rsep_jet    = 0.5d0
@@ -326,17 +326,17 @@ ELSEIF( ObsSet.EQ.22 ) THEN! set of observables for ttbgamma production with di-
     pT_miss_cut = 40d0*GeV
 
 ELSEIF( ObsSet.EQ.23 ) THEN! set of observables for ttbgamma production with di-lept.decays at LHC
-    Rsep_jet    = 0.4d0
+    Rsep_jet    = 0.4d0       !*0d0
     pT_pho_cut  = 20d0*GeV
-    Rsep_Pj     = 0.4d0
-    Rsep_Pbj    = 0.4d0
-    Rsep_Plep   = 0.4d0
+    Rsep_Pj     = 0.4d0       !*0d0
+    Rsep_Pbj    = 0.4d0       !*0d0
+    Rsep_Plep   = 0.4d0       !*0d0
 
-    pT_bjet_cut = 25d0*GeV
-    eta_bjet_cut= 2.5d0
-    pT_lep_cut  = 20d0*GeV
-    eta_lep_cut = 2.5d0
-    pT_miss_cut = 40d0*GeV
+    pT_bjet_cut = 25d0*GeV    !*0d0
+    eta_bjet_cut= 2.5d0       !*100d0
+    pT_lep_cut  = 20d0*GeV    !*0d0
+    eta_lep_cut = 2.5d0       !*100d0
+    pT_miss_cut = 40d0*GeV    !*0d0
 
 ELSEIF( ObsSet.EQ.24 ) THEN! set of observables for ttbgamma production with semi-lept.decays(hadr.Atop, lept.top decay) at Tevatron
 
@@ -9026,6 +9026,8 @@ elseif( ObsSet.eq.24 .or. ObsSet.eq.25 ) then! set of observables for ttb+gamma 
 elseif( ObsSet.eq.26 .or. ObsSet.eq.27 .or. ObsSet.eq.28 ) then! set of observables for ttb+gamma production with semi-lept. decays(hadr.Atop, lept.top decay) at the Tevatron/LHC
                                                                ! ObsSet 26,27 include suppression cuts for photon radiation from top decay
 
+                                                               
+                                                                                                                            
 !   request two separated b-jets
     if( .not.(any(JetList(1:NJet).eq.1) .and. any(JetList(1:NJet).eq.2)) ) then
         applyPSCut = .true.

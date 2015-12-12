@@ -560,6 +560,47 @@ ELSEIF( PROCESS.EQ.6 ) THEN !   3_Str  + 4_AStr --> 5_Glu  + 1_ATop + 2_Top
 
 
 
+
+ELSEIF( PROCESS.EQ.7 .OR. PROCESS.EQ.8 ) THEN !   Top/ATop decay width
+
+
+  IF( CORRECTION.EQ.0 ) THEN
+      NumExtParticles = 1
+      allocate(Crossing(1:NumExtParticles))
+      allocate(ExtParticle(1:NumExtParticles))
+      IF( PROCESS.EQ.7 ) MasterProcess=45! Atop decay
+      IF( PROCESS.EQ.8 ) MasterProcess=46! Top decay
+      NDim = 4    ! PS integration
+      VegasNc0_default = 200000
+      VegasNc1_default = 200000
+!   ELSEIF( CORRECTION.EQ.4 ) THEN
+!       NumExtParticles = 3
+!       allocate(Crossing(1:NumExtParticles))
+!       allocate(ExtParticle(1:NumExtParticles))
+!       IF( PROCESS.EQ.7 ) MasterProcess=45
+!       IF( PROCESS.EQ.8 ) MasterProcess=46
+!       NDim = NDim + 2    ! st PS integration
+!       NDim = NDim + 4    ! fake t PS integration
+! !       NDim = NDim + 1    ! for dummy integration
+!       VegasNc0_default = 200000
+!       VegasNc1_default = 200000
+!   ELSEIF( CORRECTION.EQ.5 ) THEN
+!       NumExtParticles = 4
+!       allocate(Crossing(1:NumExtParticles))
+!       allocate(ExtParticle(1:NumExtParticles))
+!       IF( PROCESS.EQ.7 ) MasterProcess=45
+!       IF( PROCESS.EQ.8 ) MasterProcess=46
+!       NDim = NDim + 2    ! st PS integration
+!       NDim = NDim + 3    ! real gluon
+!       NDim = NDim + 4    ! fake t PS integration
+!       VegasNc0_default = 200000
+!       VegasNc1_default = 200000
+  ELSE
+      call Error("Correction to this process is not available")
+  ENDIF
+
+  
+
 ELSEIF( PROCESS.EQ.9 ) THEN !   3_Glu  + 4_Glu  --> 5_Glu  + 6_Glu  + 1_ATop + 2_Top
   IF( CORRECTION.EQ.2 ) THEN
       NumExtParticles = 6
@@ -5193,6 +5234,16 @@ ELSEIF( MASTERPROCESS.EQ.44 ) THEN
     ExtParticle(1)%PartType = Top_
 
 
+ELSEIF( MASTERPROCESS.EQ.45 ) THEN
+
+    ExtParticle(1)%PartType = ATop_
+
+
+ELSEIF( MASTERPROCESS.EQ.46 ) THEN
+
+    ExtParticle(1)%PartType = Top_
+
+
 
 
     
@@ -7876,6 +7927,14 @@ ELSEIF( MasterProcess.EQ.43) THEN
 
 
 ELSEIF( MasterProcess.EQ.44) THEN
+!   do nothing 
+
+
+ELSEIF( MasterProcess.EQ.45) THEN
+!   do nothing 
+
+
+ELSEIF( MasterProcess.EQ.46) THEN
 !   do nothing 
 
 

@@ -7,6 +7,73 @@ integer,private,parameter :: NumMaxHisto=45
 contains
 
 
+
+
+
+
+FUNCTION EvalCS_TopWidth(yRnd,VgsWgt)
+use ModProcess
+use ModKinematics
+use ModAmplitudes
+use ModMyRecurrence
+use ModParameters
+implicit none
+real(8) ::  EvalCS_TopWidth,yRnd(1:VegasMxDim),VgsWgt,HOp(1:3)
+complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),Amp,Amp2,Spi(1:4),BarSpi(1:4)
+integer :: iHel,jHel,kHel,lHel,iPrimAmp,jPrimAmp
+real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,PSWgt4,PSWgt5,ISFac
+real(8) :: MomExt(1:4,1:15),MomP(1:4,1:4),MomBoost(1:4),MomExtTd(1:4,1:9),pbDpg,ptDpg,ptDpb,TheDipole
+logical :: applyPSCut
+real(8) :: eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac,AccPoles
+real(8) :: pdf(-6:6,1:2),pdf_z(-6:6,1:2),xE,sigmaTot,beta
+integer :: NBin(1:NumMaxHisto),NHisto,nHel(1:2)
+real(8), parameter :: CF=4d0/3d0
+include 'vegas_common.f'
+
+
+   EvalCS_TopWidth = 0d0
+   MomExt(1:4,3) = (/m_Top,0d0,0d0,0d0/)
+   ExtParticle(1)%Mom(1:4) = dcmplx( MomExt(1:4,3) )
+   IF( CORRECTION.EQ.0 .OR.CORRECTION.EQ.4  ) THEN
+       call EvalPhasespace_TopDecay(MomExt(1:4,3),yRnd(1:4),.false.,MomExt(1:4,5:7),PSWgt2)
+   ENDIF
+   PSWgt = PSWgt2
+   IF( TopDecays.eq.1 ) PSWgt = PSWgt * 9d0
+ 
+
+   PreFac = PSWgt /(2d0*m_Top) * 2d0*Ga_Top(0)*M_Top
+   IF( CORRECTION.EQ.0 ) THEN
+      LO_Res_Unpol = (0d0,0d0)
+      do jHel=-1,+1,2
+      do kHel=-1,+1,2
+          call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,5:7),Gluon2Hel=jHel)
+          Spi(1:4) = ExtParticle(1)%Pol(1:4)
+          IF( ExtParticle(1)%PartType.lt.0d0 ) THEN
+                call vBarSpi(ExtParticle(1)%Mom(1:4),m_Top,kHel,BarSpi(1:4))
+          ELSE
+                call uSpi(ExtParticle(1)%Mom(1:4),m_Top,kHel,BarSpi(1:4))
+          ENDIF
+          Amp = psp1_(Spi(1:4),BarSpi(1:4))/(2d0*m_Top)
+          LO_Res_UnPol = LO_Res_UnPol +  Amp*dconjg(Amp) * 0.5d0
+      enddo!helicity loop
+      enddo!helicity loop
+
+!  normalization
+      EvalCS_TopWidth = LO_Res_Unpol * PreFac * 100d0
+
+   ENDIF
+
+
+
+   EvalCounter = EvalCounter + 1
+   EvalCS_TopWidth = EvalCS_TopWidth
+
+return
+END FUNCTION
+
+
+
+
 FUNCTION EvalCS_1L_ttbgg_MPI(yRnd,VgsWgt,res)
 implicit none
 integer :: EvalCS_1L_ttbgg_MPI

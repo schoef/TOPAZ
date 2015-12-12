@@ -3819,8 +3819,8 @@ ELSEIF( Correction.EQ.3 ) THEN
    HOp(1:3) = HOp(1:3)*RunFactor**3 * PreFac
 
    EvalCS_DKP_1L_ttbgg = HOp(1)    * pdf(0,1)  * pdf(0,2)   &
-                      + HOp(2)/xE * pdf_z(0,1)* pdf(0,2)   &
-                      + HOp(3)/xE * pdf(0,1)  * pdf_z(0,2)
+                       + HOp(2)/xE * pdf_z(0,1)* pdf(0,2)   &
+                       + HOp(3)/xE * pdf(0,1)  * pdf_z(0,2)
 ENDIF
 
    do NHisto=1,NumHistograms

@@ -98,7 +98,7 @@ real(8), public :: AbsDelF1A, AbsDelF1V    !, DeltaF2A, DeltaF2V    ! later
 real(8), public :: RelDelF1A, RelDelF1V, RelDelF2A, RelDelF2V   !, DeltaF2A, DeltaF2V    ! later
 real(8), public :: DelGam2V,DelGam2A       ! q-dependent coupling for the photon
 
-logical, parameter :: TTBPhoton_SMonly = .true.  ! true: no anomalous ttb+gamma couplings,  false: anomalous ttb+gamma couplings
+logical, parameter :: TTBPhoton_SMonly = .false.  ! true: no anomalous ttb+gamma couplings,  false: anomalous ttb+gamma couplings
 
 ! top-H couplings
 real(8), public :: kappaTTBH      
@@ -511,16 +511,20 @@ Ga_Top(1) = Ga_Top(0) * ( - RUNALPHAS(2,MuRen)*alpha_sOver2Pi*4d0/3d0*(   &   ! 
 ! Ga_Top_BSM(1)=0d0
 
 
+! to do: check with interferecen seeem 14 instead of 13.80
+! check gauge inv. for photon ichir...
+
 ! LO top width with anomalous couplings hep-ph/0605190       
-  couplWTB_left  =1d0
-  couplWTB_right =0d0
-  couplWTB_left2 =0.0d0
+  couplWTB_left  =1.0d0
+  couplWTB_right =0.0d0
+  couplWTB_left2 =0.2d0
   couplWTB_right2=0.0d0
 Ga_Top_BSM(0) = g2_weak*m_top/(64d0*DblPi*r2)*(1d0-r2)  &
               *( (2d0-r2-r2**2)*(cdabs(couplWTB_left2)**2+cdabs(couplWTB_right2)**2) + (1d0+r2-2d0*r2**2)*(cdabs(couplWTB_left)**2+cdabs(couplWTB_right)**2) &
                  - 6d0*dsqrt(r2)*(1d0-r2)*dreal(couplWTB_right*dconjg(couplWTB_left2) + couplWTB_left*dconjg(couplWTB_right2)) )
 Ga_Top_BSM(1)=0d0
-print *, "chekcer",Ga_Top_BSM(0)/Ga_top(0)
+Ga_top(0) = Ga_Top_BSM(0)
+! print *, "chekcer",Ga_Top_BSM(0)/Ga_top(0)
 
 ! definitions according to 0811.3842
 EFTOP_C333_phiq  = Lambda_BSM**2/vev**2*dconjg(couplWTB_left-1d0)
@@ -528,11 +532,11 @@ EFTOP_C33_phiphi = 2d0*Lambda_BSM**2/vev**2*couplWTB_right
 EFTOP_C33_dW     = 1d0/dsqrt(2d0)*Lambda_BSM**2/vev**2*dconjg(couplWTB_left2)
 EFTOP_C33_uW     = 1d0/dsqrt(2d0)*Lambda_BSM**2/vev**2*couplWTB_right2
 
-! print *, "W width"
-! print *, "EFTOP_C333_phiq",EFTOP_C333_phiq
-! print *, "EFTOP_C33_phiphi",EFTOP_C33_phiphi
-! print *, "EFTOP_C33_dW",EFTOP_C33_dW
-! print *, "EFTOP_C33_uW",EFTOP_C33_uW
+print *, "W width"
+print *, "EFTOP_C333_phiq",EFTOP_C333_phiq
+print *, "EFTOP_C33_phiphi",EFTOP_C33_phiphi
+print *, "EFTOP_C33_dW",EFTOP_C33_dW
+print *, "EFTOP_C33_uW",EFTOP_C33_uW
 ! pause
 
 WWidthChoice = 1!          0=experimental W width,    1=calculated W width
@@ -603,8 +607,8 @@ ENDIF
    couplZTT_right2_dyn=couplZTT_right2
    
    EFTOP_C33_uBphi = couplGaTT_V2/dsqrt(2d0)*Lambda_BSM**2/vev/m_top*dsqrt(alpha4Pi)/cw - sw/cw * EFTOP_C33_uW
-! print *, "ttb+gamma"
-! print *,"EFTOP_C33_uBphi",EFTOP_C33_uBphi
+print *, "ttb+gamma"
+print *,"EFTOP_C33_uBphi",EFTOP_C33_uBphi
 ! pause
 
    

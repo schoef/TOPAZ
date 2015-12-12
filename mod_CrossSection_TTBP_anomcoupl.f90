@@ -46,7 +46,7 @@ use ModIntDipoles_GGTTBGP
 implicit none
 real(8) ::  EvalCS_anomcoupl_1L_ttbggp,yRnd(1:VegasMxDim),VgsWgt
 complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1),FermionLoopPartAmp(1:3,-2:1)
-complex(8) :: BosonicPartAmp(1:3,-2:1),mydummy
+complex(8) :: BosonicPartAmp(1:3,-2:1),mydummy,Msq_T_BWENU,M_T_BWENU,Spi(1:4),BarSpi(1:4)
 integer :: iHel,jHel,kHel,iPrimAmp,jPrimAmp
 real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac
 real(8) :: MomExt(1:4,1:12)
@@ -81,9 +81,11 @@ IF( TOPDECAYS.NE.0 ) THEN
    call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(8:11),.false.,MomExt(1:4,6:8),PSWgt2)
    call EvalPhasespace_TopDecay(MomExt(1:4,5),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
    PSWgt = PSWgt * PSWgt2*PSWgt3
-   call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8))
-   call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11))
+!    call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8))
+!    call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11))
    NRndHel=16
+ELSE 
+   PSWgt = PSWgt /4d0 ! removes the loop over b-quark helicities
 ENDIF
 
    call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
@@ -107,6 +109,14 @@ ENDIF
 !------------ LO --------------
 IF( Correction.EQ.0 ) THEN
    do iHel=nHel(1),nHel(2)
+   do jHel=-1,+1,2!  bottom quark helicities for anomalous Wtb vertex
+   do kHel=-1,+1,2
+   
+      IF( TOPDECAYS.NE.0 ) THEN
+        call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8),Gluon2Hel=jHel)
+        call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11),Gluon2Hel=kHel)
+      ENDIF
+   
       call HelCrossing(Helicities(iHel,1:NumExtParticles))
       call SetPolarizations()
       do iPrimAmp=1,NumBornAmps
@@ -120,6 +130,8 @@ IF( Correction.EQ.0 ) THEN
       enddo
       enddo
       LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
+   enddo!helicity loop
+   enddo!helicity loop
    enddo!helicity loop
 
 
@@ -564,7 +576,7 @@ implicit none
 real(8) ::  EvalCS_anomcoupl_1L_ttbqqbp,yRnd(1:VegasMxDim),VgsWgt,xE
 complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1)
 complex(8) :: BosonicPartAmp(1:2,-2:1),FermionPartAmp(1:2,-2:1),mydummy(1:2),LOPartAmp(1:2)
-integer :: iHel,iPrimAmp,jPrimAmp
+integer :: iHel,jHel,kHel,iPrimAmp,jPrimAmp
 real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac,AccPoles,HOp(1:2,1:3),pdf_z(-6:6,1:2)
 real(8) :: MomExt(1:4,1:12)
 logical :: applyPSCut
@@ -633,13 +645,22 @@ IF( CORRECTION.EQ.0 ) THEN
     endif
     ISFac = MomCrossing(MomExt)
     IF( TOPDECAYS.GE.1 ) THEN
-          call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8))
-          call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11))
+!           call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8))
+!           call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11))
     ENDIF
-!     call InitCurrCache()
     call SetPropagators()
 
+
+
     do iHel=nHel(1),nHel(2)
+    do jHel=-1,+1,2!  bottom quark helicities for anomalous Wtb vertex
+    do kHel=-1,+1,2
+   
+        IF( TOPDECAYS.NE.0 ) THEN
+          call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8),Gluon2Hel=jHel)
+          call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11),Gluon2Hel=kHel)
+        ENDIF
+    
 !     do iHel=27,27; print *, "helicity 27"
         call HelCrossing(Helicities(iHel,1:NumExtParticles))
         call SetPolarizations()
@@ -679,6 +700,8 @@ IF( CORRECTION.EQ.0 ) THEN
 !       pause
 
         LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
+    enddo!helicity loop
+    enddo!helicity loop
     enddo!helicity loop
   enddo! npdf loop
   call swapMom(MomExt(1:4,1),MomExt(1:4,2))   ! swap back to original order, for ID below
@@ -3652,14 +3675,16 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
 IF( Correction.EQ.0 ) THEN
    do iHel=nHel(1),nHel(2)
    do PhoHel=1,-1,-2 ! loop over additional photon polarization
+   do jHel=1,-1,-2 ! loop over additional bottom polarization
+   do kHel=1,-1,-2 ! loop over additional bottom polarization
       call HelCrossing(Helicities(iHel,1:NumExtParticles))
       call SetPolarizations()
       if( nPhoRad.eq.1 ) then
-         call TopDecay(ExtParticle(1),DKP_LO_T,MomExt(1:4,5:8),PhotonHel=PhoHel)
+         call TopDecay(ExtParticle(1),DKP_LO_T,MomExt(1:4,5:8),PhotonHel=PhoHel,Gluon2Hel=jHel)
       else
-         call TopDecay(ExtParticle(1),DKP_LO_L,MomExt(1:4,5:8),PhotonHel=PhoHel)
+         call TopDecay(ExtParticle(1),DKP_LO_L,MomExt(1:4,5:8),PhotonHel=PhoHel,Gluon2Hel=jHel)
       endif
-      call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11))
+      call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11),Gluon2Hel=kHel)
 
       do iPrimAmp=1,NumBornAmps
           call EvalTree(BornAmps(iPrimAmp))
@@ -3671,6 +3696,8 @@ IF( Correction.EQ.0 ) THEN
       enddo
       enddo
       LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
+   enddo!helicity loop
+   enddo!helicity loop
    enddo!helicity loop
    enddo!helicity loop
 
@@ -3867,13 +3894,15 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W,nPhoRa
 IF( Correction.EQ.0 ) THEN
    do iHel=nHel(1),nHel(2)
    do PhoHel=1,-1,-2 ! loop over additional photon polarization
+   do jHel=1,-1,-2 ! loop over additional bottom polarization
+   do kHel=1,-1,-2 ! loop over additional bottom polarization
       call HelCrossing(Helicities(iHel,1:NumExtParticles))
       call SetPolarizations()
-      call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,5:7))
+      call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,5:7),Gluon2Hel=jHel)
       if( nPhoRad.eq.1 ) then
-         call TopDecay(ExtParticle(2),DKP_LO_T,MomExt(1:4,8:11),PhotonHel=PhoHel)
+         call TopDecay(ExtParticle(2),DKP_LO_T,MomExt(1:4,8:11),PhotonHel=PhoHel,Gluon2Hel=kHel)
       else
-         call TopDecay(ExtParticle(2),DKP_LO_L,MomExt(1:4,8:11),PhotonHel=PhoHel)
+         call TopDecay(ExtParticle(2),DKP_LO_L,MomExt(1:4,8:11),PhotonHel=PhoHel,Gluon2Hel=kHel)
       endif
 
       do iPrimAmp=1,NumBornAmps
@@ -3886,6 +3915,8 @@ IF( Correction.EQ.0 ) THEN
       enddo
       enddo
       LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
+   enddo!helicity loop
+   enddo!helicity loop
    enddo!helicity loop
    enddo!helicity loop
 
@@ -4081,7 +4112,7 @@ real(8) :: EvalCS_anomcoupl_DKP_1L_ttbqqb,EvalCS_anomcoupl_DKP_1L_ttbqqb_1,EvalC
 real(8) :: yRnd(1:VegasMxDim),VgsWgt,xE,HOp(1:3)
 complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1)
 complex(8) :: BosonicPartAmp(1:2,-2:1),FermionPartAmp(1:2,-2:1)
-integer :: iHel,iPrimAmp,jPrimAmp,nPhoRad,PhoHel
+integer :: iHel,jHel,kHel,iPrimAmp,jPrimAmp,nPhoRad,PhoHel
 real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac
 real(8) :: MomExt(1:4,1:12),MomP(1:4,1:4)
 logical :: applyPSCut
@@ -4153,14 +4184,16 @@ IF( CORRECTION.EQ.0 ) THEN
 
     do iHel=nHel(1),nHel(2)
     do PhoHel=1,-1,-2 ! loop over additional photon polarization
+    do jHel=1,-1,-2 ! loop over additional bottom polarization
+    do kHel=1,-1,-2 ! loop over additional bottom polarization
         call HelCrossing(Helicities(iHel,1:NumExtParticles))
         call SetPolarizations()
         if( nPhoRad.eq.1 ) then
-          call TopDecay(ExtParticle(1),DKP_LO_T,MomExt(1:4,5:8),PhotonHel=PhoHel)
+          call TopDecay(ExtParticle(1),DKP_LO_T,MomExt(1:4,5:8),PhotonHel=PhoHel,Gluon2Hel=jHel)
         else
-          call TopDecay(ExtParticle(1),DKP_LO_L,MomExt(1:4,5:8),PhotonHel=PhoHel)
+          call TopDecay(ExtParticle(1),DKP_LO_L,MomExt(1:4,5:8),PhotonHel=PhoHel,Gluon2Hel=jHel)
         endif
-        call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11))
+        call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11),Gluon2Hel=kHel)
 
         do iPrimAmp=1,NumBornAmps
             call EvalTree(BornAmps(iPrimAmp))
@@ -4172,6 +4205,8 @@ IF( CORRECTION.EQ.0 ) THEN
         enddo
         enddo
         LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol*PDFFac
+    enddo!helicity loop
+    enddo!helicity loop
     enddo!helicity loop
     enddo!helicity loop
   enddo! npdf loop
@@ -4425,13 +4460,15 @@ IF( CORRECTION.EQ.0 ) THEN
 
     do iHel=nHel(1),nHel(2)
     do PhoHel=1,-1,-2 ! loop over additional photon polarization
+    do jHel=1,-1,-2 ! loop over additional bottom polarization
+    do kHel=1,-1,-2 ! loop over additional bottom polarization
         call HelCrossing(Helicities(iHel,1:NumExtParticles))
         call SetPolarizations()
-        call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,5:7))
+        call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,5:7),Gluon2Hel=jHel)
         if( nPhoRad.eq.1 ) then
-          call TopDecay(ExtParticle(2),DKP_LO_T,MomExt(1:4,8:11),PhotonHel=PhoHel)
+          call TopDecay(ExtParticle(2),DKP_LO_T,MomExt(1:4,8:11),PhotonHel=PhoHel,Gluon2Hel=kHel)
         else
-          call TopDecay(ExtParticle(2),DKP_LO_L,MomExt(1:4,8:11),PhotonHel=PhoHel)
+          call TopDecay(ExtParticle(2),DKP_LO_L,MomExt(1:4,8:11),PhotonHel=PhoHel,Gluon2Hel=kHel)
         endif
 
         do iPrimAmp=1,NumBornAmps
@@ -4444,6 +4481,8 @@ IF( CORRECTION.EQ.0 ) THEN
         enddo
         enddo
         LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol*PDFFac
+    enddo!helicity loop
+    enddo!helicity loop
     enddo!helicity loop
     enddo!helicity loop
   enddo! npdf loop
