@@ -1,8 +1,3 @@
-
-! currently this is a copy of ModCrossSection_TTBP and should be replaced with the subroutines from ttbZ 
-
-
-
 MODULE ModCrossSection_TTBP_anomcoupl
 use ModTopDecay
 implicit none
@@ -56,7 +51,7 @@ real(8) :: MadGraph_tree
 real(8),parameter :: Nc=3d0
 real(8) :: eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac,AccPoles
 real(8) :: pdf(-6:6,1:2),pdf_z(-6:6,1:2),xE,HOp(1:3)
-integer :: NBin(1:NumMaxHisto),NHisto,PhotonCouplCorr=2d0,nHel(1:2),NRndHel
+integer :: NBin(1:NumMaxHisto),NHisto,nHel(1:2),NRndHel
 ! real(8) :: ThresholdCutOff = 1.0d0
 include 'misc/global_import'
 include 'vegas_common.f'
@@ -84,8 +79,6 @@ IF( TOPDECAYS.NE.0 ) THEN
 !    call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8))
 !    call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11))
    NRndHel=16
-ELSE 
-   PSWgt = PSWgt /4d0 ! removes the loop over b-quark helicities
 ENDIF
 
    call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
@@ -105,7 +98,10 @@ ENDIF
    LO_Res_Unpol             = (0d0,0d0)
    NLO_Res_Unpol(-2:1)      = (0d0,0d0)
    NLO_Res_Unpol_Ferm(-2:1) = (0d0,0d0)
+   
 
+
+   
 !------------ LO --------------
 IF( Correction.EQ.0 ) THEN
    do iHel=nHel(1),nHel(2)
@@ -115,6 +111,8 @@ IF( Correction.EQ.0 ) THEN
       IF( TOPDECAYS.NE.0 ) THEN
         call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8),Gluon2Hel=jHel)
         call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11),Gluon2Hel=kHel)
+      ELSE 
+         if( jHel.ne.-1 .or. kHel.ne.-1 ) cycle
       ENDIF
    
       call HelCrossing(Helicities(iHel,1:NumExtParticles))
@@ -463,7 +461,7 @@ ENDIF
 
 IF( Correction.EQ.0 ) THEN
 !  normalization
-   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * WidthExpansion
+   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 *alpha4Pi * WidthExpansion
    EvalCS_anomcoupl_1L_ttbggp = LO_Res_Unpol * PreFac
 
 ELSEIF( Correction.EQ.1 ) THEN
@@ -482,9 +480,9 @@ ELSEIF( Correction.EQ.1 ) THEN
 !    NLO_Res_UnPol_Ferm(0) = NLO_Res_UnPol_Ferm(0) + NLO_Res_UnPol_Ferm(-1)*2d0*dlog(m_top/MuRen)
 
 !  normalization
-   LO_Res_Unpol = LO_Res_Unpol                         * ISFac * (alpha_s4Pi*RunFactor)**2                            * Q_top**2*alpha4Pi*PhotonCouplCorr
-   NLO_Res_UnPol(-2:1) = NLO_Res_UnPol(-2:1)           * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha_sOver2Pi*RunFactor * Q_top**2*alpha4Pi*PhotonCouplCorr
-   NLO_Res_UnPol_Ferm(-2:1) = NLO_Res_UnPol_Ferm(-2:1) * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha_sOver2Pi*RunFactor * Q_top**2*alpha4Pi*PhotonCouplCorr
+   LO_Res_Unpol = LO_Res_Unpol                         * ISFac * (alpha_s4Pi*RunFactor)**2                            * alpha4Pi
+   NLO_Res_UnPol(-2:1) = NLO_Res_UnPol(-2:1)           * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha_sOver2Pi*RunFactor * alpha4Pi
+   NLO_Res_UnPol_Ferm(-2:1) = NLO_Res_UnPol_Ferm(-2:1) * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha_sOver2Pi*RunFactor * alpha4Pi
    EvalCS_anomcoupl_1L_ttbggp = ( NLO_Res_UnPol(0)+NLO_Res_UnPol(1) + NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1) ) * PreFac
 
 
@@ -549,7 +547,7 @@ ENDIF
 
 
    EvalCS_anomcoupl_1L_ttbggp = EvalCS_anomcoupl_1L_ttbggp/VgsWgt
-
+   
 RETURN
 END FUNCTION
 
@@ -584,7 +582,7 @@ real(8) :: MG_MOM(0:3,1:NumExtParticles)
 real(8) :: MadGraph_tree
 real(8),parameter :: Nc=3d0
 real(8) :: tau,eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac_a(1:2),PDFFac_b(1:2),PDFFac(1:2),pdf(-6:6,1:2)
-integer :: NHisto,NBin(1:NumMaxHisto),npdf,ParityFlip=1,PhotonCouplCorr=2d0,nHel(1:2),NRndHel
+integer :: NHisto,NBin(1:NumMaxHisto),npdf,ParityFlip=1,nHel(1:2),NRndHel
 integer,parameter :: up=1,dn=2
 include 'misc/global_import'
 include "vegas_common.f"
@@ -659,46 +657,19 @@ IF( CORRECTION.EQ.0 ) THEN
         IF( TOPDECAYS.NE.0 ) THEN
           call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8),Gluon2Hel=jHel)
           call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11),Gluon2Hel=kHel)
+        ELSE 
+          if( jHel.ne.-1 .or. kHel.ne.-1 ) cycle
         ENDIF
     
-!     do iHel=27,27; print *, "helicity 27"
         call HelCrossing(Helicities(iHel,1:NumExtParticles))
         call SetPolarizations()
         do iPrimAmp=1,NumBornAmps
             call EvalTree(BornAmps(iPrimAmp))
-! ./TOPAZ Collider=1 TopDK=0 Process=22 Correction=0 NLOParam=1 ObsSet=21  VegasNc0=1000 VegasNc1=1000
-! if( ExtParticle(3)%Helicity*ExtParticle(4)%Helicity.eq.+1 ) cycle
-! print *, ExtParticle(1)%Helicity,ExtParticle(2)%Helicity,ExtParticle(3)%Helicity,ExtParticle(4)%Helicity,ExtParticle(5)%Helicity
-! print *, BornAmps(iPrimAmp)%ExtLine
-! print *, "BornAmp",iPrimAmp,BornAmps(iPrimAmp)%Result * dsqrt(2d0)
-! pause
         enddo
 
-        LOPartAmp(up) = BornAmps(1)%Result + Q_up/Q_top * BornAmps(2)%Result
-        LOPartAmp(dn) = BornAmps(1)%Result + Q_dn/Q_top * BornAmps(2)%Result
+        LOPartAmp(up) = BornAmps(1)%Result + (-Q_up) * BornAmps(2)%Result
+        LOPartAmp(dn) = BornAmps(1)%Result + (-Q_dn) * BornAmps(2)%Result
         LO_Res_Pol = ColLO_ttbqqb(1,1) * ( LOPartAmp(up)*dconjg(LOPartAmp(up))*PDFFac(up) + LOPartAmp(dn)*dconjg(LOPartAmp(dn))*PDFFac(dn))
-
-
-!       print *, "helicity ", ExtParticle(1)%Helicity,ExtParticle(2)%Helicity,ExtParticle(3)%Helicity,ExtParticle(4)%Helicity,ExtParticle(5)%Helicity
-!       print *, "-----"
-!       mydummy(1) = cdabs(BornAmps(1)%Result)*dsqrt(2d0)
-!       mydummy(2) = cdabs((-1.246106094083781d-002,2.384433430790109d-002) +(-0.236268898844133d0,-7.208990082860921d-002))
-!       print *, "Markus:",mydummy(1)
-!       print *, "Andreas:",mydummy(2)
-!       print *, "ratio1",mydummy(1)/mydummy(2)
-!       print *, ""
-!       mydummy(1) = cdabs(BornAmps(2)%Result)*dsqrt(2d0)
-!       mydummy(2) = cdabs((-3.449927694153093d-002,0.137660370291406d0) +(-6.553216668898655d-002,-8.502282966201087d-002) )
-!       print *, "Markus:",mydummy(1)
-!       print *, "Andreas:",mydummy(2)
-!       print *, "ratio2",mydummy(1)/mydummy(2)
-!
-!       mydummy(1) = (-1.246106094083781d-002,2.384433430790109d-002) +(-0.236268898844133d0,-7.208990082860921d-002)
-!       mydummy(2) = (-3.449927694153093d-002,0.137660370291406d0) +(-6.553216668898655d-002,-8.502282966201087d-002)
-!       print *, "sum ratio",cdabs(BornAmps(1)%Result+BornAmps(2)%Result)*dsqrt(2d0)/cdabs(mydummy(1)+mydummy(2))
-!       print *, "sum with colors",LO_Res_Pol*2d0/(0.243307611897825d0)
-!       pause
-
         LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
     enddo!helicity loop
     enddo!helicity loop
@@ -1000,7 +971,7 @@ ENDIF
 
 IF( CORRECTION.EQ.0 ) THEN
 !  normalization
-   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * WidthExpansion
+   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 *alpha4Pi * WidthExpansion
    EvalCS_anomcoupl_1L_ttbqqbp = LO_Res_Unpol * PreFac
 
 ELSEIF( CORRECTION.EQ.1 ) THEN
@@ -1021,9 +992,9 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
 !    NLO_Res_UnPol_Ferm(0) = NLO_Res_UnPol_Ferm(0) + NLO_Res_UnPol_Ferm(-1)*2d0*dlog(m_top/MuRen)
 
 !  normalization
-   LO_Res_Unpol = LO_Res_Unpol                         * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr
-   NLO_Res_UnPol(-2:1) = NLO_Res_UnPol(-2:1)           * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * alpha_sOver2Pi*RunFactor
-   NLO_Res_UnPol_Ferm(-2:1) = NLO_Res_UnPol_Ferm(-2:1) * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * alpha_sOver2Pi*RunFactor
+   LO_Res_Unpol = LO_Res_Unpol                         * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi
+   NLO_Res_UnPol(-2:1) = NLO_Res_UnPol(-2:1)           * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi * alpha_sOver2Pi*RunFactor
+   NLO_Res_UnPol_Ferm(-2:1) = NLO_Res_UnPol_Ferm(-2:1) * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi * alpha_sOver2Pi*RunFactor
 
 
    EvalCS_anomcoupl_1L_ttbqqbp = ( NLO_Res_UnPol(0)+NLO_Res_UnPol(1) + NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1) ) * PreFac
@@ -1183,7 +1154,6 @@ real(8) :: MomExt(1:4,1:12),pdf(-6:6,1:2)
 real(8) :: MG_MOM(0:3,1:6)
 real(8) :: MadGraph_tree
 logical :: applyPSCut,applySingCut
-real(8),parameter :: PhotonCouplCorr=2d0
 include "vegas_common.f"
 
 
@@ -1244,7 +1214,7 @@ ENDIF
           LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
         enddo!helicity loop
 
-        LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi  *PhotonCouplCorr
+        LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi  
         EvalCS_anomcoupl_Real_ttbgggp = LO_Res_Unpol * PreFac
 
         do NHisto=1,NumHistograms
@@ -1253,7 +1223,7 @@ ENDIF
 endif!applyPSCut
 
 
-    PreFac = PreFac * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi*PhotonCouplCorr /PSWgt2/PSWgt3
+    PreFac = PreFac * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi /PSWgt2/PSWgt3
     call EvalDipoles_GGTTBGP((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),-MomExt(1:4,1),-MomExt(1:4,2),MomExt(1:4,3)/),yRnd(11:18),PreFac,DipoleResult)
 
 !      sij = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,3))
@@ -1306,7 +1276,6 @@ real(8) :: MomExt(1:4,1:12),sij,pdf(-6:6,1:2)
 real(8) :: MG_MOM(0:3,1:6)
 real(8) :: MadGraph_tree
 logical :: applyPSCut,applySingCut
-real(8),parameter :: PhotonCouplCorr=2d0
 integer,parameter :: up=1, dn=2
 include "vegas_common.f"
 
@@ -1420,11 +1389,9 @@ else
         enddo!helicity loop
 
 
-! print *, "real unpol p",LO_Res_UnPol* Q_top**2  *PhotonCouplCorr
-! pause
 
 
-        LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi  *PhotonCouplCorr
+        LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi  
         EvalCS_anomcoupl_Real_ttbqqbgp = EvalCS_anomcoupl_Real_ttbqqbgp + dble(LO_Res_Unpol*PreFac)
 
         do NHisto=1,NumHistograms
@@ -1432,7 +1399,7 @@ else
         enddo
 endif!applyPSCut
 
-    PreFacDip = PreFac * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi*PhotonCouplCorr /PSWgt2/PSWgt3
+    PreFacDip = PreFac * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi /PSWgt2/PSWgt3
     IF( PROCESS.EQ.30 ) THEN
         call EvalDipoles_QQBTTBGP((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),-MomExt(1:4,1),-MomExt(1:4,2),MomExt(1:4,3)/),yRnd(11:18),(/PreFacDip*PDFFac(1),PreFacDip*PDFFac(2)/),DipoleResult)
     ELSEIF( PROCESS.EQ.24 ) THEN
@@ -1532,7 +1499,7 @@ real(8) :: tau,eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac_a(1:2),PDFFac_b(1:2),P
 real(8) :: pdf(-6:6,1:2),ColCorrLO(1:NumBornAmps,1:NumBornAmps)
 integer :: NBin(1:NumMaxHisto),NHisto,npdf
 real(8) :: pbDpg,ptDpg,ptDpb,z,omz,Dipole,rsq,y
-real(8), parameter :: CF=4d0/3d0,PhotonCouplCorr=2d0
+real(8), parameter :: CF=4d0/3d0
 real(8) :: MomBoost(1:4),MomLep1(1:4),MomLep2(1:4)
 integer,parameter :: up=1,dn=2,glu=1
 include "vegas_common.f"
@@ -1627,7 +1594,7 @@ do npdf=1,2
       NLO_Res_UnPol = NLO_Res_UnPol + NLO_Res_Pol
    enddo!helicity loop
 !  normalization
-   NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * PreFac
+   NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi * PreFac
    EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + dble(NLO_Res_Unpol)
 
    do NHisto=1,NumHistograms
@@ -1697,7 +1664,7 @@ do npdf=1,2
       NLO_Res_UnPol = NLO_Res_UnPol + NLO_Res_Pol
    enddo!helicity loop
 !  normalization
-   NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * PreFac
+   NLO_Res_Unpol = NLO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi * PreFac
    EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + NLO_Res_Unpol
 
 
@@ -1771,7 +1738,7 @@ do npdf=1,2
    enddo!helicity loop
 
 !  normalization
-   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * PreFac
+   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi * PreFac
    EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + dble(LO_Res_Unpol)
 
    do NHisto=1,NumHistograms
@@ -1828,7 +1795,7 @@ do npdf=1,2
    enddo!helicity loop
 
 !  normalization
-   Dip_Res_Unpol = Dip_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Dipole * Q_top**2*alpha4Pi*PhotonCouplCorr * PreFac
+   Dip_Res_Unpol = Dip_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Dipole * Q_top**2*alpha4Pi * PreFac
    EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + Dip_Res_Unpol
 
    do NHisto=1,NumHistograms
@@ -1905,7 +1872,7 @@ do npdf=1,2
    enddo!helicity loop
 
 !  normalization
-   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * PreFac
+   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi * PreFac
    EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + dble(LO_Res_Unpol)
 
    do NHisto=1,NumHistograms
@@ -1959,7 +1926,7 @@ do npdf=1,2
    enddo!helicity loop
 
 !  normalization
-   Dip_Res_Unpol = Dip_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Dipole * Q_top**2*alpha4Pi*PhotonCouplCorr * PreFac
+   Dip_Res_Unpol = Dip_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Dipole * Q_top**2*alpha4Pi * PreFac
    EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + dble(Dip_Res_Unpol)
 
 !             print *, MomDK(1,7)/EHat,pbDpg/EHat**2,EvalCS_anomcoupl_NLODK_ttbp/dble(Dip_Res_Unpol)
@@ -2008,7 +1975,7 @@ integer, parameter :: ParityFlip=1
 real(8) :: tau,eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac,RunFactor
 real(8) :: pdf(-6:6,1:2),ColCorrLO(1:NumBornAmps,1:NumBornAmps)
 integer :: NBin(1:NumMaxHisto),NHisto,nPhoRad
-real(8), parameter :: CF=4d0/3d0,PhotonCouplCorr=2d0
+real(8), parameter :: CF=4d0/3d0
 include "vegas_common.f"
 ! SCHARFS STUFF
 integer :: Top_Atop,i, count_t1, count_t2

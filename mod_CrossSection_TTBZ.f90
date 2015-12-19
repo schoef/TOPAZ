@@ -924,7 +924,7 @@ IF( TTBZ_DebugSwitch.EQ.0 .OR. TTBZ_DebugSwitch.EQ.1 ) THEN
 
    if (nonrenormcoupl) then
       NLO_Res_UnPol(-1)=NLO_Res_UnPol(-1)+HOO_Ren_Res_UnPol
-      NLO_Res_UnPol(0) =NLO_Res_UnPol(0) +dlog(MuRen**2/TTBZ_MassScale**2)*HOO_Ren_Res_UnPol
+      NLO_Res_UnPol(0) =NLO_Res_UnPol(0) +dlog(MuRen**2/M_Z**2)*HOO_Ren_Res_UnPol
    endif
 
 ENDIF
@@ -1778,10 +1778,10 @@ ENDIF
 !      print *, "incl counterterms for non-renorm sigma couplings"
 !      print *, " NOTE: double check finite counterterms !!!"
       NLO_Res_UnPol(-1)=NLO_Res_UnPol(-1)+HOO_Ren_Res_UnPol
-      NLO_Res_UnPol(0)=NLO_Res_UnPol(0)+dlog(MuRen**2/TTBZ_MassScale)*HOO_Ren_Res_UnPol
+      NLO_Res_UnPol(0)=NLO_Res_UnPol(0)+dlog(MuRen**2/M_Z**2)*HOO_Ren_Res_UnPol
 endif
 ! print *, "HOO CT/LO",HOO_Ren_Res_UnPol/LO_res_unpol
-
+  
 
 !  normalization
    LO_Res_Unpol = LO_Res_Unpol                         * ISFac * (alpha_s4Pi*RunFactor)**2 * alpha4Pi

@@ -22,7 +22,7 @@ ELSEIF( PROCESS.EQ.19 ) THEN !   4_AChm + 6_AChm -->  3_AChm + 5_AChm + 1_ATop +
 
 
 
-
+Set switch TTBPhoton_SMonly: .true.= old implementation with Abelianized gluons, .false.=new implementation photon=massless Z boson (anomalous couplings)
 ELSEIF( PROCESS.EQ.20 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho(in production)
 ELSEIF( PROCESS.EQ.21 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho(in decay)
 ELSEIF( PROCESS.EQ.22 ) THEN !   3_Str  + 4_AStr --> 1_ATop + 2_Top + 5_Pho(in production)
@@ -100,8 +100,6 @@ ELSEIF( PROCESS.EQ.75 ) THEN !   3_Glu  + 4_Glu  --> 5_Glu  + 1_ATop + 2_Top + 6
 ELSEIF( PROCESS.EQ.76 ) THEN !   3_Str  + 4_AStr --> 5_Glu  + 1_ATop + 2_Top + 6_Z
 
 
-
-ELSEIF( PROCESS.EQ.81 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho  (ZDK must be <= -2)
 
 
 

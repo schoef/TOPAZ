@@ -268,8 +268,8 @@ logical,parameter :: removePhoton=.false.
           FF4 = FF4 +(-3d0+1d0)       !   WFR counter terms
     endif
     if(xe.eq. 0) then 
-          FF1 = FF1 + (-4d0 - 3d0*dlog(MuRen**2/m_top**2) + 1d0*dlog(MuRen**2/TTBZ_MassScale**2)) *m_top!   WFR counter terms
-          FF4 = FF4 + (-4d0 - 3d0*dlog(MuRen**2/m_top**2) + 1d0*dlog(MuRen**2/TTBZ_MassScale**2))       !   WFR counter terms
+          FF1 = FF1 + (-4d0 - 3d0*dlog(MuRen**2/m_top**2) + 1d0*dlog(MuRen**2/M_Z**2)) *m_top!   WFR counter terms
+          FF4 = FF4 + (-4d0 - 3d0*dlog(MuRen**2/m_top**2) + 1d0*dlog(MuRen**2/M_Z**2))       !   WFR counter terms
     endif
 ! print *, "WARNING: switching off WFR CT"
 
@@ -321,9 +321,9 @@ logical,parameter :: removePhoton=.false.
           FF1 = FF1 +(-3d0+1d0) *m_top!   WFR counter terms
           FF4 = FF4 +(-3d0+1d0)       !   WFR counter terms
     endif
-    if(xe.eq. 0) then 
-          FF1 = FF1 + (-4d0 - 3d0*dlog(MuRen**2/m_top**2) + 1d0*dlog(MuRen**2/TTBZ_MassScale**2)) *m_top!   WFR counter terms
-          FF4 = FF4 + (-4d0 - 3d0*dlog(MuRen**2/m_top**2) + 1d0*dlog(MuRen**2/TTBZ_MassScale**2))       !   WFR counter terms
+    if(xe.eq. 0) then                                                      !  v-- this used to be TTBZ_MassScale. maybe for the photon it should become mtop
+          FF1 = FF1 + (-4d0 - 3d0*dlog(MuRen**2/m_top**2) + 1d0*dlog(MuRen**2/M_Z**2)) *m_top!   WFR counter terms
+          FF4 = FF4 + (-4d0 - 3d0*dlog(MuRen**2/m_top**2) + 1d0*dlog(MuRen**2/M_Z**2))       !   WFR counter terms
     endif
 ! print *, "WARNING: switching off WFR CT"
 

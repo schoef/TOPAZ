@@ -947,7 +947,11 @@ ELSEIF( PROCESS.EQ.20 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho(in p
       allocate(Crossing(1:NumExtParticles))
       allocate(ExtParticle(1:NumExtParticles))
       Crossing(:) = (/4,5,-1,-2,3/)
-      MasterProcess=8
+      if( TTBPhoton_SMonly ) then
+        MasterProcess=8
+      else
+        MasterProcess=17    
+      endif
       NDim = NDim + 5    ! PS integration
       AvgFactor = SpinAvg * GluonColAvg**2
       NDim = NDim + 2    ! shat integration
@@ -958,7 +962,11 @@ ELSEIF( PROCESS.EQ.20 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho(in p
       allocate(Crossing(1:NumExtParticles))
       allocate(ExtParticle(1:NumExtParticles))
       Crossing(:) = (/4,5,-1,-2,3/)
-      MasterProcess=8
+      if( TTBPhoton_SMonly ) then
+        MasterProcess=8
+      else
+        MasterProcess=17    
+      endif 
       AvgFactor = SpinAvg * GluonColAvg**2
       NDim = NDim + 5    ! t tbar photon PS integration
       NDim = NDim + 2    ! shat integration
@@ -1039,7 +1047,11 @@ ELSEIF( PROCESS.EQ.22 ) THEN !   3_Str  + 4_AStr --> 1_ATop + 2_Top + 5_Pho(in p
       allocate(Crossing(1:NumExtParticles))
       allocate(ExtParticle(1:NumExtParticles))
       Crossing(:) = (/4,5,-1,-2,3/)
-      MasterProcess=9
+      if( TTBPhoton_SMonly ) then
+        MasterProcess=9
+      else
+        MasterProcess=18
+      endif   
       AvgFactor = SpinAvg * QuarkColAvg**2
       NDim = NDim + 5    ! t tbar photon PS integration
       NDim = NDim + 2    ! shat integration
@@ -1050,7 +1062,11 @@ ELSEIF( PROCESS.EQ.22 ) THEN !   3_Str  + 4_AStr --> 1_ATop + 2_Top + 5_Pho(in p
       allocate(Crossing(1:NumExtParticles))
       allocate(ExtParticle(1:NumExtParticles))
       Crossing(:) = (/4,5,-1,-2,3/)
-      MasterProcess=9
+      if( TTBPhoton_SMonly ) then
+        MasterProcess=9
+      else
+        MasterProcess=18
+      endif 
       AvgFactor = SpinAvg * QuarkColAvg**2
       NDim = NDim + 5    ! t tbar photon PS integration
       NDim = NDim + 2    ! shat integration
@@ -2696,89 +2712,89 @@ ELSEIF( PROCESS.EQ.76 ) THEN !   3_Str  + 4_AStr --> 5_Glu  + 1_ATop + 2_Top + 6
   ENDIF
 
 
-ELSEIF( PROCESS.EQ.81 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho ! ttbPhoton
-  IF( CORRECTION.EQ.0 ) THEN
-      NumExtParticles = 5
-      allocate(Crossing(1:NumExtParticles))
-      allocate(ExtParticle(1:NumExtParticles))
-      Crossing(:) = (/4,5,-1,-2,3/)
-      MasterProcess=17
-      NDim = NDim + 5    ! PS integration
-      AvgFactor = SpinAvg * GluonColAvg**2
-      NDim = NDim + 2    ! shat integration
-      VegasNc0_default = 100000
-      VegasNc1_default = 100000
-  ELSEIF( CORRECTION.EQ.1 ) THEN
-      NumExtParticles = 5
-      allocate(Crossing(1:NumExtParticles))
-      allocate(ExtParticle(1:NumExtParticles))
-      Crossing(:) = (/4,5,-1,-2,3/)
-      MasterProcess=17
-      AvgFactor = SpinAvg * GluonColAvg**2
-      NDim = NDim + 5    ! t tbar photon PS integration
-      NDim = NDim + 2    ! shat integration
-      VegasNc0_default = 100000
-      VegasNc1_default = 100000
-  ELSE
-      call Error("Correction to this process is not available")
-  ENDIF
+! ELSEIF( PROCESS.EQ.81 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho ! ttbPhoton
+!   IF( CORRECTION.EQ.0 ) THEN
+!       NumExtParticles = 5
+!       allocate(Crossing(1:NumExtParticles))
+!       allocate(ExtParticle(1:NumExtParticles))
+!       Crossing(:) = (/4,5,-1,-2,3/)
+!       MasterProcess=17
+!       NDim = NDim + 5    ! PS integration
+!       AvgFactor = SpinAvg * GluonColAvg**2
+!       NDim = NDim + 2    ! shat integration
+!       VegasNc0_default = 100000
+!       VegasNc1_default = 100000
+!   ELSEIF( CORRECTION.EQ.1 ) THEN
+!       NumExtParticles = 5
+!       allocate(Crossing(1:NumExtParticles))
+!       allocate(ExtParticle(1:NumExtParticles))
+!       Crossing(:) = (/4,5,-1,-2,3/)
+!       MasterProcess=17
+!       AvgFactor = SpinAvg * GluonColAvg**2
+!       NDim = NDim + 5    ! t tbar photon PS integration
+!       NDim = NDim + 2    ! shat integration
+!       VegasNc0_default = 100000
+!       VegasNc1_default = 100000
+!   ELSE
+!       call Error("Correction to this process is not available")
+!   ENDIF
 
 
-ELSEIF( PROCESS.EQ.82 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho ! ttbPhoton
-  IF( CORRECTION.EQ.0 ) THEN
-      NumExtParticles = 5
-      allocate(Crossing(1:NumExtParticles))
-      allocate(ExtParticle(1:NumExtParticles))
-      Crossing(:) = (/4,5,-1,-2,3/)
-      MasterProcess=18
-      NDim = NDim + 5    ! PS integration
-      AvgFactor = SpinAvg * QuarkColAvg**2
-      NDim = NDim + 2    ! shat integration
-      VegasNc0_default = 100000
-      VegasNc1_default = 100000
-  ELSEIF( CORRECTION.EQ.1 ) THEN
-      NumExtParticles = 5
-      allocate(Crossing(1:NumExtParticles))
-      allocate(ExtParticle(1:NumExtParticles))
-      Crossing(:) = (/4,5,-1,-2,3/)
-      MasterProcess=18
-      AvgFactor = SpinAvg * QuarkColAvg**2
-      NDim = NDim + 5    ! t tbar photon PS integration
-      NDim = NDim + 2    ! shat integration
-      VegasNc0_default = 100000
-      VegasNc1_default = 100000
-  ELSE
-      call Error("Correction to this process is not available")
-  ENDIF
+! ELSEIF( PROCESS.EQ.82 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho ! ttbPhoton
+!   IF( CORRECTION.EQ.0 ) THEN
+!       NumExtParticles = 5
+!       allocate(Crossing(1:NumExtParticles))
+!       allocate(ExtParticle(1:NumExtParticles))
+!       Crossing(:) = (/4,5,-1,-2,3/)
+!       MasterProcess=18
+!       NDim = NDim + 5    ! PS integration
+!       AvgFactor = SpinAvg * QuarkColAvg**2
+!       NDim = NDim + 2    ! shat integration
+!       VegasNc0_default = 100000
+!       VegasNc1_default = 100000
+!   ELSEIF( CORRECTION.EQ.1 ) THEN
+!       NumExtParticles = 5
+!       allocate(Crossing(1:NumExtParticles))
+!       allocate(ExtParticle(1:NumExtParticles))
+!       Crossing(:) = (/4,5,-1,-2,3/)
+!       MasterProcess=18
+!       AvgFactor = SpinAvg * QuarkColAvg**2
+!       NDim = NDim + 5    ! t tbar photon PS integration
+!       NDim = NDim + 2    ! shat integration
+!       VegasNc0_default = 100000
+!       VegasNc1_default = 100000
+!   ELSE
+!       call Error("Correction to this process is not available")
+!   ENDIF
 
 
-ELSEIF( PROCESS.EQ.86 ) THEN !   3_Str  + 4_AStr --> 5_Glu  + 1_ATop + 2_Top + 6_Pho
-  IF( CORRECTION.EQ.2 ) THEN
-      NumExtParticles = 6
-      allocate(Crossing(1:NumExtParticles))
-      allocate(ExtParticle(1:NumExtParticles))
-      Crossing(:) = (/5,6,-1,-2,3,4/)
-      MasterProcess=20
-      AvgFactor = SpinAvg * QuarkColAvg**2
-      NDim = NDim + 8    ! t tbar glu photon PS integration
-      NDim = NDim + 2    ! shat integration
-      VegasNc0_default = 1000000
-      VegasNc1_default = 1000000
-  ELSEIF( CORRECTION.EQ.3 ) THEN
-      NumExtParticles = 5
-      allocate(Crossing(1:NumExtParticles))
-      allocate(ExtParticle(1:NumExtParticles))
-      Crossing(:) = (/4,5,-1,-2,3/)
-      MasterProcess=18
-      AvgFactor = SpinAvg * QuarkColAvg**2
-      NDim = NDim + 5    ! t tbar photon PS integration
-      NDim = NDim + 2    ! shat integration
-      NDim = NDim + 1    ! x integration
-      VegasNc0_default = 100000
-      VegasNc1_default = 100000
-  ELSE
-      call Error("Correction to this process is not available")
-  ENDIF
+! ELSEIF( PROCESS.EQ.86 ) THEN !   3_Str  + 4_AStr --> 5_Glu  + 1_ATop + 2_Top + 6_Pho
+!   IF( CORRECTION.EQ.2 ) THEN
+!       NumExtParticles = 6
+!       allocate(Crossing(1:NumExtParticles))
+!       allocate(ExtParticle(1:NumExtParticles))
+!       Crossing(:) = (/5,6,-1,-2,3,4/)
+!       MasterProcess=20
+!       AvgFactor = SpinAvg * QuarkColAvg**2
+!       NDim = NDim + 8    ! t tbar glu photon PS integration
+!       NDim = NDim + 2    ! shat integration
+!       VegasNc0_default = 1000000
+!       VegasNc1_default = 1000000
+!   ELSEIF( CORRECTION.EQ.3 ) THEN
+!       NumExtParticles = 5
+!       allocate(Crossing(1:NumExtParticles))
+!       allocate(ExtParticle(1:NumExtParticles))
+!       Crossing(:) = (/4,5,-1,-2,3/)
+!       MasterProcess=18
+!       AvgFactor = SpinAvg * QuarkColAvg**2
+!       NDim = NDim + 5    ! t tbar photon PS integration
+!       NDim = NDim + 2    ! shat integration
+!       NDim = NDim + 1    ! x integration
+!       VegasNc0_default = 100000
+!       VegasNc1_default = 100000
+!   ELSE
+!       call Error("Correction to this process is not available")
+!   ENDIF
 
 
 ELSEIF( PROCESS.EQ.91 ) THEN !   3_e-  + 4_e+ --> 1_ATop + 2_Top
@@ -4218,7 +4234,7 @@ ELSEIF( MASTERPROCESS.EQ.17 ) THEN
     ExtParticle(3)%PartType = Glu_
     ExtParticle(4)%PartType = Glu_
     ExtParticle(5)%PartType = Z0_
-    if( Process.ge.81 .and. Process.le.89 ) ExtParticle(5)%PartType = Pho_
+    if( Process.ge.20 .and. Process.le.31 ) ExtParticle(5)%PartType = Pho_
 
     IF( Correction.EQ.0 .OR. Correction.EQ.4 .OR.Correction.EQ.5 ) THEN
       NumPrimAmps = 2
@@ -4388,9 +4404,7 @@ ELSEIF( MASTERPROCESS.EQ.18 ) THEN
     ExtParticle(3)%PartType = AStr_
     ExtParticle(4)%PartType = Str_
     ExtParticle(5)%PartType = Z0_
-    if( Process.ge.81 .and. Process.le.89 ) ExtParticle(5)%PartType = Pho_
-
-    if( Process.ge.81 .and. Process.le.89 ) ExtParticle(5)%PartType = Pho_
+    if( Process.ge.20 .and. Process.le.31 ) ExtParticle(5)%PartType = Pho_
 
     IF( Correction.EQ.0 .OR. Correction.EQ.4 .OR.Correction.EQ.5) THEN
       NumPrimAmps = 2
@@ -4436,7 +4450,7 @@ ELSEIF( MASTERPROCESS.EQ.18 ) THEN
         Helicities(12,1:5)= (/0,0,-1,-1, 0/)! longitudinal polarization of massive V boson
      endif
     ELSE
-       if (ZDecays .gt. 0 ) then
+       if( abs(ZDecays) .gt. 0 ) then
           NumHelicities = 16
           allocate(Helicities(1:NumHelicities,1:NumExtParticles))  ! extra for Z decay
           ! for now, use all helicities. might be able to use some clever tricks later though...
@@ -4539,7 +4553,7 @@ ELSEIF( MASTERPROCESS.EQ.19 ) THEN
     ExtParticle(4)%PartType = Glu_
     ExtParticle(5)%PartType = Glu_
     ExtParticle(6)%PartType = Z0_
-    if( Process.ge.81 .and. Process.le.89 ) ExtParticle(6)%PartType = Pho_
+    if( Process.ge.20 .and. Process.le.31 ) ExtParticle(6)%PartType = Pho_
 
     IF( Correction.EQ.2 ) THEN
       NumPrimAmps = 6
@@ -4619,7 +4633,7 @@ ELSEIF( MASTERPROCESS.EQ.20 ) THEN
     ExtParticle(4)%PartType = Str_
     ExtParticle(5)%PartType = Glu_
     ExtParticle(6)%PartType = Z0_
-    if( Process.ge.81 .and. Process.le.89 ) ExtParticle(6)%PartType = Pho_
+    if( Process.ge.20 .and. Process.le.31 ) ExtParticle(6)%PartType = Pho_
 
     IF( Correction.EQ.2 ) THEN
       NumPrimAmps = 8
@@ -6672,7 +6686,7 @@ print *, "check this here"
 
 
 
-ELSEIF( MasterProcess.EQ.17 ) THEN! tb t g g Z0   ! ttbZ
+ELSEIF( MasterProcess.EQ.17 ) THEN! tb t g g Z0/Pho   ! ttb Z/Pho
 
    IF( Correction.EQ.0 .OR. Correction.EQ.4 .OR.Correction.EQ.5 ) THEN
       BornAmps(1)%ExtLine = (/1,5,2,3,4/)
@@ -7080,7 +7094,7 @@ ELSEIF( MasterProcess.EQ.17 ) THEN! tb t g g Z0   ! ttbZ
    ENDIF
 
 
-ELSEIF( MASTERPROCESS.EQ.18 ) THEN! tb t qb q Z0  ! ttbZ
+ELSEIF( MASTERPROCESS.EQ.18 ) THEN! tb t qb q Z0/Pho  ! ttbZ/Pho
 
    IF( Correction.EQ.0  .OR. Correction.EQ.4 .OR.Correction.EQ.5 ) THEN
       BornAmps(1)%ExtLine = (/1,5,2,3,4/)!  Z coupling to top quark line

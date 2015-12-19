@@ -128,10 +128,21 @@ logical :: dirresult
 ! default for BSM top-photon couplings   
    DelGam2V=0d0
    DelGam2A=0d0
+! default for BSM t-b-W couplings
+   DelWTB_Left=(0d0,0d0)
+   DelWTB_Right=(0d0,0d0)
+   DelWTB_Left2=(0d0,0d0)
+   DelWTB_Right2=(0d0,0d0)
+! default for EFT coefficinents
+   EFTOP_C333_phiq=(0d0,0d0)
+   EFTOP_C33_phiphi=(0d0,0d0)
+   EFTOP_C33_dW=(0d0,0d0)
+   EFTOP_C33_uW=(0d0,0d0)
+   EFTOP_C33_uBphi=(0d0,0d0)
 ! default for BSM top-Higgs couplings
    kappaTTBH=1d0
    kappaTTBH_tilde=0d0
-
+   
    
    
    NumArgs = NArgs()-1
@@ -236,10 +247,28 @@ logical :: dirresult
         read(arg(10:16),*) DelGam2V
     elseif( arg(1:9) .eq. "DelGam2A=" ) then
         read(arg(10:16),*) DelGam2A
+    elseif( arg(1:8) .eq. "DelWTBL=" ) then
+        read(arg(9:16),*) DelWTB_left
+    elseif( arg(1:8) .eq. "DelWTBR=" ) then
+        read(arg(9:16),*) DelWTB_right
+    elseif( arg(1:9) .eq. "DelWTBL2=" ) then
+        read(arg(10:16),*) DelWTB_left2
+    elseif( arg(1:9) .eq. "DelWTBR2=" ) then
+        read(arg(10:16),*) DelWTB_right2
      elseif( arg(1:6) .eq. "Kappa=") then
         read(arg(7:13),*) kappaTTBH
      elseif( arg(1:12) .eq. "Kappa_tilde=") then
         read(arg(13:18),*) kappaTTBH_tilde
+     elseif( arg(1:10) .eq. "EFTCoeff1=") then
+        read(arg(11:16),*) EFTOP_C333_phiq
+     elseif( arg(1:10) .eq. "EFTCoeff2=") then
+        read(arg(11:16),*) EFTOP_C33_phiphi
+     elseif( arg(1:10) .eq. "EFTCoeff3=") then
+        read(arg(11:16),*) EFTOP_C33_dW
+     elseif( arg(1:10) .eq. "EFTCoeff4=") then
+        read(arg(11:16),*) EFTOP_C33_uW
+     elseif( arg(1:10) .eq. "EFTCoeff5=") then
+        read(arg(11:16),*) EFTOP_C33_uBphi
     elseif( arg(1:9).eq."DipAlpha=" ) then
         read(arg(10:10),*) iDipAlpha(1)
         read(arg(11:11),*) iDipAlpha(2)
@@ -331,13 +360,13 @@ logical :: dirresult
               stop
           endif
     endif
-    if( Process.ge.81 .and. Process.le.89 ) then
-          ZDecays=-2
-          print *, "Please set M_Z=0 in ModParameters, recompile and remove this line."; stop
-          if( TopDecays.ne.0 ) then
-              print *, "tops are not yet allowed to decay for process",Process
-              stop
-          endif
+    if( Process.ge.20 .and. Process.le.31 ) then
+          if( .not. TTBPhoton_SMonly ) ZDecays=-2
+!           print *, "Please set M_Z=0 in ModParameters, recompile and remove this line."
+!          if( TopDecays.ne.0 ) then
+!              print *, "tops are not yet allowed to decay for process",Process
+!              stop
+!          endif
     endif
     if( Process.ge.101 .and. Process.le.109 ) then
           if( HDecays.eq.-100 ) then 
@@ -530,7 +559,7 @@ integer TheUnit
     else
        write(TheUnit,"(A)") "# no alpha_s running"
     endif
-    
+
     write(TheUnit,'(A,F10.5,A)') "# m(Z)=",m_Z*100d0, " GeV"
     write(TheUnit,'(A,F10.5,A)') "# Gamma(Z)=",Ga_ZExp*100d0, " GeV"
     write(TheUnit,'(A,F10.5,A)') "# m(W)=",m_W*100d0, " GeV"
@@ -543,20 +572,39 @@ integer TheUnit
         write(TheUnit,'(A,F10.5)') "# gL_Zpr(dn_)=",gL_Zpr(dn_)
         write(TheUnit,'(A,F10.5)') "# gR_Zpr(dn_)=",gR_Zpr(dn_)
     endif
-    if ( (ObsSet.ge.50 .and. ObsSet.le.59) .or. (ObsSet.ge.70 .and. ObsSet.le.79) ) then
+    write(TheUnit,"(A,L)") "# AnomalousInteractions=",AnomalousInteractions
+    if ( (ObsSet.ge.20 .and. ObsSet.le.29) .or. (ObsSet.ge.50 .and. ObsSet.le.59) .or. (ObsSet.ge.70 .and. ObsSet.le.79)   & 
+         .or. ( AnomalousInteractions ) ) then
        write(TheUnit,"(A,I2)") "# Z Decays=",ZDecays
-       write(TheUnit,'(A,F10.5)') '# DeltaF1V=',DeltaF1V
-       write(TheUnit,'(A,F10.5)') '# DeltaF1A=',DeltaF1A
-       write(TheUnit,'(A,F10.5)') '# DeltaF2V=',DeltaF2V
-       write(TheUnit,'(A,F10.5)') '# DeltaF2A=',DeltaF2A
-       write(TheUnit,'(A,F10.5)') '# DelGam2V=',DelGam2V
-       write(TheUnit,'(A,F10.5)') '# DelGam2A=',DelGam2A
-       write(TheUnit,'(A,F8.5)') '# SM ttbZ vector=',couplZTT_V_SM
-       write(TheUnit,'(A,F8.5)') '# SM ttbZ axial= ',couplZTT_A_SM
-       write(TheUnit,'(A,F8.5)') '# BSM ttbZ vector= ',couplZTT_V_SM * (1d0 + DeltaF1V)
-       write(TheUnit,'(A,F8.5)') '# BSM ttbZ axial=  ',couplZTT_A_SM * (1d0 + DeltaF1A)
-       write(TheUnit,'(A,F8.5)') '# BSM ttbZ vector2=',DeltaF2V
-       write(TheUnit,'(A,F8.5)') '# BSM ttbZ axial2= ',DeltaF2A
+       write(TheUnit,'(A,1F10.5)') '# DeltaF1V=',DeltaF1V
+       write(TheUnit,'(A,1F10.5)') '# DeltaF1A=',DeltaF1A
+       write(TheUnit,'(A,1F10.5)') '# DeltaF2V=',DeltaF2V
+       write(TheUnit,'(A,1F10.5)') '# DeltaF2A=',DeltaF2A
+       write(TheUnit,'(A,1F10.5)') '# DelGam2V=',DelGam2V
+       write(TheUnit,'(A,1F10.5)') '# DelGam2A=',DelGam2A
+       write(TheUnit,'(A,2F10.5)') '# DelWTB_left  =',DelWTB_left
+       write(TheUnit,'(A,2F10.5)') '# DelWTB_right =',DelWTB_right
+       write(TheUnit,'(A,2F10.5)') '# DelWTB_left2 =',DelWTB_left2
+       write(TheUnit,'(A,2F10.5)') '# DelWTB_right2=',DelWTB_right2
+       write(TheUnit,'(A,2F10.5)') '# SM ttbZ vector=',couplZTT_V_SM
+       write(TheUnit,'(A,2F10.5)') '# SM ttbZ axial= ',couplZTT_A_SM
+       write(TheUnit,'(A,2F10.5)') '# SM ttbP vector=',couplGaTT_V
+       write(TheUnit,'(A,2F10.5)') '# SM ttbP axial= ',couplGaTT_A
+       write(TheUnit,'(A,2F10.5)') '# BSM ttbZ vector= ',couplZTT_V
+       write(TheUnit,'(A,2F10.5)') '# BSM ttbZ axial=  ',couplZTT_A
+       write(TheUnit,'(A,2F10.5)') '# BSM ttbZ vector2=',couplZTT_V2
+       write(TheUnit,'(A,2F10.5)') '# BSM ttbZ axial2= ',couplZTT_A2
+       write(TheUnit,'(A,2F10.5)') '# BSM ttbP vector2=',couplGaTT_V2
+       write(TheUnit,'(A,2F10.5)') '# BSM ttbP axial2= ',couplGaTT_A2
+       write(TheUnit,'(A,2F10.5)') '# BSM Wtb left=  ',couplWTB_left
+       write(TheUnit,'(A,2F10.5)') '# BSM Wtb right= ',couplWTB_right
+       write(TheUnit,'(A,2F10.5)') '# BSM Wtb left2= ',couplWTB_left2
+       write(TheUnit,'(A,2F10.5)') '# BSM Wtb right2=',couplWTB_right2
+       write(TheUnit,'(A,2F10.5)') '# EFT OP.1 coeff C333_phiq= ',EFTOP_C333_phiq
+       write(TheUnit,'(A,2F10.5)') '# EFT OP.2 coeff C33_phiphi=',EFTOP_C33_phiphi
+       write(TheUnit,'(A,2F10.5)') '# EFT OP.3 coeff C33_dW=    ',EFTOP_C33_dW
+       write(TheUnit,'(A,2F10.5)') '# EFT OP.4 coeff C33_uW=    ',EFTOP_C33_uW
+       write(TheUnit,'(A,2F10.5)') '# EFT OP.5 coeff C33_uBphi= ',EFTOP_C33_uBphi
     endif
     if ( (ObsSet.ge.80 .and. ObsSet.le.89) .or. (ObsSet .ge. 91 .and. ObsSet .le.99)  ) then
        write(TheUnit,'(A,F10.5,A)') "# m(H)=",m_H*100d0, " GeV"
@@ -734,12 +782,20 @@ ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.1 .AND. TOPDECAYS.EQ.101) THEN! this is
    call vegas1(EvalCS_LO_bbbWWgg,VG_Result,VG_Error,VG_Chi2)
   endif
 ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.21 ) THEN
-  call vegas(EvalCS_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
+  if( TTBPhoton_SMonly ) then 
+     call vegas(EvalCS_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
+  else
+     call vegas(EvalCS_anomcoupl_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)  
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
+    if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
+    else
+      call vegas1(EvalCS_anomcoupl_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)  
+    endif
   endif
 ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.33 ) THEN
   call vegas(EvalCS_DKJ_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
@@ -873,12 +929,20 @@ IF( CORRECTION.LE.1 .AND. PROCESS.EQ.2 ) THEN
         call vegas1(EvalCS_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
         endif
 ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.23 ) THEN
-        call vegas(EvalCS_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+        if( TTBPhoton_SMonly ) then 
+          call vegas(EvalCS_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+        else
+          call vegas(EvalCS_anomcoupl_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)  
+        endif
         if( warmup ) then
         itmx = VegasIt1
         ncall= VegasNc1
         call InitHisto()
-        call vegas1(EvalCS_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+        if( TTBPhoton_SMonly ) then 
+          call vegas1(EvalCS_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+        else
+          call vegas1(EvalCS_anomcoupl_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)  
+        endif
         endif
 ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.34 ) THEN
         call vegas(EvalCS_DKJ_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
@@ -1187,7 +1251,7 @@ IF( CORRECTION   .LE.1 ) THEN
   if( TTBPhoton_SMonly ) then 
       call vegas(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
   else 
-      call vegas(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   if( warmup ) then
    itmx = VegasIt1
@@ -1196,14 +1260,14 @@ IF( CORRECTION   .LE.1 ) THEN
    if( TTBPhoton_SMonly ) then 
       call vegas1(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas1(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   endif
 ELSEIF( CORRECTION.EQ.3 ) THEN
   if( TTBPhoton_SMonly ) then 
       call vegas(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   if( warmup ) then
    itmx = VegasIt1
@@ -1212,14 +1276,14 @@ ELSEIF( CORRECTION.EQ.3 ) THEN
    if( TTBPhoton_SMonly ) then 
       call vegas1(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas1(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   endif
 ELSEIF( CORRECTION.EQ.4 ) THEN
   if( TTBPhoton_SMonly ) then 
       call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   if( warmup ) then
    itmx = VegasIt1
@@ -1228,14 +1292,14 @@ ELSEIF( CORRECTION.EQ.4 ) THEN
    if( TTBPhoton_SMonly ) then 
       call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas1(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   endif
 ELSEIF( CORRECTION.EQ.5 ) THEN
   if( TTBPhoton_SMonly ) then 
      call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
   else
-     call vegas(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   if( warmup ) then
    itmx = VegasIt1
@@ -1244,7 +1308,7 @@ ELSEIF( CORRECTION.EQ.5 ) THEN
    if( TTBPhoton_SMonly ) then 
       call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas1(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   endif
 ELSE
@@ -1258,7 +1322,7 @@ IF( CORRECTION   .LE.1 ) THEN
   if( TTBPhoton_SMonly ) then 
       call vegas(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   if( warmup ) then
    itmx = VegasIt1
@@ -1267,14 +1331,14 @@ IF( CORRECTION   .LE.1 ) THEN
    if( TTBPhoton_SMonly ) then 
       call vegas1(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas1(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   endif
 ELSEIF( CORRECTION.EQ.3 ) THEN
   if( TTBPhoton_SMonly ) then 
       call vegas(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   if( warmup ) then
    itmx = VegasIt1
@@ -1283,14 +1347,14 @@ ELSEIF( CORRECTION.EQ.3 ) THEN
    if( TTBPhoton_SMonly ) then 
       call vegas1(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas1(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   endif
 ELSEIF( CORRECTION.EQ.4 ) THEN
   if( TTBPhoton_SMonly ) then 
       call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   if( warmup ) then
    itmx = VegasIt1
@@ -1299,14 +1363,14 @@ ELSEIF( CORRECTION.EQ.4 ) THEN
    if( TTBPhoton_SMonly ) then 
       call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas1(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   endif
 ELSEIF( CORRECTION.EQ.5 ) THEN
   if( TTBPhoton_SMonly ) then 
       call vegas(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   if( warmup ) then
    itmx = VegasIt1
@@ -1315,7 +1379,7 @@ ELSEIF( CORRECTION.EQ.5 ) THEN
    if( TTBPhoton_SMonly ) then 
       call vegas1(EvalCS_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas1(EvalCS_anomcoupl_NLODK_ttbp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   endif
 ENDIF
@@ -1328,7 +1392,7 @@ IF( CORRECTION.EQ.2 ) THEN
   if( TTBPhoton_SMonly ) then 
       call vegas(EvalCS_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas(EvalCS_anomcoupl_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   if( warmup ) then
    itmx = VegasIt1
@@ -1337,7 +1401,7 @@ IF( CORRECTION.EQ.2 ) THEN
    if( TTBPhoton_SMonly ) then 
       call vegas1(EvalCS_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas1(EvalCS_anomcoupl_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   endif
 ENDIF
@@ -1351,7 +1415,7 @@ IF( CORRECTION.EQ.2 ) THEN
   if( TTBPhoton_SMonly ) then 
       call vegas(EvalCS_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas(EvalCS_anomcoupl_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   if( warmup ) then
    itmx = VegasIt1
@@ -1360,7 +1424,7 @@ IF( CORRECTION.EQ.2 ) THEN
    if( TTBPhoton_SMonly ) then 
       call vegas1(EvalCS_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
   else
-      call vegas1(EvalCS_anomcoupl_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+      call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   endif
 ENDIF
@@ -1514,12 +1578,20 @@ ENDIF
 
 IF( MASTERPROCESS.EQ.17 ) THEN
 IF( CORRECTION   .EQ.0 ) THEN
-  call vegas(EvalCS_1L_ttbggZ,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_1L_ttbggZ,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_1L_ttbggZ,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_1L_ttbggZ,VG_Result,VG_Error,VG_Chi2)
+   else
+      call vegas1(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+  endif  
   endif
 
 ELSEIF( CORRECTION   .EQ.1 ) THEN
@@ -1580,12 +1652,20 @@ ENDIF
 
 IF( MASTERPROCESS.EQ.18 ) THEN
 IF( CORRECTION   .EQ.0 ) THEN
-  call vegas(EvalCS_1L_ttbqqbZ,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas(EvalCS_1L_ttbqqbZ,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+  endif  
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_1L_ttbqqbZ,VG_Result,VG_Error,VG_Chi2)
+   if( TTBPhoton_SMonly ) then 
+      call vegas1(EvalCS_1L_ttbqqbZ,VG_Result,VG_Error,VG_Chi2)
+   else
+      call vegas1(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+   endif  
   endif
 
 ELSEIF( CORRECTION .EQ.1 ) THEN

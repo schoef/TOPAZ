@@ -2616,7 +2616,7 @@ END SUBROUTINE
          vbqV = -(0d0,1d0)*( coupl_left*Chir(.false.,sp) + coupl_right*Chir(.true.,sp) )  
       endif
 
-
+      
 ! print *, ""
 ! print *, "new",vbqV
 ! vbqV = -(0d0,1d0)*( coupl_left*Chir_OLD(.false.,spb2_(sp,e1)) + coupl_right*Chir_OLD(.true.,spb2_(sp,e1)) ) 
@@ -2953,50 +2953,6 @@ END SUBROUTINE
       RETURN
       END FUNCTION
 
-
-
-      
-
-!     this is the f-fbar-A-W contact interaction
-      FUNCTION vbqVV_Weyl(sp,eA,eW,HDcoupl_left,HDcoupl_right)
-      implicit none
-      complex(8), intent(in) :: eA(:),eW(:)
-      complex(8), intent(in) :: sp(:)
-      complex(8), intent(in) :: HDcoupl_left,HDcoupl_right
-      complex(8) :: vbqVV_Weyl(size(sp)),ubarWslAsl(size(sp)),ubarAslWsl(size(sp)),ubarsig(size(sp))
-
-
-                ubarAslWsl=spb2_Weyl(spb2_Weyl(sp,eA),eW)         
-                ubarWslAsl=spb2_Weyl(spb2_Weyl(sp,eW),eA)                
-                ubarsig=-1d0/2d0  * (ubarAslWsl-ubarWslAsl)                   ! i*sigma_{mu,nu}A^{mu}W^{nu} = -[Asl,Wsl]/2
-                vbqVV_Weyl = (0d0,-1d0)*(   &
-                  & + HDcoupl_left* (iChir_Weyl(.false.,ubarsig)) &   ! not sure if this should be iChir or Chir
-                  & + HDcoupl_right*(iChir_Weyl(.true.,ubarsig) ) )
-
-                  
-      RETURN
-      END FUNCTION
-
-
-
-
-!     this is the f-fbar-A-W contact interaction
-      FUNCTION vVVq_Weyl(eA,eW,sp,HDcoupl_left,HDcoupl_right)
-      implicit none
-      complex(8), intent(in) :: eA(:),eW(:)
-      complex(8), intent(in) :: sp(:)
-      complex(8), intent(in) :: HDcoupl_left,HDcoupl_right
-      complex(8) :: vVVq_Weyl(size(sp)),WslAslv(size(sp)),AslWslv(size(sp)),sigv(size(sp)) 
- 
-                AslWslv=spi2_Weyl(eA,spi2_Weyl(eW,sp))
-                WslAslv=spi2_Weyl(eW,spi2_Weyl(eA,sp))
-                sigv=-1d0/2d0  * (AslWslv-WslAslv)                        ! i*sigma_{mu,nu}A^{mu}W^{nu} = -[Asl,Wsl]/2
-                vVVq_Weyl = vVVq_Weyl -(0d0,1d0) *( & 
-                  & + HDcoupl_left*(iChir_Weyl(.false.,sigv)) &
-                  & + HDcoupl_right*(iChir_Weyl(.true.,sigv)) )
- 
-      RETURN
-      END FUNCTION
 
 
 

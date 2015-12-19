@@ -14,7 +14,7 @@ logical, public :: unweighted
 logical, public :: HelSampling
 logical, public :: FirstLOThenVI
 integer, public :: DKRE_switch
-integer, public, save :: ColorlessTag=3   !  1=SM Z, 2=SM+BSM Z, 3=SM+BSM Higgs
+integer, public, save :: ColorlessTag=2   !  1=SM Z, 2=SM+BSM Z, 3=SM+BSM Higgs
 integer(8), public, save :: EvalCounter=0
 integer(8), public, save :: PSCutCounter=0
 integer(8), public, save :: SkipCounter=0
@@ -98,15 +98,18 @@ real(8), public :: AbsDelF1A, AbsDelF1V    !, DeltaF2A, DeltaF2V    ! later
 real(8), public :: RelDelF1A, RelDelF1V, RelDelF2A, RelDelF2V   !, DeltaF2A, DeltaF2V    ! later
 real(8), public :: DelGam2V,DelGam2A       ! q-dependent coupling for the photon
 
-logical, parameter :: TTBPhoton_SMonly = .false.  ! true: no anomalous ttb+gamma couplings,  false: anomalous ttb+gamma couplings
+logical, parameter :: TTBPhoton_SMonly = .true.  ! true: no anomalous ttb+gamma couplings,  false: anomalous ttb+gamma couplings
+logical :: AnomalousInteractions
 
 ! top-H couplings
 real(8), public :: kappaTTBH      
 real(8), public :: kappaTTBH_tilde
 
 ! top EFT operators
+logical, parameter :: InputAnomalousCoupl = .false.!    .true.=use anom. couplings as input, .false.=use EFT OP coeffs. as input
+logical, parameter :: InputEFTCoeffCoupl  = (.not. InputAnomalousCoupl)
 real(8),parameter    :: Lambda_BSM=1000d0*GeV
-complex(8) :: EFTOP_C333_phiq, EFTOP_C33_phiphi, EFTOP_C33_dW, EFTOP_C33_uW,EFTOP_C33_uBphi
+complex(8) :: EFTOP_C333_phiq, EFTOP_C33_phiphi, EFTOP_C33_dW, EFTOP_C33_uW,EFTOP_C33_uBphi,EFTOP_C33_phiu
 
 ! Zprime couplings
 real(8), public :: m_Zpr
@@ -132,20 +135,10 @@ real(8), public, parameter :: couplZUU_right = -sw/cw*Q_up
 real(8), public, parameter :: couplZDD_left  = -sw/cw*Q_dn + 1d0/sw/cw * T3_dn
 real(8), public, parameter :: couplZDD_right = -sw/cw*Q_dn
 
-! for check against ttb+photon
-! real(8), public, parameter :: couplZUU_left  = Q_up  *1d0
-! real(8), public, parameter :: couplZUU_right = Q_up  *(-1d0)
-! real(8), public, parameter :: couplZDD_left  = Q_dn  *0d0
-! real(8), public, parameter :: couplZDD_right = Q_dn  *0d0
-
 real(8), public, parameter :: couplZTT_left_SM  = -sw/cw*Q_up + 1d0/sw/cw * T3_up!  treat the top separate from up quark
 real(8), public, parameter :: couplZTT_right_SM = -sw/cw*Q_up
-! real(8), public, parameter :: couplZTT_left_SM  = Q_up!  This is for the check against ttb+photon.
-! real(8), public, parameter :: couplZTT_right_SM = Q_up
-! real(8), public, parameter :: couplZTT_left_SM  = 1d0!  This is for the check against ttb+photon.
-! real(8), public, parameter :: couplZTT_right_SM = 1d0
-real(8), public, parameter ::  couplZTT_V_SM =  (+couplZTT_left_SM+couplZTT_right_SM)/2d0   ! our vertex is gamma^mu ( cV - cA*gamma5 ) = gamma^mu *( cL*PL + cR*PR )
-real(8), public, parameter ::  couplZTT_A_SM =  (+couplZTT_left_SM-couplZTT_right_SM)/2d0   ! i.e. cV=1/2(cL+cR), cA=1/2(cL-cR)   <-->    cL=cV+cA, cR=cV-cA
+real(8), public, parameter :: couplZTT_V_SM =  (+couplZTT_left_SM+couplZTT_right_SM)/2d0   ! our vertex is gamma^mu ( cV - cA*gamma5 ) = gamma^mu *( cL*PL + cR*PR )
+real(8), public, parameter :: couplZTT_A_SM =  (+couplZTT_left_SM-couplZTT_right_SM)/2d0   ! i.e. cV=1/2(cL+cR), cA=1/2(cL-cR)   <-->    cL=cV+cA, cR=cV-cA
 
 real(8), public, parameter :: couplZEE_left  = -sw/cw*Q_el + 1d0/sw/cw * T3_el
 real(8), public, parameter :: couplZEE_right = -sw/cw*Q_el
@@ -154,15 +147,15 @@ real(8), public, parameter :: couplZNN_left  = -sw/cw*Q_nu + 1d0/sw/cw * T3_nu
 real(8), public, parameter :: couplZNN_right = -sw/cw*Q_nu
 
 complex(8), public :: couplZTT_left,couplZTT_right,couplZTT_V,couplZTT_A,couplZTT_left_dyn,couplZTT_right_dyn,couplZTT_V_dyn,couplZTT_A_dyn!  these couplings are set dynamically (depending on whether the Z decays or not)
-complex(8),public :: couplGaTT_V2,couplGaTT_A2,couplGaTT_left2,couplGaTT_right2!  these couplings are to store the dynamic couplings so we can change them in the code (e.g. to do UV counterterms)
+complex(8),public :: couplGaTT_V,couplGaTT_A,couplGaTT_V2,couplGaTT_A2,couplGaTT_left,couplGaTT_right,couplGaTT_left2,couplGaTT_right2!  these couplings are to store the dynamic couplings so we can change them in the code (e.g. to do UV counterterms)
 complex(8), public :: couplZTT_left_store,couplZTT_right_store,couplZTT_left_dyn_store,couplZTT_right_dyn_store,couplZTT_left2_store,couplZTT_right2_store,couplZTT_left2_dyn_store,couplZTT_right2_dyn_store,Q_Top_store
 complex(8), public :: couplZUU_left_dyn,couplZUU_right_dyn
 complex(8), public :: couplZDD_left_dyn,couplZDD_right_dyn
 complex(8), public :: couplZQQ_left_dyn,couplZQQ_right_dyn
 complex(8), public :: couplZTT_left2,couplZTT_right2,couplZTT_V2,couplZTT_A2,couplZTT_left2_dyn,couplZTT_right2_dyn
-complex(8), public :: couplPTT_left2,couplPTT_right2,couplPTT_left2_dyn,couplPTT_right2_dyn
+! complex(8), public :: couplPTT_left2,couplPTT_right2,couplPTT_left2_dyn,couplPTT_right2_dyn
 complex(8), public :: couplWTB_left,couplWTB_right,couplWTB_left2,couplWTB_right2
-real(8), public, parameter :: TTBZ_MassScale= 1d0*m_Z
+complex(8), public :: DelWTB_left,DelWTB_right,DelWTB_left2,DelWTB_right2
 
 
 real(8), public :: WidthExpansion
@@ -415,7 +408,6 @@ real(8), external :: ddilog! this is borrowed from QCDLoop
 
 m_Bot  = m_Top  ! this is NOT the bottom mass! it is the mass for massive fermion in closed loops
 m_SBot = m_STop ! this is NOT the sbottom mass! it is the mass for massive scalar in closed loops
-! print *, "set m_SBot to zero";pause
 
 
 IF( COLLIDER.EQ.1 ) THEN
@@ -511,33 +503,37 @@ Ga_Top(1) = Ga_Top(0) * ( - RUNALPHAS(2,MuRen)*alpha_sOver2Pi*4d0/3d0*(   &   ! 
 ! Ga_Top_BSM(1)=0d0
 
 
-! to do: check with interferecen seeem 14 instead of 13.80
-! check gauge inv. for photon ichir...
 
-! LO top width with anomalous couplings hep-ph/0605190       
-  couplWTB_left  =1.0d0
-  couplWTB_right =0.0d0
-  couplWTB_left2 =0.2d0
-  couplWTB_right2=0.0d0
-Ga_Top_BSM(0) = g2_weak*m_top/(64d0*DblPi*r2)*(1d0-r2)  &
-              *( (2d0-r2-r2**2)*(cdabs(couplWTB_left2)**2+cdabs(couplWTB_right2)**2) + (1d0+r2-2d0*r2**2)*(cdabs(couplWTB_left)**2+cdabs(couplWTB_right)**2) &
-                 - 6d0*dsqrt(r2)*(1d0-r2)*dreal(couplWTB_right*dconjg(couplWTB_left2) + couplWTB_left*dconjg(couplWTB_right2)) )
-Ga_Top_BSM(1)=0d0
-Ga_top(0) = Ga_Top_BSM(0)
-! print *, "chekcer",Ga_Top_BSM(0)/Ga_top(0)
+if( InputAnomalousCoupl ) then
+  couplWTB_left  =1.0d0 + DelWTB_left
+  couplWTB_right =DelWTB_right
+  couplWTB_left2 =DelWTB_left2   /M_W
+  couplWTB_right2=DelWTB_right2  /M_W
+  
+  ! definitions according to 0811.3842
+  EFTOP_C333_phiq  = Lambda_BSM**2/vev**2*dconjg(couplWTB_left-1d0)
+  EFTOP_C33_phiphi = 2d0*Lambda_BSM**2/vev**2*couplWTB_right
+  EFTOP_C33_dW     = 1d0/dsqrt(2d0)*Lambda_BSM**2/vev**2*dconjg(couplWTB_left2*M_W)
+  EFTOP_C33_uW     = 1d0/dsqrt(2d0)*Lambda_BSM**2/vev**2*couplWTB_right2*M_W
+endif
 
-! definitions according to 0811.3842
-EFTOP_C333_phiq  = Lambda_BSM**2/vev**2*dconjg(couplWTB_left-1d0)
-EFTOP_C33_phiphi = 2d0*Lambda_BSM**2/vev**2*couplWTB_right
-EFTOP_C33_dW     = 1d0/dsqrt(2d0)*Lambda_BSM**2/vev**2*dconjg(couplWTB_left2)
-EFTOP_C33_uW     = 1d0/dsqrt(2d0)*Lambda_BSM**2/vev**2*couplWTB_right2
+if( InputEFTCoeffCoupl ) then
+  couplWTB_left  = 1.0d0 + (vev**2/Lambda_BSM**2 * dconjg(EFTOP_C333_phiq) )
+  couplWTB_right = ( 0.5d0*vev**2/Lambda_BSM**2 * EFTOP_C33_phiphi )
+  couplWTB_left2 = (dsqrt(2d0)*vev**2/Lambda_BSM**2 * dconjg(EFTOP_C33_dW))/M_W
+  couplWTB_right2= (dsqrt(2d0)*vev**2/Lambda_BSM**2 * EFTOP_C33_uW)/M_W
+endif
 
-print *, "W width"
-print *, "EFTOP_C333_phiq",EFTOP_C333_phiq
-print *, "EFTOP_C33_phiphi",EFTOP_C33_phiphi
-print *, "EFTOP_C33_dW",EFTOP_C33_dW
-print *, "EFTOP_C33_uW",EFTOP_C33_uW
-! pause
+! LO top width with anomalous couplings hep-ph/0605190      
+  Ga_Top_BSM(0) = g2_weak*m_top/(64d0*DblPi*r2)*(1d0-r2)  &
+                *( (2d0-r2-r2**2)*(cdabs(couplWTB_left2*M_W)**2+cdabs(couplWTB_right2*M_W)**2) + (1d0+r2-2d0*r2**2)*(cdabs(couplWTB_left)**2+cdabs(couplWTB_right)**2) &
+                   - 6d0*dsqrt(r2)*(1d0-r2)*dreal(couplWTB_right*dconjg(couplWTB_left2*M_W) + couplWTB_left*dconjg(couplWTB_right2*M_W)) )
+  Ga_Top_BSM(1)=0d0
+  Ga_top(0) = Ga_Top_BSM(0)
+
+
+
+
 
 WWidthChoice = 1!          0=experimental W width,    1=calculated W width
 IF( WWidthChoice.eq. 1 ) THEN
@@ -561,58 +557,87 @@ ENDIF
 
 
 
-!   top quark-Z-boson coupling
 
 
+if( InputAnomalousCoupl ) then
+
+
+! top quark-Z-boson coupling
 ! our vertex is gamma^mu ( cV - cA*gamma5 ) = gamma^mu *( cL*PL + cR*PR )
 ! i.e. cV=1/2(cL+cR), cA=1/2(cL-cR)   <-->    cL=cV+cA, cR=cV-cA
-
-
-
-! first get (possibly BSM) top-Z coupl
    couplZTT_V = couplZTT_V_SM * (1d0 + DeltaF1V)
    couplZTT_A = couplZTT_A_SM * (1d0 + DeltaF1A)
-   couplZTT_left  = (couplZTT_V + couplZTT_A)/1d0     ! MARKUS:  removed 1/2
-   couplZTT_right = (couplZTT_V - couplZTT_A)/1d0     ! MARKUS:  removed 1/2 and introduced a minus
+   couplZTT_V2 = DeltaF2V/M_Z
+   couplZTT_A2 = DeltaF2A/M_Z
+   
+ 
+
+! top quark-photon coupling
+   couplGaTT_V = Q_top
+   couplGaTT_A = 0d0
+   couplGaTT_V2= DelGam2V/m_top
+   couplGaTT_A2= DelGam2A/m_top
+       
+   
+!  computing EFT OP coeff. from anomalous couplings   
+   EFTOP_C33_uBphi = couplGaTT_V2*m_top/dsqrt(2d0)*Lambda_BSM**2/vev/m_top*dsqrt(alpha4Pi)/cw - sw/cw * EFTOP_C33_uW
+   
+endif
+
+if( InputEFTCoeffCoupl ) then
+  couplZTT_V = couplZTT_V_SM ! not yet available for ttb+Z
+  couplZTT_A = couplZTT_A_SM
+  couplZTT_V2 = dsqrt(2d0) * dreal(-sw*EFTOP_C33_uBphi + cw*EFTOP_C33_uW) * vev**2/Lambda_BSM**2
+  couplZTT_A2 = dsqrt(2d0) * dimag(-sw*EFTOP_C33_uBphi + cw*EFTOP_C33_uW) * vev**2/Lambda_BSM**2
+
+  couplGaTT_V = -Q_top
+  couplGaTT_A = 0d0   
+  couplGaTT_V2 = dsqrt(2d0)/dsqrt(alpha4Pi) * dreal(cw*EFTOP_C33_uBphi + sw*EFTOP_C33_uW) * vev*m_top/Lambda_BSM**2   /m_top
+  couplGaTT_A2 = dsqrt(2d0)/dsqrt(alpha4Pi) * dimag(cw*EFTOP_C33_uBphi + sw*EFTOP_C33_uW) * vev*m_top/Lambda_BSM**2   /m_top
+endif
 
 
-!   the _dyn variables will be overwritten in mod_ZDecay.f90 if the Z-boson decays
+!  converting everything to LH,RH couplings
+   couplZTT_left   = couplZTT_V  + couplZTT_A
+   couplZTT_right  = couplZTT_V  - couplZTT_A    
+   couplZTT_left2  = couplZTT_V2 + couplZTT_A2
+   couplZTT_right2 = couplZTT_V2 - couplZTT_A2   
+   couplGaTT_left  =couplGaTT_V  + couplGaTT_A 
+   couplGaTT_right =couplGaTT_V  - couplGaTT_A 
+   couplGaTT_left2 =couplGaTT_V2 + couplGaTT_A2
+   couplGaTT_right2=couplGaTT_V2 - couplGaTT_A2
+
+
+! initialize _dyn couplings which are used in the currents
+! the _dyn variables will be overwritten in mod_ZDecay.f90 if the Z-boson decays
+! it would be good to rename this in the future (or maybe couplXTT ? )
    if( Process.ge.71 .and. Process.le.76 ) then
       couplZTT_left_dyn  = couplZTT_left
       couplZTT_right_dyn = couplZTT_right
+      couplZTT_left2_dyn =couplZTT_left2
+      couplZTT_right2_dyn=couplZTT_right2
    elseif( Process.ge.101 .and. Process.le.106 ) then
-      couplZTT_left_dyn  = -m_top/vev * ( kappaTTBH - (0d0,1d0)*kappaTTBH_tilde )   ! it would be good to rename this 
-      couplZTT_right_dyn = -m_top/vev * ( kappaTTBH + (0d0,1d0)*kappaTTBH_tilde )   ! couplHTT in the future (or maybe couplXTT ? )
+      couplZTT_left_dyn  = -m_top/vev * ( kappaTTBH - (0d0,1d0)*kappaTTBH_tilde )   
+      couplZTT_right_dyn = -m_top/vev * ( kappaTTBH + (0d0,1d0)*kappaTTBH_tilde ) 
+   elseif( Process.ge.20 .and. Process.le.31 ) then
+      couplZTT_left_dyn  = couplGaTT_left
+      couplZTT_right_dyn = couplGaTT_right
+      couplZTT_left2_dyn = couplGaTT_left2
+      couplZTT_right2_dyn= couplGaTT_right2      
    else
       couplZTT_left_dyn  = (0d0,0d0)
       couplZTT_right_dyn = (0d0,0d0)   
+   endif   
+   couplZQQ_left_dyn  = (1d0,0d0)! non-top couplings are set during run-time in the code
+   couplZQQ_right_dyn = (1d0,0d0)       
+      
+   
+   if( any((/cdabs(EFTOP_C333_phiq), cdabs(EFTOP_C33_phiphi), cdabs(EFTOP_C33_dW), cdabs(EFTOP_C33_uW), cdabs(EFTOP_C33_uBphi)/).ne.0d0)  ) then
+      AnomalousInteractions = .true.
+   else
+      AnomalousInteractions = .false.
    endif
-    
-   
 
-! the coefficients of the q-terms -- set to SM value of 0 for the time being
-   couplZTT_V2=1d0*(DeltaF2V)/TTBZ_MassScale
-   couplZTT_A2=1d0*(DeltaF2A)/TTBZ_MassScale
-   couplGaTT_V2=1d0*(DelGam2V)/TTBZ_MassScale
-   couplGaTT_A2=1d0*(DelGam2A)/TTBZ_MassScale
-
-! same as the other couplings -- see notes from 12 July 
-   couplZTT_left2 =couplZTT_V2+couplZTT_A2
-   couplZTT_right2=couplZTT_V2-couplZTT_A2
-
-   couplGaTT_left2 =couplGaTT_V2+couplGaTT_A2
-   couplGaTT_right2=couplGaTT_V2-couplGaTT_A2
-
-   couplZTT_left2_dyn =couplZTT_left2
-   couplZTT_right2_dyn=couplZTT_right2
-   
-   EFTOP_C33_uBphi = couplGaTT_V2/dsqrt(2d0)*Lambda_BSM**2/vev/m_top*dsqrt(alpha4Pi)/cw - sw/cw * EFTOP_C33_uW
-print *, "ttb+gamma"
-print *,"EFTOP_C33_uBphi",EFTOP_C33_uBphi
-! pause
-
-   
-   
    r2 = (M_Z/(2*4.6d0*GeV))**2! mass correction for bottom quark
    ZWidth = alpha/12d0*M_Z * (  +((couplZUU_left+couplZUU_right)**2 + (couplZUU_left-couplZUU_right)**2 *1d0 )*3d0 &! up
                                 +((couplZDD_left+couplZDD_right)**2 + (couplZDD_left-couplZDD_right)**2 *1d0 )*3d0 &! dn

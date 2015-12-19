@@ -175,12 +175,12 @@ ELSEIF( ObsSet.EQ.2 ) THEN! set of observables for ttb production as signal proc
     eta_lep_cut = 2.5d0         !*1d2
 
 ELSEIF( ObsSet.EQ.3 ) THEN! set of observables for ttb production as signal process at LHC (di-lept. decay)
-    Rsep_jet    = 0.4d0         *0d0
-    pT_bjet_cut = 25d0*GeV      *0d0
-    eta_bjet_cut= 2.5d0         *1d2
-    pT_lep_cut  = 25d0*GeV      *0d0
-    pT_miss_cut = 50d0*GeV      *0d0
-    eta_lep_cut = 2.5d0         *1d2
+    Rsep_jet    = 0.4d0         !*0d0
+    pT_bjet_cut = 25d0*GeV      !*0d0
+    eta_bjet_cut= 2.5d0         !*1d2
+    pT_lep_cut  = 25d0*GeV      !*0d0
+    pT_miss_cut = 50d0*GeV      !*0d0
+    eta_lep_cut = 2.5d0         !*1d2
 
 ELSEIF( ObsSet.EQ.4 ) THEN! ! set of observables for ttb production with hadr. Atop, lept. top decay
     Rsep_jet    = 0.5d0
@@ -199,18 +199,18 @@ ELSEIF( ObsSet.EQ.5 ) THEN! set of observables for ttb production with hadr. top
     pT_lep_cut  = 20d0*GeV
     eta_lep_cut = 2.5d0
 
-    pT_bjet_cut = 25d0*GeV
-    pT_jet_cut  = 25d0*GeV
-    eta_bjet_cut= 2.5d0
+    pT_bjet_cut = 20d0*GeV
+    pT_jet_cut  = 20d0*GeV
+    eta_bjet_cut= 2.0d0
     eta_jet_cut = 2.5d0
 
-    pT_miss_cut = 25d0*GeV
+    pT_miss_cut = 20d0*GeV
 !   Mwt cut is hard coded below
 
-    Rsep_LepJet = 0.4d0
+    Rsep_LepJet = 0.0d0
     Rsep_jet    = 0.4d0
 
-
+    HT_cut      = 220d0*GeV
 
 
 ELSEIF( ObsSet.EQ.6 ) THEN! set of observables for ttb production with lept. top, hadr. Atop decay at LHC
@@ -412,8 +412,28 @@ ELSEIF( ObsSet.EQ.25 ) THEN! set of observables for ttbgamma production with sem
 
 
 
-ELSEIF( ObsSet.EQ.26 ) THEN! set of observables for ttbgamma production with semi-lept.decays(hadr.Atop, lept.top decay) at Tevatron with Qtop cuts
+! ELSEIF( ObsSet.EQ.26 ) THEN! set of observables for ttbgamma production with semi-lept.decays(hadr.Atop, lept.top decay) at Tevatron with Qtop cuts
+! 
+!     pT_pho_cut  = 20d0*GeV
+!     eta_pho_cut = 2.5d0
+!     Rsep_Plep   = 0.4d0
+!     Rsep_Pj     = 0.4d0
+!     Rsep_Pbj    = 0.4d0
+! 
+!     Rsep_jet    = 0.4d0
+!     pT_bjet_cut = 20d0*GeV
+!     pT_jet_cut  = 20d0*GeV
+!     eta_bjet_cut= 2d0
+!     eta_jet_cut = 2.5d0
+! 
+!     pT_lep_cut  = 20d0*GeV
+!     eta_lep_cut = 2.5d0
+! 
+!     pT_miss_cut = 20d0*GeV
+!     HT_cut      = 200d0*GeV
 
+ELSEIF( ObsSet.EQ.26 .OR. ObsSet.EQ.27 .OR. ObsSet.EQ.28) THEN! set of observables for ttbgamma production with semi-lept.decays(hadr.Atop, lept.top decay) at LHC
+                                                              ! 26=no supression cuts, 27=suppress PR, 28=supress DK
     pT_pho_cut  = 20d0*GeV
     eta_pho_cut = 2.5d0
     Rsep_Plep   = 0.4d0
@@ -432,45 +452,25 @@ ELSEIF( ObsSet.EQ.26 ) THEN! set of observables for ttbgamma production with sem
     pT_miss_cut = 20d0*GeV
     HT_cut      = 200d0*GeV
 
-ELSEIF( ObsSet.EQ.27 ) THEN! set of observables for ttbgamma production with semi-lept.decays(hadr.Atop, lept.top decay) at LHC with Qtop cuts
-
-    pT_pho_cut  = 20d0*GeV
-    eta_pho_cut = 2.5d0
-    Rsep_Plep   = 0.4d0
-    Rsep_Pj     = 0.4d0
-    Rsep_Pbj    = 0.4d0
-
-    Rsep_jet    = 0.4d0
-    pT_bjet_cut = 20d0*GeV
-    pT_jet_cut  = 20d0*GeV
-    eta_bjet_cut= 2d0
-    eta_jet_cut = 2.5d0
-
-    pT_lep_cut  = 20d0*GeV
-    eta_lep_cut = 2.5d0
-
-    pT_miss_cut = 20d0*GeV
-    HT_cut      = 200d0*GeV
-
-ELSEIF( ObsSet.EQ.28 ) THEN! set of observables for ttbgamma production with semi-lept.decays(hadr.Atop, lept.top decay) at LHC
-
-    pT_pho_cut  = 20d0*GeV
-    eta_pho_cut = 2.5d0
-    Rsep_Plep   = 0.4d0
-    Rsep_Pj     = 0.4d0
-    Rsep_Pbj    = 0.4d0
-
-    Rsep_jet    = 0.4d0
-    pT_bjet_cut = 20d0*GeV
-    pT_jet_cut  = 20d0*GeV
-    eta_bjet_cut= 2d0
-    eta_jet_cut = 2.5d0
-
-    pT_lep_cut  = 20d0*GeV
-    eta_lep_cut = 2.5d0
-
-    pT_miss_cut = 20d0*GeV
-    HT_cut      = 200d0*GeV
+! ELSEIF( ObsSet.EQ.28 ) THEN! set of observables for ttbgamma production with semi-lept.decays(hadr.Atop, lept.top decay) at LHC
+! 
+!     pT_pho_cut  = 20d0*GeV
+!     eta_pho_cut = 2.5d0
+!     Rsep_Plep   = 0.4d0
+!     Rsep_Pj     = 0.4d0
+!     Rsep_Pbj    = 0.4d0
+! 
+!     Rsep_jet    = 0.4d0
+!     pT_bjet_cut = 20d0*GeV
+!     pT_jet_cut  = 20d0*GeV
+!     eta_bjet_cut= 2d0
+!     eta_jet_cut = 2.5d0
+! 
+!     pT_lep_cut  = 20d0*GeV
+!     eta_lep_cut = 2.5d0
+! 
+!     pT_miss_cut = 20d0*GeV
+!     HT_cut      = 200d0*GeV
 
 ELSEIF( ObsSet.EQ.29 ) THEN! this is for the factorization check
 
@@ -2401,7 +2401,7 @@ ELSEIF( ObsSet.EQ.19 ) THEN! for checks of ttbjet
 ELSEIF( ObsSet.EQ.20 ) THEN! set of observables for ttbgamma production without decays at Tevatron
           if(Collider.ne.2)  call Error("Collider needs to be Tevatron!")
           if(TopDecays.ne.0) call Error("TopDecays needs to be 0!")
-          NumHistograms = 8
+          NumHistograms = 9
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
@@ -2455,11 +2455,17 @@ ELSEIF( ObsSet.EQ.20 ) THEN! set of observables for ttbgamma production without 
           Histo(8)%LowVal =-5.0d0
           Histo(8)%SetScale= 1d0
 
+          Histo(9)%Info   = "etaFB_CP"
+          Histo(9)%NBins  = 2
+          Histo(9)%BinSize= 10d0
+          Histo(9)%LowVal =-10.0d0
+          Histo(9)%SetScale= 0.1d0
+
 
 ELSEIF( ObsSet.EQ.21 ) THEN! set of observables for ttbgamma production without decays at the LHC
           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
           if(TopDecays.ne.0) call Error("TopDecays needs to be 0!")
-          NumHistograms = 8
+          NumHistograms = 9
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
@@ -2513,11 +2519,17 @@ ELSEIF( ObsSet.EQ.21 ) THEN! set of observables for ttbgamma production without 
           Histo(8)%LowVal =-5.0d0
           Histo(8)%SetScale= 1d0
 
+          Histo(9)%Info   = "etaFB_CP"
+          Histo(9)%NBins  = 2
+          Histo(9)%BinSize= 10d0
+          Histo(9)%LowVal =-10.0d0
+          Histo(9)%SetScale= 0.1d0
+
 
 ELSEIF( ObsSet.EQ.22 ) THEN! set of observables for ttbgamma production di-lept. decays at the Tevatron
           if(Collider.ne.2)  call Error("Collider needs to be TEV!")
           if(TopDecays.ne.1  ) call Error("TopDecays needs to be 1!")
-          NumHistograms = 14
+          NumHistograms = 15
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
@@ -2606,12 +2618,18 @@ ELSEIF( ObsSet.EQ.22 ) THEN! set of observables for ttbgamma production di-lept.
           Histo(14)%BinSize= 0.2d0
           Histo(14)%LowVal = 0d0
           Histo(14)%SetScale= 1d0
+
+          Histo(15)%Info   = "etaFB_CP"
+          Histo(15)%NBins  = 2
+          Histo(15)%BinSize= 10d0
+          Histo(15)%LowVal =-10.0d0
+          Histo(15)%SetScale= 0.1d0
 
 
 ELSEIF( ObsSet.EQ.23 ) THEN! set of observables for ttbgamma production di-lept. decays at the LHC
           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
           if(TopDecays.ne.1 ) call Error("TopDecays needs to be 1!")
-          NumHistograms = 14
+          NumHistograms = 15
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
@@ -2700,17 +2718,24 @@ ELSEIF( ObsSet.EQ.23 ) THEN! set of observables for ttbgamma production di-lept.
           Histo(14)%BinSize= 0.2d0
           Histo(14)%LowVal = 0d0
           Histo(14)%SetScale= 1d0
+
+          Histo(15)%Info   = "etaFB_CP"
+          Histo(15)%NBins  = 2
+          Histo(15)%BinSize= 10d0
+          Histo(15)%LowVal =-10.0d0
+          Histo(15)%SetScale= 0.1d0
 
 
 
 ELSEIF( ObsSet.EQ.24 ) THEN! set of observables for ttbgamma production semi-lept. decays at the TEV
           if(Collider.ne.2)  call Error("Collider needs to be Tevatron!")
           if(TopDecays.ne.4  ) call Error("TopDecays needs to be 4!")
-          NumHistograms = 17
+          NumHistograms = 16
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
           endif
+
 
           Histo(1)%Info   = "pT_ATop"
           Histo(1)%NBins  = 40
@@ -2736,13 +2761,13 @@ ELSEIF( ObsSet.EQ.24 ) THEN! set of observables for ttbgamma production semi-lep
           Histo(4)%LowVal =-5.0d0
           Histo(4)%SetScale= 1d0
 
-          Histo(5)%Info   = "etaFB_Lep"
+          Histo(5)%Info   = "etaFB_ATop"
           Histo(5)%NBins  = 2
           Histo(5)%BinSize= 5d0
           Histo(5)%LowVal =-5.0d0
           Histo(5)%SetScale= 1d0
 
-          Histo(6)%Info   = "etaFB_Pho"
+          Histo(6)%Info   = "etaFB_Top"
           Histo(6)%NBins  = 2
           Histo(6)%BinSize= 5d0
           Histo(6)%LowVal =-5.0d0
@@ -2750,8 +2775,8 @@ ELSEIF( ObsSet.EQ.24 ) THEN! set of observables for ttbgamma production semi-lep
 
           Histo(7)%Info   = "pT_Photon"
           Histo(7)%NBins  = 40
-          Histo(7)%BinSize= 20d0*GeV
-          Histo(7)%LowVal =  0d0*GeV
+          Histo(7)%BinSize= 25d0*GeV
+          Histo(7)%LowVal = 0d0*GeV
           Histo(7)%SetScale= 100d0
 
           Histo(8)%Info   = "eta_Photon"
@@ -2762,7 +2787,7 @@ ELSEIF( ObsSet.EQ.24 ) THEN! set of observables for ttbgamma production semi-lep
 
           Histo(9)%Info   = "pT_LepP"
           Histo(9)%NBins  = 40
-          Histo(9)%BinSize= 20d0*GeV
+          Histo(9)%BinSize= 25d0*GeV
           Histo(9)%LowVal =  0d0*GeV
           Histo(9)%SetScale= 100d0
 
@@ -2772,15 +2797,15 @@ ELSEIF( ObsSet.EQ.24 ) THEN! set of observables for ttbgamma production semi-lep
           Histo(10)%LowVal =-5.0d0
           Histo(10)%SetScale= 1d0
 
-          Histo(11)%Info   = "ET_miss"
+          Histo(11)%Info   = "pT_miss"
           Histo(11)%NBins  = 40
-          Histo(11)%BinSize= 20d0*GeV
+          Histo(11)%BinSize= 25d0*GeV
           Histo(11)%LowVal =  0d0*GeV
           Histo(11)%SetScale= 100d0
 
-          Histo(12)%Info   = "HT(jets+lept+pho+miss)"
+          Histo(12)%Info   = "HT(jets+lept+pho)"
           Histo(12)%NBins  = 40
-          Histo(12)%BinSize= 25d0*GeV
+          Histo(12)%BinSize= 50d0*GeV
           Histo(12)%LowVal = 150d0*GeV
           Histo(12)%SetScale= 100d0
 
@@ -2791,34 +2816,29 @@ ELSEIF( ObsSet.EQ.24 ) THEN! set of observables for ttbgamma production semi-lep
           Histo(13)%SetScale= 1d0
 
           Histo(14)%Info   = "m(lep+bjet)"
-          Histo(14)%NBins  = 40
-          Histo(14)%BinSize= 20d0*GeV
+          Histo(14)%NBins  = 90
+          Histo(14)%BinSize= 5d0*GeV
           Histo(14)%LowVal = 20d0*GeV
           Histo(14)%SetScale= 100d0
 
-          Histo(15)%Info   = "mT(lep,pho;pTmiss)"
-          Histo(15)%NBins  = 40
-          Histo(15)%BinSize= 20d0*GeV
-          Histo(15)%LowVal = 20d0*GeV
-          Histo(15)%SetScale= 100d0
+          Histo(15)%Info   = "phi(photon,lept)"
+          Histo(15)%NBins  = 20
+          Histo(15)%BinSize= 0.2d0
+          Histo(15)%LowVal = 0d0
+          Histo(15)%SetScale= 1d0
 
-          Histo(16)%Info   = "phi(photon,lept)"
-          Histo(16)%NBins  = 20
-          Histo(16)%BinSize= 0.2d0
-          Histo(16)%LowVal = 0d0
-          Histo(16)%SetScale= 1d0
+          Histo(16)%Info   = "etaFB_CP"
+          Histo(16)%NBins  = 2
+          Histo(16)%BinSize= 10d0
+          Histo(16)%LowVal =-10.0d0
+          Histo(16)%SetScale= 0.1d0
 
-          Histo(17)%Info   = "ET_bjet"
-          Histo(17)%NBins  = 40
-          Histo(17)%BinSize= 20d0*GeV
-          Histo(17)%LowVal =  0d0*GeV
-          Histo(17)%SetScale= 100d0
 
 
 ELSEIF( ObsSet.EQ.25 ) THEN! set of observables for ttbgamma production semi-lept. decays at the LHC
           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
           if(TopDecays.ne.4) call Error("TopDecays needs to be 3 (for Qt=-4/3) or 4 (for Qt=Qup)")
-          NumHistograms = 15
+          NumHistograms = 16
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
@@ -2914,107 +2934,113 @@ ELSEIF( ObsSet.EQ.25 ) THEN! set of observables for ttbgamma production semi-lep
           Histo(15)%LowVal = 0d0
           Histo(15)%SetScale= 1d0
 
+          Histo(16)%Info   = "etaFB_CP"
+          Histo(16)%NBins  = 2
+          Histo(16)%BinSize= 10d0
+          Histo(16)%LowVal =-10.0d0
+          Histo(16)%SetScale= 0.1d0
 
-ELSEIF( ObsSet.EQ.26 ) THEN! set of observables for ttbgamma production semi-lept. decays at the TEV
-          if(Collider.ne.2)  call Error("Collider needs to be Tevatron!")
-          if(TopDecays.ne.4  .and. TopDecays.ne.3 ) call Error("TopDecays needs to be 3 (for Qt=-4/3) or 4 (for Qt=Qup)")
-          NumHistograms = 15
-          if( .not.allocated(Histo) ) then
-                allocate( Histo(1:NumHistograms), stat=AllocStatus  )
-                if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
-          endif
 
-          Histo(1)%Info   = "pT_ATop"
-          Histo(1)%NBins  = 40
-          Histo(1)%BinSize= 50d0*GeV
-          Histo(1)%LowVal = 0d0
-          Histo(1)%SetScale= 100d0
+! ELSEIF( ObsSet.EQ.26 ) THEN! set of observables for ttbgamma production semi-lept. decays at the TEV
+!           if(Collider.ne.2)  call Error("Collider needs to be Tevatron!")
+!           if(TopDecays.ne.4  .and. TopDecays.ne.3 ) call Error("TopDecays needs to be 3 (for Qt=-4/3) or 4 (for Qt=Qup)")
+!           NumHistograms = 15
+!           if( .not.allocated(Histo) ) then
+!                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
+!                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
+!           endif
+! 
+!           Histo(1)%Info   = "pT_ATop"
+!           Histo(1)%NBins  = 40
+!           Histo(1)%BinSize= 50d0*GeV
+!           Histo(1)%LowVal = 0d0
+!           Histo(1)%SetScale= 100d0
+! 
+!           Histo(2)%Info   = "eta_ATop"
+!           Histo(2)%NBins  = 40
+!           Histo(2)%BinSize= 0.25d0
+!           Histo(2)%LowVal =-5.0d0
+!           Histo(2)%SetScale= 1d0
+! 
+!           Histo(3)%Info   = "pT_Top"
+!           Histo(3)%NBins  = 40
+!           Histo(3)%BinSize= 50d0*GeV
+!           Histo(3)%LowVal = 0d0
+!           Histo(3)%SetScale= 100d0
+! 
+!           Histo(4)%Info   = "eta_Top"
+!           Histo(4)%NBins  = 40
+!           Histo(4)%BinSize= 0.25d0
+!           Histo(4)%LowVal =-5.0d0
+!           Histo(4)%SetScale= 1d0
+! 
+!           Histo(5)%Info   = "etaFB_ATop"
+!           Histo(5)%NBins  = 2
+!           Histo(5)%BinSize= 5d0
+!           Histo(5)%LowVal =-5.0d0
+!           Histo(5)%SetScale= 1d0
+! 
+!           Histo(6)%Info   = "etaFB_Top"
+!           Histo(6)%NBins  = 2
+!           Histo(6)%BinSize= 5d0
+!           Histo(6)%LowVal =-5.0d0
+!           Histo(6)%SetScale= 1d0
+! 
+!           Histo(7)%Info   = "pT_Photon"
+!           Histo(7)%NBins  = 40
+!           Histo(7)%BinSize= 20d0*GeV
+!           Histo(7)%LowVal = 20d0*GeV
+!           Histo(7)%SetScale= 100d0
+! 
+!           Histo(8)%Info   = "eta_Photon"
+!           Histo(8)%NBins  = 40
+!           Histo(8)%BinSize= 0.25d0
+!           Histo(8)%LowVal =-5.0d0
+!           Histo(8)%SetScale= 1d0
+! 
+!           Histo(9)%Info   = "pT_LepP"
+!           Histo(9)%NBins  = 40
+!           Histo(9)%BinSize= 20d0*GeV
+!           Histo(9)%LowVal = 20d0*GeV
+!           Histo(9)%SetScale= 100d0
+! 
+!           Histo(10)%Info   = "eta_LepP"
+!           Histo(10)%NBins  = 40
+!           Histo(10)%BinSize= 0.25d0
+!           Histo(10)%LowVal =-5.0d0
+!           Histo(10)%SetScale= 1d0
+! 
+!           Histo(11)%Info   = "pT_miss"
+!           Histo(11)%NBins  = 40
+!           Histo(11)%BinSize= 20d0*GeV
+!           Histo(11)%LowVal = 20d0*GeV
+!           Histo(11)%SetScale= 100d0
+! 
+!           Histo(12)%Info   = "HT(jets+lept+pho)"
+!           Histo(12)%NBins  = 40
+!           Histo(12)%BinSize= 20d0*GeV
+!           Histo(12)%LowVal = 150d0*GeV
+!           Histo(12)%SetScale= 100d0
+! 
+!           Histo(13)%Info   = "R(pho,bjet)"
+!           Histo(13)%NBins  = 25
+!           Histo(13)%BinSize= 0.2d0
+!           Histo(13)%LowVal = 0d0
+!           Histo(13)%SetScale= 1d0
+! 
+!           Histo(14)%Info   = "m(lep+bjet)"
+!           Histo(14)%NBins  = 40
+!           Histo(14)%BinSize= 20d0*GeV
+!           Histo(14)%LowVal = 20d0*GeV
+!           Histo(14)%SetScale= 100d0
+! 
+!           Histo(15)%Info   = "phi(photon,lept)"
+!           Histo(15)%NBins  = 20
+!           Histo(15)%BinSize= 0.2d0
+!           Histo(15)%LowVal = 0d0
+!           Histo(15)%SetScale= 1d0
 
-          Histo(2)%Info   = "eta_ATop"
-          Histo(2)%NBins  = 40
-          Histo(2)%BinSize= 0.25d0
-          Histo(2)%LowVal =-5.0d0
-          Histo(2)%SetScale= 1d0
-
-          Histo(3)%Info   = "pT_Top"
-          Histo(3)%NBins  = 40
-          Histo(3)%BinSize= 50d0*GeV
-          Histo(3)%LowVal = 0d0
-          Histo(3)%SetScale= 100d0
-
-          Histo(4)%Info   = "eta_Top"
-          Histo(4)%NBins  = 40
-          Histo(4)%BinSize= 0.25d0
-          Histo(4)%LowVal =-5.0d0
-          Histo(4)%SetScale= 1d0
-
-          Histo(5)%Info   = "etaFB_ATop"
-          Histo(5)%NBins  = 2
-          Histo(5)%BinSize= 5d0
-          Histo(5)%LowVal =-5.0d0
-          Histo(5)%SetScale= 1d0
-
-          Histo(6)%Info   = "etaFB_Top"
-          Histo(6)%NBins  = 2
-          Histo(6)%BinSize= 5d0
-          Histo(6)%LowVal =-5.0d0
-          Histo(6)%SetScale= 1d0
-
-          Histo(7)%Info   = "pT_Photon"
-          Histo(7)%NBins  = 40
-          Histo(7)%BinSize= 20d0*GeV
-          Histo(7)%LowVal = 20d0*GeV
-          Histo(7)%SetScale= 100d0
-
-          Histo(8)%Info   = "eta_Photon"
-          Histo(8)%NBins  = 40
-          Histo(8)%BinSize= 0.25d0
-          Histo(8)%LowVal =-5.0d0
-          Histo(8)%SetScale= 1d0
-
-          Histo(9)%Info   = "pT_LepP"
-          Histo(9)%NBins  = 40
-          Histo(9)%BinSize= 20d0*GeV
-          Histo(9)%LowVal = 20d0*GeV
-          Histo(9)%SetScale= 100d0
-
-          Histo(10)%Info   = "eta_LepP"
-          Histo(10)%NBins  = 40
-          Histo(10)%BinSize= 0.25d0
-          Histo(10)%LowVal =-5.0d0
-          Histo(10)%SetScale= 1d0
-
-          Histo(11)%Info   = "pT_miss"
-          Histo(11)%NBins  = 40
-          Histo(11)%BinSize= 20d0*GeV
-          Histo(11)%LowVal = 20d0*GeV
-          Histo(11)%SetScale= 100d0
-
-          Histo(12)%Info   = "HT(jets+lept+pho)"
-          Histo(12)%NBins  = 40
-          Histo(12)%BinSize= 20d0*GeV
-          Histo(12)%LowVal = 150d0*GeV
-          Histo(12)%SetScale= 100d0
-
-          Histo(13)%Info   = "R(pho,bjet)"
-          Histo(13)%NBins  = 25
-          Histo(13)%BinSize= 0.2d0
-          Histo(13)%LowVal = 0d0
-          Histo(13)%SetScale= 1d0
-
-          Histo(14)%Info   = "m(lep+bjet)"
-          Histo(14)%NBins  = 40
-          Histo(14)%BinSize= 20d0*GeV
-          Histo(14)%LowVal = 20d0*GeV
-          Histo(14)%SetScale= 100d0
-
-          Histo(15)%Info   = "phi(photon,lept)"
-          Histo(15)%NBins  = 20
-          Histo(15)%BinSize= 0.2d0
-          Histo(15)%LowVal = 0d0
-          Histo(15)%SetScale= 1d0
-
-ELSEIF( ObsSet.EQ.27 ) THEN! set of observables for ttbgamma production semi-lept. decays at the LHC for Q_top measurement
+ELSEIF( ObsSet.EQ.26 .OR. ObsSet.EQ.27 .OR. ObsSet.EQ.28 ) THEN! set of observables for ttbgamma production semi-lept. decays at the LHC for Q_top measurement
           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
           if(TopDecays.ne.4 .and. TopDecays.ne.3) call Error("TopDecays needs to be 3 (for Qt=-4/3) or 4 (for Qt=Qup)")
           if( Q_top.ne.Q_up .and. TopDecays.ne.3 ) call Error("TopDecays needs to be 3 for Qt=-4/3")
@@ -3025,8 +3051,8 @@ ELSEIF( ObsSet.EQ.27 ) THEN! set of observables for ttbgamma production semi-lep
           endif
 
           Histo(1)%Info   = "pT_ATop"
-          Histo(1)%NBins  = 40
-          Histo(1)%BinSize= 50d0*GeV
+          Histo(1)%NBins  = 50
+          Histo(1)%BinSize= 10d0*GeV
           Histo(1)%LowVal = 0d0
           Histo(1)%SetScale= 100d0
 
@@ -3037,8 +3063,8 @@ ELSEIF( ObsSet.EQ.27 ) THEN! set of observables for ttbgamma production semi-lep
           Histo(2)%SetScale= 1d0
 
           Histo(3)%Info   = "pT_Top"
-          Histo(3)%NBins  = 40
-          Histo(3)%BinSize= 50d0*GeV
+          Histo(3)%NBins  = 50
+          Histo(3)%BinSize= 10d0*GeV
           Histo(3)%LowVal = 0d0
           Histo(3)%SetScale= 100d0
 
@@ -3048,11 +3074,11 @@ ELSEIF( ObsSet.EQ.27 ) THEN! set of observables for ttbgamma production semi-lep
           Histo(4)%LowVal =-5.0d0
           Histo(4)%SetScale= 1d0
 
-          Histo(5)%Info   = "etaFB_ATop"
+          Histo(5)%Info   = "etaFB_CP"
           Histo(5)%NBins  = 2
-          Histo(5)%BinSize= 5d0
-          Histo(5)%LowVal =-5.0d0
-          Histo(5)%SetScale= 1d0
+          Histo(5)%BinSize= 10d0
+          Histo(5)%LowVal =-10.0d0
+          Histo(5)%SetScale= 0.1d0
 
           Histo(6)%Info   = "etaFB_Top"
           Histo(6)%NBins  = 2
@@ -3073,8 +3099,8 @@ ELSEIF( ObsSet.EQ.27 ) THEN! set of observables for ttbgamma production semi-lep
           Histo(8)%SetScale= 1d0
 
           Histo(9)%Info   = "pT_LepP"
-          Histo(9)%NBins  = 40
-          Histo(9)%BinSize= 25d0*GeV
+          Histo(9)%NBins  = 50
+          Histo(9)%BinSize= 10d0*GeV
           Histo(9)%LowVal =  0d0*GeV
           Histo(9)%SetScale= 100d0
 
@@ -3104,7 +3130,7 @@ ELSEIF( ObsSet.EQ.27 ) THEN! set of observables for ttbgamma production semi-lep
 
           Histo(14)%Info   = "m(lep+bjet)"
           Histo(14)%NBins  = 40
-          Histo(14)%BinSize= 20d0*GeV
+          Histo(14)%BinSize= 10d0*GeV
           Histo(14)%LowVal = 20d0*GeV
           Histo(14)%SetScale= 100d0
 
@@ -3138,104 +3164,104 @@ ELSEIF( ObsSet.EQ.27 ) THEN! set of observables for ttbgamma production semi-lep
           Histo(19)%LowVal = 70d0*GeV
           Histo(19)%SetScale= 100d0
           
-ELSEIF( ObsSet.EQ.28 ) THEN! set of observables for ttbgamma production semi-lept. decays at the LHC for Q_top measurement
-          if(Collider.ne.1)  call Error("Collider needs to be LHC!")
-          if(TopDecays.ne.4 .and. TopDecays.ne.3) call Error("TopDecays needs to be 3 (for Qt=-4/3) or 4 (for Qt=Qup)")
-          NumHistograms = 15
-          if( .not.allocated(Histo) ) then
-                allocate( Histo(1:NumHistograms), stat=AllocStatus  )
-                if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
-          endif
-
-          Histo(1)%Info   = "pT_ATop"
-          Histo(1)%NBins  = 40
-          Histo(1)%BinSize= 50d0*GeV
-          Histo(1)%LowVal = 0d0
-          Histo(1)%SetScale= 100d0
-
-          Histo(2)%Info   = "eta_ATop"
-          Histo(2)%NBins  = 40
-          Histo(2)%BinSize= 0.25d0
-          Histo(2)%LowVal =-5.0d0
-          Histo(2)%SetScale= 1d0
-
-          Histo(3)%Info   = "pT_Top"
-          Histo(3)%NBins  = 40
-          Histo(3)%BinSize= 50d0*GeV
-          Histo(3)%LowVal = 0d0
-          Histo(3)%SetScale= 100d0
-
-          Histo(4)%Info   = "eta_Top"
-          Histo(4)%NBins  = 40
-          Histo(4)%BinSize= 0.25d0
-          Histo(4)%LowVal =-5.0d0
-          Histo(4)%SetScale= 1d0
-
-          Histo(5)%Info   = "etaFB_ATop"
-          Histo(5)%NBins  = 2
-          Histo(5)%BinSize= 5d0
-          Histo(5)%LowVal =-5.0d0
-          Histo(5)%SetScale= 1d0
-
-          Histo(6)%Info   = "etaFB_Top"
-          Histo(6)%NBins  = 2
-          Histo(6)%BinSize= 5d0
-          Histo(6)%LowVal =-5.0d0
-          Histo(6)%SetScale= 1d0
-
-          Histo(7)%Info   = "pT_Photon"
-          Histo(7)%NBins  = 40
-          Histo(7)%BinSize= 25d0*GeV
-          Histo(7)%LowVal = 0d0*GeV
-          Histo(7)%SetScale= 100d0
-
-          Histo(8)%Info   = "eta_Photon"
-          Histo(8)%NBins  = 40
-          Histo(8)%BinSize= 0.25d0
-          Histo(8)%LowVal =-5.0d0
-          Histo(8)%SetScale= 1d0
-
-          Histo(9)%Info   = "pT_LepP"
-          Histo(9)%NBins  = 40
-          Histo(9)%BinSize= 25d0*GeV
-          Histo(9)%LowVal =  0d0*GeV
-          Histo(9)%SetScale= 100d0
-
-          Histo(10)%Info   = "eta_LepP"
-          Histo(10)%NBins  = 40
-          Histo(10)%BinSize= 0.25d0
-          Histo(10)%LowVal =-5.0d0
-          Histo(10)%SetScale= 1d0
-
-          Histo(11)%Info   = "pT_miss"
-          Histo(11)%NBins  = 40
-          Histo(11)%BinSize= 25d0*GeV
-          Histo(11)%LowVal =  0d0*GeV
-          Histo(11)%SetScale= 100d0
-
-          Histo(12)%Info   = "HT(jets+lept+pho)"
-          Histo(12)%NBins  = 40
-          Histo(12)%BinSize= 50d0*GeV
-          Histo(12)%LowVal = 150d0*GeV
-          Histo(12)%SetScale= 100d0
-
-          Histo(13)%Info   = "R(pho,bjet)"
-          Histo(13)%NBins  = 25
-          Histo(13)%BinSize= 0.25d0
-          Histo(13)%LowVal = 0d0
-          Histo(13)%SetScale= 1d0
-
-          Histo(14)%Info   = "m(lep+bjet)"
-          Histo(14)%NBins  = 90
-          Histo(14)%BinSize= 5d0*GeV
-          Histo(14)%LowVal = 20d0*GeV
-          Histo(14)%SetScale= 100d0
-
-          Histo(15)%Info   = "phi(photon,lept)"
-          Histo(15)%NBins  = 20
-          Histo(15)%BinSize= 0.2d0
-          Histo(15)%LowVal = 0d0
-          Histo(15)%SetScale= 1d0
+! ELSEIF( ObsSet.EQ.28 ) THEN! set of observables for ttbgamma production semi-lept. decays at the LHC for Q_top measurement
+!           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
+!           if(TopDecays.ne.4 .and. TopDecays.ne.3) call Error("TopDecays needs to be 3 (for Qt=-4/3) or 4 (for Qt=Qup)")
+!           NumHistograms = 15
+!           if( .not.allocated(Histo) ) then
+!                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
+!                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
+!           endif
+! 
+!           Histo(1)%Info   = "pT_ATop"
+!           Histo(1)%NBins  = 40
+!           Histo(1)%BinSize= 50d0*GeV
+!           Histo(1)%LowVal = 0d0
+!           Histo(1)%SetScale= 100d0
+! 
+!           Histo(2)%Info   = "eta_ATop"
+!           Histo(2)%NBins  = 40
+!           Histo(2)%BinSize= 0.25d0
+!           Histo(2)%LowVal =-5.0d0
+!           Histo(2)%SetScale= 1d0
+! 
+!           Histo(3)%Info   = "pT_Top"
+!           Histo(3)%NBins  = 40
+!           Histo(3)%BinSize= 50d0*GeV
+!           Histo(3)%LowVal = 0d0
+!           Histo(3)%SetScale= 100d0
+! 
+!           Histo(4)%Info   = "eta_Top"
+!           Histo(4)%NBins  = 40
+!           Histo(4)%BinSize= 0.25d0
+!           Histo(4)%LowVal =-5.0d0
+!           Histo(4)%SetScale= 1d0
+! 
+!           Histo(5)%Info   = "etaFB_ATop"
+!           Histo(5)%NBins  = 2
+!           Histo(5)%BinSize= 5d0
+!           Histo(5)%LowVal =-5.0d0
+!           Histo(5)%SetScale= 1d0
+! 
+!           Histo(6)%Info   = "etaFB_Top"
+!           Histo(6)%NBins  = 2
+!           Histo(6)%BinSize= 5d0
+!           Histo(6)%LowVal =-5.0d0
+!           Histo(6)%SetScale= 1d0
+! 
+!           Histo(7)%Info   = "pT_Photon"
+!           Histo(7)%NBins  = 40
+!           Histo(7)%BinSize= 25d0*GeV
+!           Histo(7)%LowVal = 0d0*GeV
+!           Histo(7)%SetScale= 100d0
+! 
+!           Histo(8)%Info   = "eta_Photon"
+!           Histo(8)%NBins  = 40
+!           Histo(8)%BinSize= 0.25d0
+!           Histo(8)%LowVal =-5.0d0
+!           Histo(8)%SetScale= 1d0
+! 
+!           Histo(9)%Info   = "pT_LepP"
+!           Histo(9)%NBins  = 40
+!           Histo(9)%BinSize= 25d0*GeV
+!           Histo(9)%LowVal =  0d0*GeV
+!           Histo(9)%SetScale= 100d0
+! 
+!           Histo(10)%Info   = "eta_LepP"
+!           Histo(10)%NBins  = 40
+!           Histo(10)%BinSize= 0.25d0
+!           Histo(10)%LowVal =-5.0d0
+!           Histo(10)%SetScale= 1d0
+! 
+!           Histo(11)%Info   = "pT_miss"
+!           Histo(11)%NBins  = 40
+!           Histo(11)%BinSize= 25d0*GeV
+!           Histo(11)%LowVal =  0d0*GeV
+!           Histo(11)%SetScale= 100d0
+! 
+!           Histo(12)%Info   = "HT(jets+lept+pho)"
+!           Histo(12)%NBins  = 40
+!           Histo(12)%BinSize= 50d0*GeV
+!           Histo(12)%LowVal = 150d0*GeV
+!           Histo(12)%SetScale= 100d0
+! 
+!           Histo(13)%Info   = "R(pho,bjet)"
+!           Histo(13)%NBins  = 25
+!           Histo(13)%BinSize= 0.25d0
+!           Histo(13)%LowVal = 0d0
+!           Histo(13)%SetScale= 1d0
+! 
+!           Histo(14)%Info   = "m(lep+bjet)"
+!           Histo(14)%NBins  = 90
+!           Histo(14)%BinSize= 5d0*GeV
+!           Histo(14)%LowVal = 20d0*GeV
+!           Histo(14)%SetScale= 100d0
+! 
+!           Histo(15)%Info   = "phi(photon,lept)"
+!           Histo(15)%NBins  = 20
+!           Histo(15)%BinSize= 0.2d0
+!           Histo(15)%LowVal = 0d0
+!           Histo(15)%SetScale= 1d0
 
 
 ELSEIF( ObsSet.EQ.29 ) THEN! set of observables for ttbgamma production without decays at Tevatron
@@ -8570,8 +8596,8 @@ real(8) :: MomHadr(1:4,0:8)
 real(8) :: MomBoost(1:4),MomMiss(1:4),MomObs(1:4)
 logical :: applyPSCut,isolated
 integer :: NBin(:),PartList(1:7),JetList(1:7),NJet,NObsJet,k,NObsJet_Tree,NJet_CHECK
-real(8) :: pT_lepM,pT_lepP,ET_miss,pT_ATop,pT_Top,HT,ET_bjet
-real(8) :: eta_ATop,eta_Top,eta_lepM,eta_lepP,m_lb,m_jj,mTblP,m_jjb,mT_lp
+real(8) :: pT_lepM,pT_lepP,ET_miss,pT_ATop,pT_Top,HT,ET_bjet,eta_CP
+real(8) :: eta_ATop,eta_Top,eta_lepM,eta_lepP,m_lb,m_jj,mTblP,m_jjb,m_jjbP,mT_lp
 real(8) :: pT_jet(1:7),eta_jet(1:7),eta_sepa,pt_Pho,eta_Pho,Rphobjet,mT_bln(1:2),mT_blnp(1:2)
 real(8) :: R_Pj(1:5),R_lj(1:5),R_PlepP,R_PlepM,pT_lept,ET_lept,mT,MInvPb1jj,mTb2lP,MInvPb2jj,mTb1lP,Phi_LP,Phi_LL
 integer :: tbar,t,pho,inLeft,inRight,realp,bbar,lepM,nubar,b,lepP,nu,qdn,qbup,qbdn,qup,L,N
@@ -8733,6 +8759,8 @@ if( ObsSet.eq.20 .or. ObsSet.eq.21) then! ttb+photon production without top deca
     eta_ATop = get_ETA(Mom(1:4,tbar))
     eta_Top  = get_ETA(Mom(1:4,t))
 
+    eta_CP = dabs(eta_Top)-dabs(eta_ATop)
+
     pT_Pho  = get_PT(Mom(1:4,pho))
     eta_Pho = get_ETA(Mom(1:4,pho))
 
@@ -8763,6 +8791,7 @@ if( ObsSet.eq.20 .or. ObsSet.eq.21) then! ttb+photon production without top deca
     NBin(6) = WhichBin(6,eta_Pho)
     NBin(7) = WhichBin(7,eta_ATop)
     NBin(8) = WhichBin(8,eta_Top)
+    NBin(9) = WhichBin(9,eta_CP)
 
 !-------------------------------------------------------
 elseif( ObsSet.eq.22 .or. ObsSet.eq.23 ) then! set of observables for ttb+gamma production with di-lept. decays at the Tevatron & LHC
@@ -8780,6 +8809,8 @@ elseif( ObsSet.eq.22 .or. ObsSet.eq.23 ) then! set of observables for ttb+gamma 
 
     eta_ATop = get_ETA(Mom(1:4,tbar))
     eta_Top  = get_ETA(Mom(1:4,t))
+
+    eta_CP = dabs(eta_Top)-dabs(eta_ATop)
 
     pT_Pho  = get_PT(Mom(1:4,pho))
     eta_Pho = get_ETA(Mom(1:4,pho))
@@ -8870,6 +8901,7 @@ elseif( ObsSet.eq.22 .or. ObsSet.eq.23 ) then! set of observables for ttb+gamma 
     NBin(12)= WhichBin(12,HT)
     NBin(13)= WhichBin(13,m_lb)
     NBin(14)= WhichBin(14,Phi_LL)
+    NBin(15)= WhichBin(15,eta_CP)
 
 
 elseif( ObsSet.eq.24 .or. ObsSet.eq.25 ) then! set of observables for ttb+gamma production with semi-lept. at the Tevatron/LHC
@@ -8928,6 +8960,8 @@ elseif( ObsSet.eq.24 .or. ObsSet.eq.25 ) then! set of observables for ttb+gamma 
 
     eta_ATop = get_ETA(Mom(1:4,tbar))
     eta_Top  = get_ETA(Mom(1:4,t))
+
+    eta_CP = dabs(eta_Top)-dabs(eta_ATop)
 
     pT_Pho  = get_PT(Mom(1:4,pho))
     eta_Pho = get_ETA(Mom(1:4,pho))
@@ -9019,6 +9053,7 @@ elseif( ObsSet.eq.24 .or. ObsSet.eq.25 ) then! set of observables for ttb+gamma 
     NBin(13) = WhichBin(13,Rphobjet)
     NBin(14) = WhichBin(14,m_lb)
     NBin(15) = WhichBin(15,Phi_LP)
+    NBin(16) = WhichBin(16,eta_CP)
 
 
 
@@ -9082,6 +9117,8 @@ elseif( ObsSet.eq.26 .or. ObsSet.eq.27 .or. ObsSet.eq.28 ) then! set of observab
 
     eta_ATop = get_ETA(Mom(1:4,tbar))
     eta_Top  = get_ETA(Mom(1:4,t))
+    eta_CP = dabs(eta_Top)-dabs(eta_ATop)
+
 
     pT_Pho  = get_PT(Mom(1:4,pho))
     eta_Pho = get_ETA(Mom(1:4,pho))
@@ -9159,12 +9196,12 @@ elseif( ObsSet.eq.26 .or. ObsSet.eq.27 .or. ObsSet.eq.28 ) then! set of observab
         RETURN
     endif
 
-
-
-IF( OBSSET.NE.28 ) THEN!   these are the cuts to suppress photon radiation from top quarks and W bosons
     m_jj = get_Minv(MomJet(1:4,3)+MomJet(1:4,4))! 3 4 is the pair
+    
+    ! using m_lb to associate lepton and b-jets
     if( dabs(get_Minv(Mom(1:4,L)+MomJet(1:4,1))).lt.dabs(get_Minv(Mom(1:4,L)+MomJet(1:4,2))) ) then
         mTblP = get_MT(MomJet(1:4,1)+Mom(1:4,pho)+Mom(1:4,L),MomMiss(1:4))
+        m_jjbP= get_mInv(MomJet(1:4,2)+MomJet(1:4,3)+MomJet(1:4,4)+Mom(1:4,pho))
         m_jjb = get_mInv(MomJet(1:4,2)+MomJet(1:4,3)+MomJet(1:4,4))
         
         if( get_Minv(MomJet(1:4,1)+Mom(1:4,L)+MomMiss(1:4)+Mom(1:4,pho)) .lt. get_Minv(MomJet(1:4,1)+MomJet(1:4,3)+MomJet(1:4,4)+Mom(1:4,pho))  ) then
@@ -9174,6 +9211,7 @@ IF( OBSSET.NE.28 ) THEN!   these are the cuts to suppress photon radiation from 
         endif
     else
         mTblP = get_MT(MomJet(1:4,2)+Mom(1:4,pho)+Mom(1:4,L),MomMiss(1:4))
+        m_jjbP= get_mInv(MomJet(1:4,1)+MomJet(1:4,3)+MomJet(1:4,4)+Mom(1:4,pho))
         m_jjb = get_mInv(MomJet(1:4,1)+MomJet(1:4,3)+MomJet(1:4,4))
         if( get_Minv(MomJet(1:4,2)+Mom(1:4,L)+MomMiss(1:4)+Mom(1:4,pho)) .lt. get_Minv(MomJet(1:4,1)+MomJet(1:4,3)+MomJet(1:4,4)+Mom(1:4,pho))  ) then
             R_Pj(1) = get_R(MomJet(1:4,2),Mom(1:4,pho))
@@ -9201,6 +9239,9 @@ IF( OBSSET.NE.28 ) THEN!   these are the cuts to suppress photon radiation from 
          endif
     endif
     
+
+
+IF( OBSSET.EQ.27 ) THEN!   these are the cuts to suppress photon radiation from top quarks and W bosons
     
 !     if( m_jjb.lt.160d0*GeV .or. m_jjb.gt.180d0*GeV) then
 !          applyPSCut = .true.
@@ -9223,17 +9264,45 @@ IF( OBSSET.NE.28 ) THEN!   these are the cuts to suppress photon radiation from 
              RETURN
      endif
 
-!    mT_lp = get_MT(Mom(1:4,pho)+Mom(1:4,L),MomMiss(1:4))
-    
-    
-    
-    
-    
      if( mTblP.gt.175d0*GeV ) then!   this is to enhance the decay contribution
          applyPSCut = .true.
          RETURN
      endif
 
+
+
+ELSEIF( OBSSET.EQ.28 ) THEN!   these are the cuts to suppress photon radiation from top quarks and W bosons
+    
+!     if( m_jjb.lt.160d0*GeV .or. m_jjb.gt.180d0*GeV) then
+!          applyPSCut = .true.
+!         RETURN
+!     endif
+!     if( (mTblP.lt.180d0*GeV) ) then
+!         applyPSCut = .true.
+!         RETURN
+!     endif
+! 
+! 
+     if( m_jj.lt.75d0*GeV .or. m_jj.gt.86d0*GeV) then
+             applyPSCut = .true.
+             RETURN
+     endif
+
+     m_jj = get_Minv(Mom(1:4,L)+MomMiss(1:4))
+     if( m_jj.lt.75d0*GeV .or. m_jj.gt.86d0*GeV) then
+             applyPSCut = .true.
+             RETURN
+     endif
+
+     if( mTblP.lt.175d0*GeV ) then!   this is to suppress the decay contribution
+         applyPSCut = .true.
+         RETURN
+     endif
+
+     
+          
+     
+     
 ENDIF
 
 
@@ -9256,7 +9325,7 @@ ENDIF
     NBin(13) = WhichBin(13,R_Pj(1)) !Rphobjet)
     NBin(14) = WhichBin(14,m_lb)
     NBin(15) = WhichBin(15,Phi_LP)
-    NBin(16) = WhichBin(16,m_jjb)
+    NBin(16) = WhichBin(16,m_jjbP)
     NBin(17) = WhichBin(17,m_jj)
     NBin(18) = WhichBin(18,mTblP)
     NBin(19) = WhichBin(19,mT)
@@ -12139,11 +12208,15 @@ elseif( ObsSet.eq.5 ) then! set of observables for ttb production with hadr. Ato
 
     mT_lp = get_MT(MomLept(1:4,3),MomLept(1:4,4))! this is the transverse W mass
 
-    if( ET_miss+mT_lp.lt.60*GeV  ) then
+!     if( ET_miss+mT_lp.lt.60*GeV  ) then
+!         applyPSCut = .true.
+!         RETURN
+!     endif
+
+    if( HT.lt.HT_cut ) then
         applyPSCut = .true.
         RETURN
     endif
-
 
 !   construct hadr. W momentum
     MomTops(1:4,1) = MomJet(1:4,1)+MomJet(1:4,2)+MomLept(1:4,3)+MomLept(1:4,4) + MomJet(1:4,3)+MomJet(1:4,4)
@@ -15012,6 +15085,7 @@ integer :: NPart
 complex(8),optional :: SecondPol(1:4)
 integer,optional :: iSel
 
+
    do NPart=1,NumExtParticles
       if( IsAQuark(ExtParticle(NPart)%PartType) .and. ExtParticle(NPart)%PartType.lt.0 .and. abs(ExtParticle(NPart)%Helicity).eq.1 ) then
          call vSpi(ExtParticle(NPart)%Mom(1:4),ExtParticle(NPart)%Mass,ExtParticle(NPart)%Helicity,ExtParticle(NPart)%Pol(1:4))
@@ -15045,7 +15119,6 @@ integer,optional :: iSel
          call ubarSpi(ExtParticle(NPart)%Mom(1:4),ExtParticle(NPart)%Mass,ExtParticle(NPart)%Helicity,ExtParticle(NPart)%Pol(1:4))
          ExtParticle(NPart)%Pol(5:16) = (0d0,0d0)
       endif
-   
    enddo
 
 !       check gauge invariance

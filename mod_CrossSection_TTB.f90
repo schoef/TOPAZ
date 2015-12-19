@@ -153,11 +153,11 @@ IF( TOPDECAYS.NE.0 ) THEN
    PSWgt = PSWgt * PSWgt2*PSWgt3
 
    NRndHel=13
-   IF( TOPDECAYS.GE.1 ) THEN
+   IF( TOPDECAYS.GE.1 .AND. .not.AnomalousInteractions ) THEN
 ! top decay with spin correlations
-      call TopDecay(ExtParticle(1),DK_LO,MomDK(1:4,1:3))
-      call TopDecay(ExtParticle(2),DK_LO,MomDK(1:4,4:6))
-   ELSE
+       call TopDecay(ExtParticle(1),DK_LO,MomDK(1:4,1:3))
+       call TopDecay(ExtParticle(2),DK_LO,MomDK(1:4,4:6))
+   ELSEIF( TOPDECAYS.LE.-1 ) THEN
 ! spherical decay of ATop
 !       Msq_T_BW = dsqrt(2d0)*GF*m_top**4*(1d0-m_w**2/m_top**2)*(1d0+2d0*m_w**2/m_top**2)  ! sq.mat.el. for T -> b W
 !       Msq_W_ENU = dsqrt(2d0)*GF*m_W**4/3d0*4d0  ! sq.mat.el. for W -> l nu
@@ -208,6 +208,7 @@ IF( TOPDECAYS.NE.0 ) THEN
           endif
           PSWgt = PSWgt * FF(xFrag)
    ENDIF
+
 ENDIF
 
    call Kinematics_TTBAR(.false.,MomExt,MomDK,applyPSCut,NBin,xJPsiFrag=xFrag)
@@ -233,6 +234,16 @@ ENDIF
 !------------ LO --------------
 IF( Correction.EQ.0 ) THEN
    do iHel=nHel(1),nHel(2)
+   do jHel=-1,+1,2!  bottom quark helicities for anomalous Wtb vertex
+   do kHel=-1,+1,2   
+
+      IF( AnomalousInteractions ) THEN
+         call TopDecay(ExtParticle(1),DK_LO,MomDK(1:4,1:3),Gluon2Hel=jHel)
+         call TopDecay(ExtParticle(2),DK_LO,MomDK(1:4,4:6),Gluon2Hel=kHel)
+      ELSE
+         if( jHel.ne.-1 .or. kHel.ne.-1 ) cycle
+      ENDIF   
+   
       call HelCrossing(Helicities(iHel,1:NumExtParticles))
       call SetPolarizations()
       do iPrimAmp=1,NumBornAmps
@@ -245,6 +256,8 @@ IF( Correction.EQ.0 ) THEN
       enddo
       enddo
       LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
+   enddo!helicity loop
+   enddo!helicity loop
    enddo!helicity loop
 
 !------------ 1 LOOP --------------
@@ -544,7 +557,7 @@ real(8) ::  EvalCS_1L_ttbqqb,yRnd(1:VegasMxDim),VgsWgt,xE,IOp(-2:0),HOp(1:3)
 complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1)
 complex(8) :: BosonicPartAmp(1:2,-2:1),FermionPartAmp(1:2,-2:1)
 complex(8) ::  Msq_T_BWENU,M_T_BWENU,Spi(1:4),BarSpi(1:4)
-integer :: iHel,iPrimAmp,jPrimAmp
+integer :: iHel,jHel,kHel,iPrimAmp,jPrimAmp
 real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac,xFrag,SpinDecorr
 real(8) :: MomExt(1:4,1:NumExtParticles),MomDK(1:4,1:6),MomP(1:4,1:4),MomJPsi(1:4)
 logical :: applyPSCut
@@ -641,10 +654,10 @@ IF( CORRECTION.EQ.0 ) THEN
     endif
     ISFac = MomCrossing(MomExt)
 
-IF( TOPDECAYS.GE.1 ) THEN
+IF( TOPDECAYS.GE.1 .and. .not.AnomalousInteractions ) THEN
 !     top decays with spin correlations
-      call TopDecay(ExtParticle(1),DK_LO,MomDK(1:4,1:3))
-      call TopDecay(ExtParticle(2),DK_LO,MomDK(1:4,4:6))
+       call TopDecay(ExtParticle(1),DK_LO,MomDK(1:4,1:3))
+       call TopDecay(ExtParticle(2),DK_LO,MomDK(1:4,4:6))
 ELSEIF( TOPDECAYS.LE.-1 ) THEN
 ! spherical decay of ATop
 !      Msq_T_BW = dsqrt(2d0)*GF*m_top**4*(1d0-m_w**2/m_top**2)*(1d0+2d0*m_w**2/m_top**2)  ! sq.mat.el. for T -> b W
@@ -676,10 +689,21 @@ ELSEIF( TOPDECAYS.LE.-1 ) THEN
       Msq_T_BWENU = Msq_T_BWENU + M_T_BWENU*dconjg(M_T_BWENU)/2d0
       SpinDecorr = SpinDecorr * Msq_T_BWENU
 ENDIF
+
     call InitCurrCache()
     call SetPropagators()
 
     do iHel=nHel(1),nHel(2)
+    do jHel=-1,+1,2!  bottom quark helicities for anomalous Wtb vertex
+    do kHel=-1,+1,2   
+    
+        IF( AnomalousInteractions ) THEN
+           call TopDecay(ExtParticle(1),DK_LO,MomDK(1:4,1:3),Gluon2Hel=jHel)
+           call TopDecay(ExtParticle(2),DK_LO,MomDK(1:4,4:6),Gluon2Hel=kHel)
+        ELSE
+           if( jHel.ne.-1 .or. kHel.ne.-1 ) cycle
+        ENDIF   
+    
         call HelCrossing(Helicities(iHel,1:NumExtParticles))
         call SetPolarizations()
         do iPrimAmp=1,NumBornAmps
@@ -692,6 +716,8 @@ ENDIF
         enddo
         enddo
         LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol*PDFFac*SpinDecorr
+    enddo!helicity loop
+    enddo!helicity loop
     enddo!helicity loop
   enddo! npdf loop
 
