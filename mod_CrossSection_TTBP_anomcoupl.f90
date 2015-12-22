@@ -540,10 +540,19 @@ ENDIF
         return
    endif
 
-
-   do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_1L_ttbggp)
-   enddo
+   IF( ObsSet.GE.25 .AND. ObsSet.LE.28 ) THEN
+      do NHisto=1,NumHistograms-1
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_1L_ttbggp)
+      enddo
+      call intoHisto(NumHistograms,1,MInv_LB*EvalCS_anomcoupl_1L_ttbggp)
+   ELSE
+      do NHisto=1,NumHistograms
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_1L_ttbggp)
+      enddo
+   ENDIF   
+!    do NHisto=1,NumHistograms
+!       call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_1L_ttbggp)
+!    enddo
 
 
    EvalCS_anomcoupl_1L_ttbggp = EvalCS_anomcoupl_1L_ttbggp/VgsWgt
@@ -1119,9 +1128,19 @@ ENDIF
    endif
 
 
-   do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_1L_ttbqqbp)
-   enddo
+   IF( ObsSet.GE.25 .AND. ObsSet.LE.28 ) THEN
+      do NHisto=1,NumHistograms-1
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_1L_ttbqqbp)
+      enddo
+      call intoHisto(NumHistograms,1,MInv_LB*EvalCS_anomcoupl_1L_ttbqqbp)
+   ELSE
+      do NHisto=1,NumHistograms
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_1L_ttbqqbp)
+      enddo
+   ENDIF   
+!    do NHisto=1,NumHistograms
+!       call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_1L_ttbqqbp)
+!    enddo
 
 
 
@@ -3821,9 +3840,19 @@ ELSEIF( Correction.EQ.3 ) THEN
                       + HOp(3)/xE * pdf(0,1)  * pdf_z(0,2)
 ENDIF
 
-   do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbgg)
-   enddo
+   IF( ObsSet.GE.25 .AND. ObsSet.LE.28 ) THEN
+      do NHisto=1,NumHistograms-1
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbgg)
+      enddo
+      call intoHisto(NumHistograms,1,MInv_LB*EvalCS_anomcoupl_DKP_1L_ttbgg)
+   ELSE
+      do NHisto=1,NumHistograms
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbgg)
+      enddo
+   ENDIF   
+!    do NHisto=1,NumHistograms
+!       call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbgg)
+!    enddo
 
 EvalCS_anomcoupl_DKP_1L_ttbgg_1 = EvalCS_anomcoupl_DKP_1L_ttbgg_1 + EvalCS_anomcoupl_DKP_1L_ttbgg
 
@@ -4041,9 +4070,19 @@ ELSEIF( Correction.EQ.3 ) THEN
                       + HOp(3)/xE * pdf(0,1)  * pdf_z(0,2)
 ENDIF
 
-   do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbgg)
-   enddo
+   IF( ObsSet.GE.25 .AND. ObsSet.LE.28 ) THEN
+      do NHisto=1,NumHistograms-1
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbgg)
+      enddo
+      call intoHisto(NumHistograms,1,MInv_LB*EvalCS_anomcoupl_DKP_1L_ttbgg)
+   ELSE
+      do NHisto=1,NumHistograms
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbgg)
+      enddo
+   ENDIF   
+!    do NHisto=1,NumHistograms
+!       call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbgg)
+!    enddo
 
    EvalCS_anomcoupl_DKP_1L_ttbgg_2 = EvalCS_anomcoupl_DKP_1L_ttbgg_2 + EvalCS_anomcoupl_DKP_1L_ttbgg
 
@@ -4380,9 +4419,19 @@ ELSEIF( PROCESS.EQ.27 ) THEN
 ENDIF
 ENDIF
 
-   do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbqqb)
-   enddo
+   IF( ObsSet.GE.25 .AND. ObsSet.LE.28 ) THEN
+      do NHisto=1,NumHistograms-1
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbqqb)
+      enddo
+      call intoHisto(NumHistograms,1,MInv_LB*EvalCS_anomcoupl_DKP_1L_ttbqqb)
+   ELSE
+      do NHisto=1,NumHistograms
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbqqb)
+      enddo
+   ENDIF   
+!    do NHisto=1,NumHistograms
+!       call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbqqb)
+!    enddo
 
 EvalCS_anomcoupl_DKP_1L_ttbqqb_1 = EvalCS_anomcoupl_DKP_1L_ttbqqb_1 + EvalCS_anomcoupl_DKP_1L_ttbqqb
 enddo! nPhoRad loop
@@ -4655,9 +4704,19 @@ ELSEIF( PROCESS.EQ.27 ) THEN
 ENDIF
 ENDIF
 
-   do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbqqb)
-   enddo
+   IF( ObsSet.GE.25 .AND. ObsSet.LE.28 ) THEN
+      do NHisto=1,NumHistograms-1
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbqqb)
+      enddo
+      call intoHisto(NumHistograms,1,MInv_LB*EvalCS_anomcoupl_DKP_1L_ttbqqb)
+   ELSE
+      do NHisto=1,NumHistograms
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbqqb)
+      enddo
+   ENDIF  
+!    do NHisto=1,NumHistograms
+!       call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbqqb)
+!    enddo
 
    EvalCS_anomcoupl_DKP_1L_ttbqqb_2 = EvalCS_anomcoupl_DKP_1L_ttbqqb_2 + EvalCS_anomcoupl_DKP_1L_ttbqqb
 enddo! nPhoRad loop

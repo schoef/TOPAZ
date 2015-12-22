@@ -210,7 +210,8 @@ ELSEIF( ObsSet.EQ.5 ) THEN! set of observables for ttb production with hadr. top
     Rsep_LepJet = 0.0d0
     Rsep_jet    = 0.4d0
 
-    HT_cut      = 220d0*GeV
+!     HT_cut      = 220d0*GeV
+    HT_cut      = 380d0*GeV  ! this is for ratios to ttb+gamma and ttb+Z
 
 
 ELSEIF( ObsSet.EQ.6 ) THEN! set of observables for ttb production with lept. top, hadr. Atop decay at LHC
@@ -454,7 +455,7 @@ ELSEIF( ObsSet.EQ.25 .OR. ObsSet.EQ.26 .OR. ObsSet.EQ.27 .OR. ObsSet.EQ.28) THEN
     Rsep_jet    = 0.4d0
     pT_bjet_cut = 20d0*GeV      !*0d0
     pT_jet_cut  = 20d0*GeV      !*0d0
-    eta_bjet_cut= 2d0           !*100d0
+    eta_bjet_cut= 2.0d0         !*100d0
     eta_jet_cut = 2.5d0         !*100d0
 
     pT_lep_cut  = 20d0*GeV      !*0d0
@@ -669,15 +670,15 @@ ELSEIF( ObsSet.EQ.53 ) THEN! set of observables for ttb+Z ( semi-lept. ttbar dec
 
     Rsep_jet    = 0.4d0
     pT_bjet_cut = 20d0*GeV
-    eta_bjet_cut= 2.5d0
+    eta_bjet_cut= 2.0d0
     pT_jet_cut  = 20d0*GeV
     eta_jet_cut = 2.5d0
 
-    pT_lep_cut  = 15d0*GeV
+    pT_lep_cut  = 20d0*GeV
     pT_miss_cut = 20d0*GeV
     eta_lep_cut = 2.5d0
-    Rsep_jetlep = 0.4d0
-    MZ_window   = 20d0*GeV
+    Rsep_jetlep = 0.0d0
+    MZ_window   = 10d0*GeV
 
 ELSEIF( ObsSet.EQ.54 ) THEN! set of observables for ttb+Z ( semi-lept. ttbar decays and di-lept. Z decay from 7 TeV CMS data)
 
@@ -1345,31 +1346,31 @@ ELSEIF( ObsSet.EQ.4 ) THEN! set of observables for ttb production with semi hadr
 ELSEIF( ObsSet.EQ.5 ) THEN! set of observables for ttb production with hadr. top, lept. Atop decay
           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
           if(TopDecays.ne.4) call Error("TopDecays needs to be 4!")
-          NumHistograms = 11
+          NumHistograms = 12
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
           endif
 
-          Histo(1)%Info   = "pT_ATop"
-          Histo(1)%NBins  = 40
-          Histo(1)%BinSize= 50d0*GeV
-          Histo(1)%LowVal = 0d0
+          Histo(1)%Info   = "(pT_Top+pT_ATop)/2"
+          Histo(1)%NBins  = 4
+          Histo(1)%BinSize= 60d0*GeV
+          Histo(1)%LowVal = 40d0*GeV
           Histo(1)%SetScale= 100d0
 
-          Histo(2)%Info   = "y_ATop"
+          Histo(2)%Info   = "(y_ATop+y_Top)/2"
           Histo(2)%NBins  = 40
           Histo(2)%BinSize= 0.25d0
           Histo(2)%LowVal =-5.0d0
           Histo(2)%SetScale= 1d0
 
-          Histo(3)%Info   = "pT_Top"
-          Histo(3)%NBins  = 40
-          Histo(3)%BinSize= 50d0*GeV
-          Histo(3)%LowVal = 0d0
+          Histo(3)%Info   = "(pT_Top+pT_ATop)/2 for HT>580"
+          Histo(3)%NBins  = 4
+          Histo(3)%BinSize= 60d0*GeV
+          Histo(3)%LowVal = 120d0*GeV
           Histo(3)%SetScale= 100d0
 
-          Histo(4)%Info   = "y_Top"
+          Histo(4)%Info   = "(y_ATop+y_Top)/2 for HT>580"
           Histo(4)%NBins  = 40
           Histo(4)%BinSize= 0.25d0
           Histo(4)%LowVal =-5.0d0
@@ -1416,6 +1417,12 @@ ELSEIF( ObsSet.EQ.5 ) THEN! set of observables for ttb production with hadr. top
           Histo(11)%BinSize= 5d0*GeV
           Histo(11)%LowVal = 20d0*GeV
           Histo(11)%SetScale= 100d0
+
+          Histo(12)%Info   = "<Ehat>"
+          Histo(12)%NBins  = 1
+          Histo(12)%BinSize= 10000d0*GeV
+          Histo(12)%LowVal = 0d0
+          Histo(12)%SetScale=0.01d0
 
 
 
@@ -3056,19 +3063,19 @@ ELSEIF( ObsSet.EQ.25 .OR. ObsSet.EQ.26 .OR. ObsSet.EQ.27 .OR. ObsSet.EQ.28 ) THE
           if( (ObsSet.EQ.26 .OR. ObsSet.EQ.27 .OR. ObsSet.EQ.28) .and. TopDecays.ne.4) call Error("TopDecays needs to be 4 for ObsSet=26,27,28")
           if( (ObsSet.EQ.25) .and. TopDecays.ne.3) call Error("TopDecays needs to be 3 for ObsSet=25")
           if( (ObsSet.EQ.26 .OR. ObsSet.EQ.27 .OR. ObsSet.EQ.28) .and. (Q_top.ne.Q_up .and. TopDecays.ne.3) ) call Error("TopDecays needs to be 3 for Qt=-4/3")
-          NumHistograms = 19
+          NumHistograms = 20
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
           endif
 
-          Histo(1)%Info   = "pT_ATop"
-          Histo(1)%NBins  = 50
-          Histo(1)%BinSize= 10d0*GeV
-          Histo(1)%LowVal = 0d0
+          Histo(1)%Info   = "(pT_Top+pT_ATop)/2"
+          Histo(1)%NBins  = 4
+          Histo(1)%BinSize= 60d0*GeV
+          Histo(1)%LowVal = 40d0*GeV
           Histo(1)%SetScale= 100d0
 
-          Histo(2)%Info   = "eta_ATop"
+          Histo(2)%Info   = "(y_ATop+y_Top)/2"
           Histo(2)%NBins  = 40
           Histo(2)%BinSize= 0.25d0
           Histo(2)%LowVal =-5.0d0
@@ -3077,15 +3084,15 @@ ELSEIF( ObsSet.EQ.25 .OR. ObsSet.EQ.26 .OR. ObsSet.EQ.27 .OR. ObsSet.EQ.28 ) THE
           Histo(3)%Info   = "pT_Top"
           Histo(3)%NBins  = 50
           Histo(3)%BinSize= 10d0*GeV
-          Histo(3)%LowVal = 0d0
+          Histo(3)%LowVal = 0d0*GeV
           Histo(3)%SetScale= 100d0
 
-          Histo(4)%Info   = "eta_Top"
+          Histo(4)%Info   = "y_Top"
           Histo(4)%NBins  = 40
           Histo(4)%BinSize= 0.25d0
           Histo(4)%LowVal =-5.0d0
           Histo(4)%SetScale= 1d0
-
+          
           Histo(5)%Info   = "etaFB_CP"
           Histo(5)%NBins  = 2
           Histo(5)%BinSize= 10d0
@@ -3175,6 +3182,12 @@ ELSEIF( ObsSet.EQ.25 .OR. ObsSet.EQ.26 .OR. ObsSet.EQ.27 .OR. ObsSet.EQ.28 ) THE
           Histo(19)%BinSize= 4d0*GeV
           Histo(19)%LowVal = 70d0*GeV
           Histo(19)%SetScale= 100d0
+
+          Histo(20)%Info   = "<Ehat>"
+          Histo(20)%NBins  = 1
+          Histo(20)%BinSize= 10000d0*GeV
+          Histo(20)%LowVal = 0d0
+          Histo(20)%SetScale=0.01d0
           
 ! ELSEIF( ObsSet.EQ.28 ) THEN! set of observables for ttbgamma production semi-lept. decays at the LHC for Q_top measurement
 !           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
@@ -3874,23 +3887,35 @@ ELSEIF( ObsSet.EQ.52 .or. ObsSet.EQ.55 ) THEN! set of observables for ttb+Z ( di
 ELSEIF( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58  ) THEN! set of observables for ttb+Z ( semi-lept. ttbar decays and di-lept. Z decay )
           if(abs(TopDecays).ne.4)  call Error("TopDecays needs to be 4")
           if(abs(ZDecays).ne.1 .and. abs(ZDecays).ne.11)    call Error("ZDecays needs to be 1 or 11")
-          NumHistograms = 26
+          NumHistograms = 27
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
           endif
 
-          Histo(1)%Info   = "pT(lep+)"
-          Histo(1)%NBins  = 50
-          Histo(1)%BinSize= 20d0*GeV
-          Histo(1)%LowVal =  0d0*GeV
+!           Histo(1)%Info   = "pT(lep+)"
+!           Histo(1)%NBins  = 50
+!           Histo(1)%BinSize= 20d0*GeV
+!           Histo(1)%LowVal =  0d0*GeV
+!           Histo(1)%SetScale= 100d0
+! 
+!           Histo(2)%Info   = "pT(mu-)"
+!           Histo(2)%NBins  = 50
+!           Histo(2)%BinSize= 20d0*GeV
+!           Histo(2)%LowVal =  0d0*GeV
+!           Histo(2)%SetScale= 100d0
+
+          Histo(1)%Info   = "(pT_Top+pT_ATop)/2"
+          Histo(1)%NBins  = 4
+          Histo(1)%BinSize= 60d0*GeV
+          Histo(1)%LowVal = 40d0*GeV
           Histo(1)%SetScale= 100d0
 
-          Histo(2)%Info   = "pT(mu-)"
-          Histo(2)%NBins  = 50
-          Histo(2)%BinSize= 20d0*GeV
-          Histo(2)%LowVal =  0d0*GeV
-          Histo(2)%SetScale= 100d0
+          Histo(2)%Info   = "(y_ATop+y_Top)/2"
+          Histo(2)%NBins  = 40
+          Histo(2)%BinSize= 0.25d0
+          Histo(2)%LowVal =-5.0d0
+          Histo(2)%SetScale= 1d0
 
           Histo(3)%Info   = "pT(mu+)"
           Histo(3)%NBins  = 50
@@ -4051,6 +4076,12 @@ ELSEIF( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58  ) THEN! set of observa
           Histo(26)%LowVal = 50d0*GeV
           Histo(26)%SetScale= 100d0
           Histo(26)%BinSmearing=.false.
+
+          Histo(27)%Info   = "<Ehat>"
+          Histo(27)%NBins  = 1
+          Histo(27)%BinSize= 10000d0*GeV
+          Histo(27)%LowVal = 0d0
+          Histo(27)%SetScale=0.01d0
 
 
 !       ELSEIF( ObsSet.EQ.54 .or. ObsSet.EQ.58 ) THEN
@@ -8583,7 +8614,7 @@ RETURN!     this is needed to avoid the cuts below
 
 !-------------------------------------------------------
 else
-  print *, "ObsSet not implemented",ObsSet
+  print *, "ObsSet not implemented TTBJET",ObsSet
   stop
 endif
 
@@ -9252,7 +9283,10 @@ elseif( ObsSet.eq.25 .or. ObsSet.eq.26 .or. ObsSet.eq.27 .or. ObsSet.eq.28 ) the
               endif
          endif
     endif
+
     
+   ! this is Ehat for <EHat> in NHisto=12
+   MInv_LB= get_MInv(Mom(1:4,inLeft)+Mom(1:4,inRight))
 
 
 IF( OBSSET.EQ.27 ) THEN!   these are the cuts to suppress photon radiation from top quarks and W bosons
@@ -9324,8 +9358,13 @@ ENDIF
 
 
 ! binning
-    NBin(1) = WhichBin(1,pT_ATop)
-    NBin(2) = WhichBin(2,eta_ATop)
+    NBin(1:4) = 0
+    if( 0.5d0*(pT_ATop+pT_Top).lt.600d0*GeV ) then
+        NBin(1) = WhichBin(1,0.5d0*(pT_ATop+pT_Top)  )
+        NBin(2) = WhichBin(2,0.5d0*(eta_ATop+eta_Top))
+    endif
+!     NBin(1) = WhichBin(1,pT_ATop)
+!     NBin(2) = WhichBin(2,eta_ATop)
     NBin(3) = WhichBin(3,pT_Top)
     NBin(4) = WhichBin(4,eta_Top)
     NBin(5) = WhichBin(5,eta_CP)
@@ -9388,7 +9427,7 @@ elseif( ObsSet.eq.29) then! ttb+photon production without top decays at Tevatron
 
 !-------------------------------------------------------
 else
-  print *, "ObsSet not implemented",ObsSet
+  print *, "ObsSet not implemented TTBPHOTON",ObsSet
   stop
 endif
 
@@ -9802,8 +9841,9 @@ elseif( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58 ) then! set of observab
     eta_Z = get_eta(MomZ(1:4))
     Minv_Z = get_MInv(MomZ(1:4))
 
-    pT_top = get_PT(Mom(1:4,t))
-    eta_top = get_ETA(Mom(1:4,t))
+    pT_Top   = get_PT(Mom(1:4,t))
+    pT_ATop  = get_PT(Mom(1:4,tbar))
+    eta_top  = get_ETA(Mom(1:4,t))
     eta_atop = get_ETA(Mom(1:4,tbar))
 
 
@@ -9904,11 +9944,18 @@ elseif( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58 ) then! set of observab
        enddo
     endif
 
+   ! this is Ehat for <EHat> in NHisto=12
+   MInv_LB= get_MInv(Mom(1:4,inLeft)+Mom(1:4,inRight))
 
 
 ! binning
-    NBin(1) = WhichBin(1,pT_Lep(1))
-    NBin(2) = WhichBin(2,pT_Lep(2))
+    NBin(1:2) = 0
+    if( 0.5d0*(pT_ATop+pT_Top).lt.600d0*GeV ) then
+        NBin(1) = WhichBin(1,0.5d0*(pT_ATop+pT_Top)  )
+        NBin(2) = WhichBin(2,0.5d0*(eta_ATop+eta_Top))
+    endif
+!     NBin(1) = WhichBin(1,pT_Lep(1))
+!     NBin(2) = WhichBin(2,pT_Lep(2))
     NBin(3) = WhichBin(3,pT_Lep(3))
     NBin(4) = WhichBin(4,pT_jet(1))
     NBin(5) = WhichBin(5,pT_jet(2))
@@ -10225,7 +10272,7 @@ elseif( ObsSet.eq.57 ) then! set of observables for ttb+Z ( di-lept. ttbar decay
 
 !-------------------------------------------------------
 else
-  print *, "ObsSet not implemented",ObsSet
+  print *, "ObsSet not implemented TTBZ",ObsSet
   stop
 endif
 
@@ -10731,7 +10778,7 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
 
 !-------------------------------------------------------
 else
-  print *, "ObsSet not implemented",ObsSet
+  print *, "ObsSet not implemented TTBH",ObsSet
   stop
 endif
 
@@ -11111,7 +11158,7 @@ endif
 
 
     else
-       print *, "ObsSet not implemented",ObsSet
+       print *, "ObsSet not implemented TH",ObsSet
        stop
     endif
 
@@ -11480,7 +11527,7 @@ endif
 
                                                                                                                                                                                
     else
-       print *, "ObsSet not implemented",ObsSet
+       print *, "ObsSet not implemented TBH",ObsSet
        stop
     endif
 
@@ -12240,13 +12287,20 @@ elseif( ObsSet.eq.5 ) then! set of observables for ttb production with hadr. Ato
         pT_Top   = -1d0
     endif
 
-
+   
+   ! this is Ehat for <EHat> in NHisto=12
+   MInv_LB= get_MInv(MomExt(1:4,1)+MomExt(1:4,2))
 
 ! binning
-    NBin(1) = WhichBin(1,pT_ATop)
-    NBin(2) = WhichBin(2,eta_ATop)
-    NBin(3) = WhichBin(3,pT_Top)
-    NBin(4) = WhichBin(4,eta_Top)
+    NBin(1:4) = 0
+    if( 0.5d0*(pT_ATop+pT_Top).lt.600d0*GeV ) then
+        NBin(1) = WhichBin(1,0.5d0*(pT_ATop+pT_Top)  )
+        NBin(2) = WhichBin(2,0.5d0*(eta_ATop+eta_Top))
+        if( HT.gt.580d0*GeV ) then
+            NBin(3) = WhichBin(3,0.5d0*(pT_ATop+pT_Top)  )
+            NBin(4) = WhichBin(4,0.5d0*(eta_ATop+eta_Top))    
+        endif
+    endif
     NBin(5) = WhichBin(5,eta_ATop)
     NBin(6) = WhichBin(6,eta_Top)
     NBin(7) = WhichBin(7,pT_lepP)
@@ -12254,7 +12308,6 @@ elseif( ObsSet.eq.5 ) then! set of observables for ttb production with hadr. Ato
     NBin(9) = WhichBin(9,ET_miss)
     NBin(10)= WhichBin(10,HT)
     NBin(11)= WhichBin(11,m_lb)
-
 
 
 
@@ -13148,7 +13201,7 @@ elseif( ObsSet.eq.33 .or. ObsSet.eq.35 .or. ObsSet.eq.36 .or.ObsSet.eq.43 .or. O
 
 !-------------------------------------------------------
 else
-  print *, "ObsSet not implemented",ObsSet
+  print *, "ObsSet not implemented TTBETmiss",ObsSet
   stop
 endif
 
@@ -15028,7 +15081,6 @@ real(8) :: LowerBinValue,UpperBinValue,NeighbBinValue,ErrorFunct
     if( IsNaN(Value) ) return
     if( (.not. Histo(NHisto)%BinSmearing) .or. NBin.eq.0 .or. NBin.eq.Histo(NHisto)%NBins+1 ) then
 !DEC$ IF(_UseMPIVegas.EQ.0)
-
         Histo(NHisto)%Value(NBin)  = Histo(NHisto)%Value(NBin)  + Value
         Histo(NHisto)%Value2(NBin) = Histo(NHisto)%Value2(NBin) + Value**2
         Histo(NHisto)%Hits(NBin)   = Histo(NHisto)%Hits(NBin)+1

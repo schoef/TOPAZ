@@ -470,18 +470,15 @@ IF( ObsSet.EQ.7 ) THEN
    call intoHisto(4,1,MInv_LB*EvalCS_1L_ttbgg)
    call intoHisto(5,1,MInv_LB**2*EvalCS_1L_ttbgg)
    call intoHisto(6,1,xFrag*EvalCS_1L_ttbgg)
+ELSEIF( ObsSet.EQ.5 ) THEN
+   do NHisto=1,11
+      call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbgg)
+   enddo
+   call intoHisto(12,1,MInv_LB*EvalCS_1L_ttbgg)
 ELSE
    do NHisto=1,NumHistograms
       call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbgg)
    enddo
-
-! if(EvalCS_1L_ttbgg.lt.0d0) then
-!     print *, EvalCS_1L_ttbgg
-!     print *, pdf(0,1) , pdf(0,2),fluxFac , sHatJacobi , PSWgt , VgsWgt , PDFFac,LO_Res_Unpol, ISFac
-!     pause
-! endif
-
-
 ENDIF
 
    EvalCS_1L_ttbgg = EvalCS_1L_ttbgg/VgsWgt
@@ -1117,6 +1114,11 @@ IF( ObsSet.EQ.7 ) THEN
    call intoHisto(4,1,MInv_LB*EvalCS_1L_ttbqqb)
    call intoHisto(5,1,MInv_LB**2*EvalCS_1L_ttbqqb)
    call intoHisto(6,1,xFrag*EvalCS_1L_ttbqqb)
+ELSEIF( ObsSet.EQ.5 ) THEN
+   do NHisto=1,11
+      call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbqqb)
+   enddo
+   call intoHisto(12,1,MInv_LB*EvalCS_1L_ttbqqb)
 ELSE
    do NHisto=1,NumHistograms
       call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbqqb)

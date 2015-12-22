@@ -1578,7 +1578,7 @@ ENDIF
 
 IF( MASTERPROCESS.EQ.17 ) THEN
 IF( CORRECTION   .EQ.0 ) THEN
-   if( TTBPhoton_SMonly ) then 
+   if( TTBPhoton_SMonly .or. (Process.ge.71 .and. Process.le.76) ) then 
       call vegas(EvalCS_1L_ttbggZ,VG_Result,VG_Error,VG_Chi2)
   else
       call vegas(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
@@ -1587,7 +1587,7 @@ IF( CORRECTION   .EQ.0 ) THEN
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   if( TTBPhoton_SMonly ) then 
+   if( TTBPhoton_SMonly .or. (Process.ge.71 .and. Process.le.76) ) then 
       call vegas1(EvalCS_1L_ttbggZ,VG_Result,VG_Error,VG_Chi2)
    else
       call vegas1(EvalCS_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
@@ -1652,7 +1652,7 @@ ENDIF
 
 IF( MASTERPROCESS.EQ.18 ) THEN
 IF( CORRECTION   .EQ.0 ) THEN
-   if( TTBPhoton_SMonly ) then 
+   if( TTBPhoton_SMonly .or. (Process.ge.71 .and. Process.le.76) ) then 
       call vegas(EvalCS_1L_ttbqqbZ,VG_Result,VG_Error,VG_Chi2)
   else
       call vegas(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
@@ -1661,7 +1661,7 @@ IF( CORRECTION   .EQ.0 ) THEN
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   if( TTBPhoton_SMonly ) then 
+   if( TTBPhoton_SMonly .or. (Process.ge.71 .and. Process.le.76) ) then 
       call vegas1(EvalCS_1L_ttbqqbZ,VG_Result,VG_Error,VG_Chi2)
    else
       call vegas1(EvalCS_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)

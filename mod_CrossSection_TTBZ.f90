@@ -1039,10 +1039,19 @@ ENDIF
         return
    endif
 
-
-   do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbggZ,BinValue=PObs(NHisto))
-   enddo
+   IF( ObsSet.EQ.53 ) THEN
+      do NHisto=1,NumHistograms-1
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbggZ,BinValue=PObs(NHisto))
+      enddo
+      call intoHisto(NumHistograms,1,MInv_LB*EvalCS_1L_ttbggZ)
+   ELSE
+      do NHisto=1,NumHistograms
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbggZ,BinValue=PObs(NHisto))
+      enddo
+   ENDIF   
+!    do NHisto=1,NumHistograms
+!       call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbggZ,BinValue=PObs(NHisto))
+!    enddo
    EvalCounter = EvalCounter + 1 
 
 
@@ -1968,12 +1977,22 @@ ENDIF
         EvalCS_1L_ttbqqbZ = 0d0
         return
    endif
+
+
+   IF( ObsSet.EQ.53 ) THEN
+      do NHisto=1,NumHistograms-1
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbqqbZ,BinValue=PObs(NHisto))
+      enddo
+      call intoHisto(NumHistograms,1,MInv_LB*EvalCS_1L_ttbqqbZ)
+   ELSE
+      do NHisto=1,NumHistograms
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbqqbZ,BinValue=PObs(NHisto))
+      enddo
+   ENDIF
+!    do NHisto=1,NumHistograms
+!       call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbqqbZ,BinValue=PObs(NHisto))
+!    enddo
     EvalCounter = EvalCounter + 1 
-
-
-   do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbqqbZ,BinValue=PObs(NHisto))
-   enddo
 
 
 
