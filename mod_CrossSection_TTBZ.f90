@@ -103,7 +103,12 @@ QPtol=1d-3
 EvalCS_1L_ttbggZ = 0d0
 
    call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
-   call SmearExternal(yRnd(18),M_Z,Ga_ZExp,Zero,EHat,MZ_Inv,MZJacobi)
+   if( ZDECAYS.LT.10 ) then
+      MZ_Inv = M_Z
+      MZJacobi = 1d0
+   else
+      call SmearExternal(yRnd(18),M_Z,Ga_ZExp,Zero,EHat,MZ_Inv,MZJacobi)
+   endif     
    if( EHat.le.2d0*m_Top+MZ_Inv ) then
       EvalCS_1L_ttbggZ = 0d0
       return
@@ -1165,7 +1170,12 @@ complex(8) :: tmpBornResults(14),RenormAmps(14),HOORenormPartAmp(1:2),HOO_Renorm
   prim_opp_err=0d0
 
   call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
-  call SmearExternal(yRnd(18),M_Z,Ga_ZExp,Zero,EHat,MZ_Inv,MZJacobi)
+   if( ZDECAYS.LT.10 ) then
+      MZ_Inv = M_Z
+      MZJacobi = 1d0
+   else
+      call SmearExternal(yRnd(18),M_Z,Ga_ZExp,Zero,EHat,MZ_Inv,MZJacobi)
+   endif     
   if( EHat.le.2d0*m_Top+MZ_Inv ) then
      EvalCS_1L_ttbqqbZ = 0d0
      return
@@ -2057,7 +2067,12 @@ integer, parameter :: SelectChannel=99
   EvalCS_Real_ttbgggZ= 0d0
   DipoleResult = 0d0
   call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
-  call SmearExternal(yRnd(21),M_Z,Ga_ZExp,Zero,EHat,MZ_Inv,MZJacobi)
+  if( ZDECAYS.LT.10 ) then
+     MZ_Inv = M_Z
+     MZJacobi = 1d0
+  else
+     call SmearExternal(yRnd(21),M_Z,Ga_ZExp,Zero,EHat,MZ_Inv,MZJacobi)
+  endif
   if( EHat.le.2d0*m_Top+MZ_Inv) then
       EvalCS_Real_ttbgggZ = 0d0
       return
@@ -2257,7 +2272,12 @@ include "vegas_common.f"
    EvalCS_Dips_ttbqqbgZ= 0d0
 
    call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
-   call SmearExternal(yRnd(21),M_Z,Ga_ZExp,Zero,EHat,MZ_Inv,MZJacobi)
+   if( ZDECAYS.LT.10 ) then
+      MZ_Inv = M_Z
+      MZJacobi = 1d0
+   else
+      call SmearExternal(yRnd(21),M_Z,Ga_ZExp,Zero,EHat,MZ_Inv,MZJacobi)
+   endif   
    if( EHat.le.2d0*m_Top+MZ_Inv ) then
       EvalCS_Real_ttbqqbgZ = 0d0
       return
@@ -2532,8 +2552,14 @@ include "vegas_common.f"
 
   EvalCS_NLODK_ttbZ = 0d0
   call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
-  IF( CORRECTION.EQ.4 ) call SmearExternal(yRnd(18),M_Z,Ga_ZExp,Zero,EHat,MZ_Inv,MZJacobi)
-  IF( CORRECTION.EQ.5 ) call SmearExternal(yRnd(21),M_Z,Ga_ZExp,Zero,EHat,MZ_Inv,MZJacobi)
+  if( ZDECAYS.LT.10 ) then
+      MZ_Inv = M_Z
+      MZJacobi = 1d0
+  elseif( Correction.eq.4 ) then 
+      call SmearExternal(yRnd(18),M_Z,Ga_ZExp,Zero,EHat,MZ_Inv,MZJacobi)
+  elseif( Correction.eq.5 ) then
+      call SmearExternal(yRnd(21),M_Z,Ga_ZExp,Zero,EHat,MZ_Inv,MZJacobi)
+  endif   
   if( EHat.le.2d0*m_Top+MZ_Inv ) then
       EvalCS_NLODK_ttbZ = 0d0
       return

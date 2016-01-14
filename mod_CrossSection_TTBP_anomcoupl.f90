@@ -5221,6 +5221,778 @@ END FUNCTION
 
 
 
+
+
+
+
+
+! ------------------------------------- unweighted ---------------------------------------------------
+
+
+
+FUNCTION GenUW_anomcoupl_1L_ttbggp(yRnd,VgsWgt)
+use ModProcess
+use ModKinematics
+use ModUCuts
+use ModUCuts_128
+use ModIntegrals
+use ModAmplitudes
+use ModMyRecurrence
+use ModParameters
+use ModIntDipoles_GGTTBGP
+implicit none
+real(8) ::  GenUW_anomcoupl_1L_ttbggp,yRnd(1:VegasMxDim),VgsWgt
+complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1),FermionLoopPartAmp(1:3,-2:1)
+complex(8) :: BosonicPartAmp(1:3,-2:1),mydummy,Msq_T_BWENU,M_T_BWENU,Spi(1:4),BarSpi(1:4)
+integer :: iHel,jHel,kHel,iPrimAmp,jPrimAmp
+real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac
+real(8) :: MomExt(1:4,1:12)
+logical :: applyPSCut
+real(8) :: MG_MOM(0:3,1:5)
+real(8) :: MadGraph_tree
+real(8),parameter :: Nc=3d0
+real(8) :: eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac,AccPoles
+real(8) :: pdf(-6:6,1:2),pdf_z(-6:6,1:2),xE,HOp(1:3)
+integer :: NBin(1:NumMaxHisto),NHisto,nHel(1:2),NRndHel
+! real(8) :: ThresholdCutOff = 1.0d0
+include 'misc/global_import'
+include 'vegas_common.f'
+GenUW_anomcoupl_1L_ttbggp = 0d0
+
+
+
+   call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+   if( EHat.le.(2d0*m_Top+pT_pho_cut)  ) then
+      GenUW_anomcoupl_1L_ttbggp = 0d0
+      return
+   endif
+   FluxFac = 1d0/(2d0*EHat**2)
+
+   call EvalPhaseSpace_2to3(EHat,yRnd(3:7),MomExt(1:4,1:5),PSWgt)
+   call boost2Lab(eta1,eta2,5,MomExt(1:4,1:5))
+   ISFac = MomCrossing(MomExt)
+
+   NRndHel=8
+IF( TOPDECAYS.NE.0 ) THEN
+   call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(8:11),.false.,MomExt(1:4,6:8),PSWgt2)
+   call EvalPhasespace_TopDecay(MomExt(1:4,5),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
+   PSWgt = PSWgt * PSWgt2*PSWgt3
+   NRndHel=16
+ENDIF
+
+   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
+   if( applyPSCut ) then
+      GenUW_anomcoupl_1L_ttbggp = 0d0
+      return
+   endif
+
+   call SetPropagators()
+   call SetPDFs(eta1,eta2,MuFac,pdf)
+   PDFFac = pdf(0,1) * pdf(0,2)
+   PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt * VgsWgt * PDFFac
+   RunFactor = RunAlphaS(NLOParam,MuRen)
+   nHel(1:2) = getHelicity(yrnd(NRndHel))
+   PreFac = PreFac * dble(NumHelicities/(nHel(2)-nHel(1)+1))
+
+   LO_Res_Unpol             = (0d0,0d0)
+   NLO_Res_Unpol(-2:1)      = (0d0,0d0)
+   NLO_Res_Unpol_Ferm(-2:1) = (0d0,0d0)
+   
+
+
+   
+!------------ LO --------------
+IF( Correction.EQ.0 ) THEN
+   do iHel=nHel(1),nHel(2)
+   do jHel=-1,+1,2!  bottom quark helicities for anomalous Wtb vertex
+   do kHel=-1,+1,2
+   
+      IF( TOPDECAYS.NE.0 ) THEN
+        call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8),Gluon2Hel=jHel)
+        call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11),Gluon2Hel=kHel)
+      ELSE 
+         if( jHel.ne.-1 .or. kHel.ne.-1 ) cycle
+      ENDIF
+   
+      call HelCrossing(Helicities(iHel,1:NumExtParticles))
+      call SetPolarizations()
+      do iPrimAmp=1,NumBornAmps
+          call EvalTree(BornAmps(iPrimAmp))
+      enddo
+
+      LO_Res_Pol = (0d0,0d0)
+      do jPrimAmp=1,NumBornAmps
+      do iPrimAmp=1,NumBornAmps
+          LO_Res_Pol = LO_Res_Pol + ColLO_ttbgg(iPrimAmp,jPrimAmp) * BornAmps(iPrimAmp)%Result*dconjg(BornAmps(jPrimAmp)%Result)
+      enddo
+      enddo
+      LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
+   enddo!helicity loop
+   enddo!helicity loop
+   enddo!helicity loop
+
+
+ENDIF
+
+
+IF( Correction.EQ.0 ) THEN
+!  normalization
+   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 *alpha4Pi * WidthExpansion
+   GenUW_anomcoupl_1L_ttbggp = LO_Res_Unpol * PreFac
+
+ENDIF
+
+
+
+   IF( ObsSet.GE.25 .AND. ObsSet.LE.28 ) THEN
+      do NHisto=1,NumHistograms-1
+          call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_1L_ttbggp)
+      enddo
+      call intoHisto(NumHistograms,1,MInv_LB*GenUW_anomcoupl_1L_ttbggp)
+   ELSE
+      do NHisto=1,NumHistograms
+          call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_1L_ttbggp)
+      enddo
+   ENDIF   
+!    do NHisto=1,NumHistograms
+!       call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_1L_ttbggp)
+!    enddo
+
+
+   GenUW_anomcoupl_1L_ttbggp = GenUW_anomcoupl_1L_ttbggp/VgsWgt
+   
+RETURN
+END FUNCTION
+
+
+
+
+
+
+
+
+FUNCTION GenUW_anomcoupl_1L_ttbqqbp(yRnd,VgsWgt)
+use ModProcess
+use ModKinematics
+use ModUCuts
+use ModUCuts_128
+use ModIntegrals
+use ModAmplitudes
+use ModMyRecurrence
+use ModParameters
+use ModIntDipoles_QQBTTBGP
+use ModIntDipoles_QGTTBQP
+use ModIntDipoles_QBGTTBQBP
+implicit none
+real(8) ::  GenUW_anomcoupl_1L_ttbqqbp,yRnd(1:VegasMxDim),VgsWgt,xE
+complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1)
+complex(8) :: BosonicPartAmp(1:2,-2:1),FermionPartAmp(1:2,-2:1),mydummy(1:2),LOPartAmp(1:2)
+integer :: iHel,jHel,kHel,iPrimAmp,jPrimAmp
+real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac,AccPoles,HOp(1:2,1:3),pdf_z(-6:6,1:2)
+real(8) :: MomExt(1:4,1:12)
+logical :: applyPSCut
+real(8) :: MG_MOM(0:3,1:NumExtParticles)
+real(8) :: MadGraph_tree
+real(8),parameter :: Nc=3d0
+real(8) :: tau,eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac_a(1:2),PDFFac_b(1:2),PDFFac(1:2),pdf(-6:6,1:2)
+integer :: NHisto,NBin(1:NumMaxHisto),npdf,ParityFlip=1,nHel(1:2),NRndHel
+integer,parameter :: up=1,dn=2
+include 'misc/global_import'
+include "vegas_common.f"
+
+
+
+  GenUW_anomcoupl_1L_ttbqqbp = 0d0
+  call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+  if( EHat.le.2d0*m_Top+pT_pho_cut ) then
+      GenUW_anomcoupl_1L_ttbqqbp = 0d0
+      return
+  endif
+  FluxFac = 1d0/(2d0*EHat**2)
+
+   call EvalPhaseSpace_2to3(EHat,yRnd(3:7),MomExt(1:4,1:5),PSWgt)
+   call boost2Lab(eta1,eta2,5,MomExt(1:4,1:5))
+
+   NRndHel=8
+IF( TOPDECAYS.NE.0 ) THEN
+   call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(8:11),.false.,MomExt(1:4,6:8),PSWgt2)
+   call EvalPhasespace_TopDecay(MomExt(1:4,5),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
+   PSWgt = PSWgt * PSWgt2*PSWgt3
+   NRndHel=16
+ENDIF
+
+   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
+   if( applyPSCut ) then
+      GenUW_anomcoupl_1L_ttbqqbp = 0d0
+      return
+   endif
+
+   call setPDFs(eta1,eta2,MuFac,pdf)
+   IF( PROCESS.EQ.22 ) THEN
+      PDFFac_a(up) = pdf(Up_,1)*pdf(AUp_,2) + pdf(Chm_,1)*pdf(AChm_,2)
+      PDFFac_a(dn) = pdf(Dn_,1)*pdf(ADn_,2) + pdf(Str_,1)*pdf(AStr_,2) + pdf(Bot_,1)*pdf(ABot_,2)
+      PDFFac_b(up) = pdf(Up_,2)*pdf(AUp_,1) + pdf(Chm_,2)*pdf(AChm_,1)
+      PDFFac_b(dn) = pdf(Dn_,2)*pdf(ADn_,1) + pdf(Str_,2)*pdf(AStr_,1) + pdf(Bot_,2)*pdf(ABot_,1)
+   ENDIF
+
+
+   PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt * VgsWgt
+   RunFactor = RunAlphaS(NLOParam,MuRen)
+   nHel(1:2) = getHelicity(yrnd(NRndHel))
+   PreFac = PreFac * dble(NumHelicities/(nHel(2)-nHel(1)+1))
+
+   LO_Res_Unpol             = (0d0,0d0)
+   NLO_Res_Unpol(-2:1)      = (0d0,0d0)
+   NLO_Res_Unpol_Ferm(-2:1) = (0d0,0d0)
+!------------ LO --------------
+IF( CORRECTION.EQ.0 ) THEN
+  do npdf=1,2
+    if(npdf.eq.1) then
+        PDFFac(1:2) = PDFFac_a(1:2)
+!         PDFFac(1:2) = PDFFac_a(1:2)+PDFFac_b(1:2)
+    elseif(npdf.eq.2) then
+        PDFFac(1:2) = PDFFac_b(1:2)
+        call swapMom(MomExt(1:4,1),MomExt(1:4,2))
+    endif
+    ISFac = MomCrossing(MomExt)
+    call SetPropagators()
+
+
+
+    do iHel=nHel(1),nHel(2)
+    do jHel=-1,+1,2!  bottom quark helicities for anomalous Wtb vertex
+    do kHel=-1,+1,2
+   
+        IF( TOPDECAYS.NE.0 ) THEN
+          call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8),Gluon2Hel=jHel)
+          call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11),Gluon2Hel=kHel)
+        ELSE 
+          if( jHel.ne.-1 .or. kHel.ne.-1 ) cycle
+        ENDIF
+    
+        call HelCrossing(Helicities(iHel,1:NumExtParticles))
+        call SetPolarizations()
+        do iPrimAmp=1,NumBornAmps
+            call EvalTree(BornAmps(iPrimAmp))
+        enddo
+
+        LOPartAmp(up) = BornAmps(1)%Result + (-Q_up) * BornAmps(2)%Result
+        LOPartAmp(dn) = BornAmps(1)%Result + (-Q_dn) * BornAmps(2)%Result
+        LO_Res_Pol = ColLO_ttbqqb(1,1) * ( LOPartAmp(up)*dconjg(LOPartAmp(up))*PDFFac(up) + LOPartAmp(dn)*dconjg(LOPartAmp(dn))*PDFFac(dn))
+        LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
+    enddo!helicity loop
+    enddo!helicity loop
+    enddo!helicity loop
+  enddo! npdf loop
+  call swapMom(MomExt(1:4,1),MomExt(1:4,2))   ! swap back to original order, for ID below
+! print *, "mom swap deactivated"
+
+ENDIF
+
+
+
+
+IF( CORRECTION.EQ.0 ) THEN
+!  normalization
+   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 *alpha4Pi * WidthExpansion
+   GenUW_anomcoupl_1L_ttbqqbp = LO_Res_Unpol * PreFac
+ENDIF
+
+   IF( ObsSet.GE.25 .AND. ObsSet.LE.28 ) THEN
+      do NHisto=1,NumHistograms-1
+          call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_1L_ttbqqbp)
+      enddo
+      call intoHisto(NumHistograms,1,MInv_LB*GenUW_anomcoupl_1L_ttbqqbp)
+   ELSE
+      do NHisto=1,NumHistograms
+          call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_1L_ttbqqbp)
+      enddo
+   ENDIF   
+!    do NHisto=1,NumHistograms
+!       call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_1L_ttbqqbp)
+!    enddo
+
+
+
+   GenUW_anomcoupl_1L_ttbqqbp = GenUW_anomcoupl_1L_ttbqqbp/VgsWgt
+
+RETURN
+END FUNCTION
+
+
+
+
+
+
+
+FUNCTION GenUW_anomcoupl_DKP_1L_ttbgg(yRnd,VgsWgt)
+use ModProcess
+use ModKinematics
+use ModUCuts
+use ModUCuts_128
+use ModIntegrals
+use ModAmplitudes
+use ModMyRecurrence
+use ModParameters
+use ModIntDipoles_DKP_GGTTBG
+implicit none
+real(8) ::  GenUW_anomcoupl_DKP_1L_ttbgg,GenUW_anomcoupl_DKP_1L_ttbgg_1,GenUW_anomcoupl_DKP_1L_ttbgg_2
+real(8) ::  yRnd(1:VegasMxDim),VgsWgt,IOp(-2:0),HOp(1:3)
+complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1),FermionLoopPartAmp(7:8,-2:1)
+integer :: iHel,jHel,kHel,iPrimAmp,jPrimAmp,nPhoRad,PhoHel
+real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac
+real(8) :: MomExt(1:4,1:12),MomP(1:4,1:4)
+logical :: applyPSCut
+real(8) :: eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac,AccPoles
+real(8) :: pdf(-6:6,1:2),pdf_z(-6:6,1:2),xE
+integer :: NBin(1:NumMaxHisto),NHisto,ParityFlip,nHel(1:2)
+include 'misc/global_import'
+include 'vegas_common.f'
+
+  ParityFlip=1
+  GenUW_anomcoupl_DKP_1L_ttbgg = 0d0
+  GenUW_anomcoupl_DKP_1L_ttbgg_1 = 0d0
+  GenUW_anomcoupl_DKP_1L_ttbgg_2 = 0d0
+
+  call PDFMapping(2,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+  if( EHat.le.2d0*m_Top ) then
+      GenUW_anomcoupl_DKP_1L_ttbgg = 0d0
+      return
+  endif
+  FluxFac = 1d0/(2d0*EHat**2)
+
+   call EvalPhaseSpace_2to2(EHat,yRnd(3:4),MomExt(1:4,1:4),PSWgt)
+   call boost2Lab(eta1,eta2,4,MomExt(1:4,1:4))
+   ISFac = MomCrossing(MomExt)
+
+   call SetPropagators()
+
+   call SetPDFs(eta1,eta2,MuFac,pdf)
+   PDFFac = pdf(0,1) * pdf(0,2)
+   RunFactor = RunAlphaS(NLOParam,MuRen)
+   nHel(1:2) = getHelicity(yRnd(16))
+
+!----------------------------------
+! photon emission off anti-top    |
+!----------------------------------
+do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoRad=2: photon radiation off W/lep
+   LO_Res_Unpol             = (0d0,0d0)
+   NLO_Res_Unpol(-2:1)      = (0d0,0d0)
+   NLO_Res_Unpol_Ferm(-2:1) = (0d0,0d0)
+   if( nPhoRad.eq.1 ) then
+      call EvalPhasespace_TopDecay(MomExt(1:4,3),yRnd(5:11),.true.,MomExt(1:4,5:8),PSWgt2)
+   else
+      call EvalPhasespace_TopDecay2(MomExt(1:4,3),yRnd(5:11),.true.,MomExt(1:4,5:8),PSWgt2)
+   endif
+   call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
+   PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt*PSWgt2*PSWgt3 * VgsWgt * PDFFac * dble(NumHelicities/(nHel(2)-nHel(1)+1))
+
+   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,8,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin)
+   if( applyPSCut ) then
+      cycle
+   endif
+!------------ LO --------------
+IF( Correction.EQ.0 ) THEN
+   do iHel=nHel(1),nHel(2)
+   do PhoHel=1,-1,-2 ! loop over additional photon polarization
+   do jHel=1,-1,-2 ! loop over additional bottom polarization
+   do kHel=1,-1,-2 ! loop over additional bottom polarization
+      call HelCrossing(Helicities(iHel,1:NumExtParticles))
+      call SetPolarizations()
+      if( nPhoRad.eq.1 ) then
+         call TopDecay(ExtParticle(1),DKP_LO_T,MomExt(1:4,5:8),PhotonHel=PhoHel,Gluon2Hel=jHel)
+      else
+         call TopDecay(ExtParticle(1),DKP_LO_L,MomExt(1:4,5:8),PhotonHel=PhoHel,Gluon2Hel=jHel)
+      endif
+      call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11),Gluon2Hel=kHel)
+
+      do iPrimAmp=1,NumBornAmps
+          call EvalTree(BornAmps(iPrimAmp))
+      enddo
+      LO_Res_Pol = (0d0,0d0)
+      do jPrimAmp=1,NumBornAmps
+      do iPrimAmp=1,NumBornAmps
+          LO_Res_Pol = LO_Res_Pol + ColLO_ttbgg(iPrimAmp,jPrimAmp) * ParityFlip*BornAmps(iPrimAmp)%Result*dconjg(BornAmps(jPrimAmp)%Result)
+      enddo
+      enddo
+      LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
+   enddo!helicity loop
+   enddo!helicity loop
+   enddo!helicity loop
+   enddo!helicity loop
+
+ENDIF
+
+
+IF( Correction.EQ.0 ) THEN
+!  normalization
+   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * WidthExpansion
+   GenUW_anomcoupl_DKP_1L_ttbgg = LO_Res_Unpol * PreFac
+ENDIF
+
+   IF( ObsSet.GE.25 .AND. ObsSet.LE.28 ) THEN
+      do NHisto=1,NumHistograms-1
+          call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_DKP_1L_ttbgg)
+      enddo
+      call intoHisto(NumHistograms,1,MInv_LB*GenUW_anomcoupl_DKP_1L_ttbgg)
+   ELSE
+      do NHisto=1,NumHistograms
+          call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_DKP_1L_ttbgg)
+      enddo
+   ENDIF   
+!    do NHisto=1,NumHistograms
+!       call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_DKP_1L_ttbgg)
+!    enddo
+
+GenUW_anomcoupl_DKP_1L_ttbgg_1 = GenUW_anomcoupl_DKP_1L_ttbgg_1 + GenUW_anomcoupl_DKP_1L_ttbgg
+
+enddo! nPhoRad loop
+
+
+! GenUW_anomcoupl_DKP_1L_ttbgg = (GenUW_anomcoupl_DKP_1L_ttbgg_1)/VgsWgt
+! return
+! -----------------------------------------------------------------------------
+
+
+!----------------------------------
+! photon emission off top         |
+!----------------------------------
+do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W,nPhoRad=2: photon radiation off W/lep
+   LO_Res_Unpol             = (0d0,0d0)
+   NLO_Res_Unpol(-2:1)      = (0d0,0d0)
+   NLO_Res_Unpol_Ferm(-2:1) = (0d0,0d0)
+   call EvalPhasespace_TopDecay(MomExt(1:4,3),yRnd(5:8),.false.,MomExt(1:4,5:7),PSWgt2)
+   if( nPhoRad.eq.1 ) then
+      call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(9:15),.true.,MomExt(1:4,8:11),PSWgt3)
+   else
+      call EvalPhasespace_TopDecay2(MomExt(1:4,4),yRnd(9:15),.true.,MomExt(1:4,8:11),PSWgt3)
+   endif
+   PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt*PSWgt2*PSWgt3 * VgsWgt * PDFFac * dble(NumHelicities/(nHel(2)-nHel(1)+1))
+
+   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin)
+   if( applyPSCut ) then
+      cycle
+   endif
+
+!------------ LO --------------
+IF( Correction.EQ.0 ) THEN
+   do iHel=nHel(1),nHel(2)
+   do PhoHel=1,-1,-2 ! loop over additional photon polarization
+   do jHel=1,-1,-2 ! loop over additional bottom polarization
+   do kHel=1,-1,-2 ! loop over additional bottom polarization
+      call HelCrossing(Helicities(iHel,1:NumExtParticles))
+      call SetPolarizations()
+      call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,5:7),Gluon2Hel=jHel)
+      if( nPhoRad.eq.1 ) then
+         call TopDecay(ExtParticle(2),DKP_LO_T,MomExt(1:4,8:11),PhotonHel=PhoHel,Gluon2Hel=kHel)
+      else
+         call TopDecay(ExtParticle(2),DKP_LO_L,MomExt(1:4,8:11),PhotonHel=PhoHel,Gluon2Hel=kHel)
+      endif
+
+      do iPrimAmp=1,NumBornAmps
+          call EvalTree(BornAmps(iPrimAmp))
+      enddo
+      LO_Res_Pol = (0d0,0d0)
+      do jPrimAmp=1,NumBornAmps
+      do iPrimAmp=1,NumBornAmps
+          LO_Res_Pol = LO_Res_Pol + ColLO_ttbgg(iPrimAmp,jPrimAmp) * ParityFlip*BornAmps(iPrimAmp)%Result*dconjg(BornAmps(jPrimAmp)%Result)
+      enddo
+      enddo
+      LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
+   enddo!helicity loop
+   enddo!helicity loop
+   enddo!helicity loop
+   enddo!helicity loop
+
+ENDIF
+
+
+IF( Correction.EQ.0 ) THEN
+!  normalization
+   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * WidthExpansion
+   GenUW_anomcoupl_DKP_1L_ttbgg = LO_Res_Unpol * PreFac
+
+ENDIF
+
+   IF( ObsSet.GE.25 .AND. ObsSet.LE.28 ) THEN
+      do NHisto=1,NumHistograms-1
+          call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_DKP_1L_ttbgg)
+      enddo
+      call intoHisto(NumHistograms,1,MInv_LB*GenUW_anomcoupl_DKP_1L_ttbgg)
+   ELSE
+      do NHisto=1,NumHistograms
+          call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_DKP_1L_ttbgg)
+      enddo
+   ENDIF   
+!    do NHisto=1,NumHistograms
+!       call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_DKP_1L_ttbgg)
+!    enddo
+
+   GenUW_anomcoupl_DKP_1L_ttbgg_2 = GenUW_anomcoupl_DKP_1L_ttbgg_2 + GenUW_anomcoupl_DKP_1L_ttbgg
+
+! print *,GenUW_anomcoupl_DKP_1L_ttbgg
+! pause
+
+enddo! nPhoRad loop
+
+
+
+   GenUW_anomcoupl_DKP_1L_ttbgg = (GenUW_anomcoupl_DKP_1L_ttbgg_1+GenUW_anomcoupl_DKP_1L_ttbgg_2)/VgsWgt
+return
+END FUNCTION
+
+
+
+
+
+
+FUNCTION GenUW_anomcoupl_DKP_1L_ttbqqb(yRnd,VgsWgt)
+use ModProcess
+use ModKinematics
+use ModUCuts
+use ModUCuts_128
+use ModIntegrals
+use ModAmplitudes
+use ModMyRecurrence
+use ModParameters
+use ModIntDipoles_DKP_QQBTTBG
+use ModIntDipoles_DKP_QGTTBQ
+implicit none
+real(8) :: GenUW_anomcoupl_DKP_1L_ttbqqb,GenUW_anomcoupl_DKP_1L_ttbqqb_1,GenUW_anomcoupl_DKP_1L_ttbqqb_2
+real(8) :: yRnd(1:VegasMxDim),VgsWgt,xE,HOp(1:3)
+complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1)
+complex(8) :: BosonicPartAmp(1:2,-2:1),FermionPartAmp(1:2,-2:1)
+integer :: iHel,jHel,kHel,iPrimAmp,jPrimAmp,nPhoRad,PhoHel
+real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac
+real(8) :: MomExt(1:4,1:12),MomP(1:4,1:4)
+logical :: applyPSCut
+real(8),parameter :: Nc=3d0
+real(8) :: tau,eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac_a,PDFFac_b,PDFFac,AccPoles
+real(8) :: pdf(-6:6,1:2),pdf_z(-6:6,1:2)
+integer :: NHisto,NBin(1:NumMaxHisto),ParityFlip,npdf,nHel(1:2),NRndHel
+include 'misc/global_import'
+include "vegas_common.f"
+
+
+  ParityFlip=1
+  GenUW_anomcoupl_DKP_1L_ttbqqb = 0d0
+  GenUW_anomcoupl_DKP_1L_ttbqqb_1 = 0d0
+  GenUW_anomcoupl_DKP_1L_ttbqqb_2 = 0d0
+
+  call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+  if( EHat.le.2d0*m_Top ) then
+      GenUW_anomcoupl_DKP_1L_ttbqqb = 0d0
+      return
+  endif
+  FluxFac = 1d0/(2d0*EHat**2)
+
+   call EvalPhaseSpace_2to2(EHat,yRnd(3:4),MomExt(1:4,1:4),PSWgt)
+   call boost2Lab(eta1,eta2,4,MomExt(1:4,1:4))
+
+   call setPDFs(eta1,eta2,MuFac,pdf)
+   PDFFac_a = pdf(Up_,1) *pdf(AUp_,2)  + pdf(Dn_,1) *pdf(ADn_,2)   &
+            + pdf(Chm_,1)*pdf(AChm_,2) + pdf(Str_,1)*pdf(AStr_,2)  &
+            + pdf(Bot_,1)*pdf(ABot_,2)
+   PDFFac_b = pdf(Up_,2) *pdf(AUp_,1)  + pdf(Dn_,2) *pdf(ADn_,1)   &
+            + pdf(Chm_,2)*pdf(AChm_,1) + pdf(Str_,2)*pdf(AStr_,1)  &
+            + pdf(Bot_,2)*pdf(ABot_,1)
+   RunFactor = RunAlphaS(NLOParam,MuRen)
+   nHel(1:2) = getHelicity(yrnd(16))
+
+
+!----------------------------------
+! photon emission off anti-top    |
+!----------------------------------
+do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoRad=2: photon radiation off W/lep
+   LO_Res_Unpol             = (0d0,0d0)
+   NLO_Res_Unpol(-2:1)      = (0d0,0d0)
+   NLO_Res_Unpol_Ferm(-2:1) = (0d0,0d0)
+   if( nPhoRad.eq.1 ) then
+      call EvalPhasespace_TopDecay(MomExt(1:4,3),yRnd(5:11),.true.,MomExt(1:4,5:8),PSWgt2)
+   else
+      call EvalPhasespace_TopDecay2(MomExt(1:4,3),yRnd(5:11),.true.,MomExt(1:4,5:8),PSWgt2)
+   endif
+   call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
+   PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt*PSWgt2*PSWgt3 * VgsWgt * dble(NumHelicities/(nHel(2)-nHel(1)+1))
+
+   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,8,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin)
+   if( applyPSCut ) then
+      cycle
+   endif
+!------------ LO --------------
+IF( CORRECTION.EQ.0 ) THEN
+  do npdf=1,2
+    if(npdf.eq.1) then
+        PDFFac = PDFFac_a
+    elseif(npdf.eq.2) then
+        PDFFac = PDFFac_b
+        call swapMom(MomExt(1:4,1),MomExt(1:4,2))
+    endif
+    ISFac = MomCrossing(MomExt)
+!     call InitCurrCache()
+    call SetPropagators()
+
+    do iHel=nHel(1),nHel(2)
+    do PhoHel=1,-1,-2 ! loop over additional photon polarization
+    do jHel=1,-1,-2 ! loop over additional bottom polarization
+    do kHel=1,-1,-2 ! loop over additional bottom polarization
+        call HelCrossing(Helicities(iHel,1:NumExtParticles))
+        call SetPolarizations()
+        if( nPhoRad.eq.1 ) then
+          call TopDecay(ExtParticle(1),DKP_LO_T,MomExt(1:4,5:8),PhotonHel=PhoHel,Gluon2Hel=jHel)
+        else
+          call TopDecay(ExtParticle(1),DKP_LO_L,MomExt(1:4,5:8),PhotonHel=PhoHel,Gluon2Hel=jHel)
+        endif
+        call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11),Gluon2Hel=kHel)
+
+        do iPrimAmp=1,NumBornAmps
+            call EvalTree(BornAmps(iPrimAmp))
+        enddo
+        LO_Res_Pol = (0d0,0d0)
+        do jPrimAmp=1,NumBornAmps
+        do iPrimAmp=1,NumBornAmps
+            LO_Res_Pol = LO_Res_Pol + ColLO_ttbqqb(iPrimAmp,jPrimAmp) * ParityFlip*BornAmps(iPrimAmp)%Result*dconjg(BornAmps(jPrimAmp)%Result)
+        enddo
+        enddo
+        LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol*PDFFac
+    enddo!helicity loop
+    enddo!helicity loop
+    enddo!helicity loop
+    enddo!helicity loop
+  enddo! npdf loop
+  call swapMom(MomExt(1:4,1),MomExt(1:4,2))   ! swap back
+
+ENDIF
+
+
+IF( CORRECTION.EQ.0 ) THEN
+!  normalization
+   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * WidthExpansion
+   GenUW_anomcoupl_DKP_1L_ttbqqb = LO_Res_Unpol * PreFac
+ENDIF
+
+   IF( ObsSet.GE.25 .AND. ObsSet.LE.28 ) THEN
+      do NHisto=1,NumHistograms-1
+          call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_DKP_1L_ttbqqb)
+      enddo
+      call intoHisto(NumHistograms,1,MInv_LB*GenUW_anomcoupl_DKP_1L_ttbqqb)
+   ELSE
+      do NHisto=1,NumHistograms
+          call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_DKP_1L_ttbqqb)
+      enddo
+   ENDIF   
+!    do NHisto=1,NumHistograms
+!       call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_DKP_1L_ttbqqb)
+!    enddo
+
+GenUW_anomcoupl_DKP_1L_ttbqqb_1 = GenUW_anomcoupl_DKP_1L_ttbqqb_1 + GenUW_anomcoupl_DKP_1L_ttbqqb
+enddo! nPhoRad loop
+
+
+!    GenUW_anomcoupl_DKP_1L_ttbqqb = (GenUW_anomcoupl_DKP_1L_ttbqqb_1)/VgsWgt
+!    return
+!-----------------------------------------------------------------------------
+
+
+!----------------------------------
+! photon emission off top    |
+!----------------------------------
+do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoRad=2: photon radiation off W/lep
+   LO_Res_Unpol             = (0d0,0d0)
+   NLO_Res_Unpol(-2:1)      = (0d0,0d0)
+   NLO_Res_Unpol_Ferm(-2:1) = (0d0,0d0)
+   call EvalPhasespace_TopDecay(MomExt(1:4,3),yRnd(5:8),.false.,MomExt(1:4,5:7),PSWgt2)
+   if( nPhoRad.eq.1 ) then
+      call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(9:15),.true.,MomExt(1:4,8:11),PSWgt3)
+   else
+      call EvalPhasespace_TopDecay2(MomExt(1:4,4),yRnd(9:15),.true.,MomExt(1:4,8:11),PSWgt3)
+   endif
+   PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt*PSWgt2*PSWgt3 * VgsWgt * dble(NumHelicities/(nHel(2)-nHel(1)+1))
+
+   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin)
+   if( applyPSCut ) then
+      cycle
+   endif
+
+!------------ LO --------------
+IF( CORRECTION.EQ.0 ) THEN
+  do npdf=1,2
+    if(npdf.eq.1) then
+        PDFFac = PDFFac_a
+    elseif(npdf.eq.2) then
+        PDFFac = PDFFac_b
+        call swapMom(MomExt(1:4,1),MomExt(1:4,2))
+    endif
+    ISFac = MomCrossing(MomExt)
+    call SetPropagators()
+
+    do iHel=nHel(1),nHel(2)
+    do PhoHel=1,-1,-2 ! loop over additional photon polarization
+    do jHel=1,-1,-2 ! loop over additional bottom polarization
+    do kHel=1,-1,-2 ! loop over additional bottom polarization
+        call HelCrossing(Helicities(iHel,1:NumExtParticles))
+        call SetPolarizations()
+        call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,5:7),Gluon2Hel=jHel)
+        if( nPhoRad.eq.1 ) then
+          call TopDecay(ExtParticle(2),DKP_LO_T,MomExt(1:4,8:11),PhotonHel=PhoHel,Gluon2Hel=kHel)
+        else
+          call TopDecay(ExtParticle(2),DKP_LO_L,MomExt(1:4,8:11),PhotonHel=PhoHel,Gluon2Hel=kHel)
+        endif
+
+        do iPrimAmp=1,NumBornAmps
+            call EvalTree(BornAmps(iPrimAmp))
+        enddo
+        LO_Res_Pol = (0d0,0d0)
+        do jPrimAmp=1,NumBornAmps
+        do iPrimAmp=1,NumBornAmps
+            LO_Res_Pol = LO_Res_Pol + ColLO_ttbqqb(iPrimAmp,jPrimAmp) * ParityFlip*BornAmps(iPrimAmp)%Result*dconjg(BornAmps(jPrimAmp)%Result)
+        enddo
+        enddo
+        LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol*PDFFac
+    enddo!helicity loop
+    enddo!helicity loop
+    enddo!helicity loop
+    enddo!helicity loop
+  enddo! npdf loop
+  call swapMom(MomExt(1:4,1),MomExt(1:4,2))!  swap back
+
+ENDIF
+
+
+IF( CORRECTION.EQ.0 ) THEN
+!  normalization
+   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * WidthExpansion
+   GenUW_anomcoupl_DKP_1L_ttbqqb = LO_Res_Unpol * PreFac
+
+ENDIF
+
+   IF( ObsSet.GE.25 .AND. ObsSet.LE.28 ) THEN
+      do NHisto=1,NumHistograms-1
+          call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_DKP_1L_ttbqqb)
+      enddo
+      call intoHisto(NumHistograms,1,MInv_LB*GenUW_anomcoupl_DKP_1L_ttbqqb)
+   ELSE
+      do NHisto=1,NumHistograms
+          call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_DKP_1L_ttbqqb)
+      enddo
+   ENDIF  
+!    do NHisto=1,NumHistograms
+!       call intoHisto(NHisto,NBin(NHisto),GenUW_anomcoupl_DKP_1L_ttbqqb)
+!    enddo
+
+   GenUW_anomcoupl_DKP_1L_ttbqqb_2 = GenUW_anomcoupl_DKP_1L_ttbqqb_2 + GenUW_anomcoupl_DKP_1L_ttbqqb
+enddo! nPhoRad loop
+
+   GenUW_anomcoupl_DKP_1L_ttbqqb = (GenUW_anomcoupl_DKP_1L_ttbqqb_1+GenUW_anomcoupl_DKP_1L_ttbqqb_2)/VgsWgt
+
+return
+END FUNCTION
+
+
+
+
+
+
 END MODULE ModCrossSection_TTBP_anomcoupl
 
 

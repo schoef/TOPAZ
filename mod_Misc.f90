@@ -912,7 +912,7 @@ FUNCTION Get_MInv(Mom)
 implicit none
 real(8) ::Mom(1:4),Get_MInv
 
-   Get_MInv = dsqrt( Mom(1:4).dot.Mom(1:4) )
+   Get_MInv = dsqrt( dabs(Mom(1:4).dot.Mom(1:4)) )
 
 RETURN
 END FUNCTION
@@ -2898,10 +2898,10 @@ END SUBROUTINE
       integer,parameter :: Ds=4, ColorlessParticle=2
 
 
-          if (ColorlessParticle .eq. 1) then 
-            vbqV_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.false.,spb2_Weyl(sp,e1)) + coupl_right*Chir_Weyl(.true.,spb2_Weyl(sp,e1)) )
-            
-          elseif (ColorlessParticle .eq. 2) then              ! see RR notes
+!           if (ColorlessParticle .eq. 1) then 
+!             vbqV_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.false.,spb2_Weyl(sp,e1)) + coupl_right*Chir_Weyl(.true.,spb2_Weyl(sp,e1)) )
+!             
+!           elseif (ColorlessParticle .eq. 2) then              ! see RR notes
             vbqV_Weyl = -(0d0,1d0) *( coupl_left*Chir_Weyl(.false.,spb2_Weyl(sp,e1)) + coupl_right*Chir_Weyl(.true.,spb2_Weyl(sp,e1))  )
             if( present(q) ) then
                 ubarZslqsl=spb2_Weyl(spb2_Weyl(sp,e1),q)                 ! ubar Zslash qslash  = ubar Z_mu gamma^mu q_nu gamma^nu
@@ -2912,9 +2912,9 @@ END SUBROUTINE
                   & + HDcoupl_right*(Chir_Weyl(.true.,ubarsig)) )    ! NOTE THAT HERE ICHIR --> CHIR
             endif
                   
-          elseif (ColorlessParticle .eq. 3) then              ! this is for a scalar, e.g. Higgs
-            vbqV_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.false.,sp) + coupl_right*Chir_Weyl(.true.,sp) )  
-          endif
+!           elseif (ColorlessParticle .eq. 3) then              ! this is for a scalar, e.g. Higgs
+!             vbqV_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.false.,sp) + coupl_right*Chir_Weyl(.true.,sp) )  
+!           endif
 
       RETURN
       END FUNCTION
@@ -2932,10 +2932,10 @@ END SUBROUTINE
       integer,parameter :: Ds=4, ColorlessParticle=2
  
           
-          if (ColorlessParticle .eq. 1) then 
-            vVq_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.true., spi2_Weyl(e1,sp)) + coupl_right*Chir_Weyl(.false., spi2_Weyl(e1,sp)) )  
+!           if (ColorlessParticle .eq. 1) then 
+!             vVq_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.true., spi2_Weyl(e1,sp)) + coupl_right*Chir_Weyl(.false., spi2_Weyl(e1,sp)) )  
 
-          elseif (ColorlessParticle .eq. 2) then
+!           elseif (ColorlessParticle .eq. 2) then
             vVq_Weyl=-(0d0,1d0) *( coupl_left*Chir_Weyl(.true., spi2_Weyl(e1,sp)) + coupl_right*Chir_Weyl(.false., spi2_Weyl(e1,sp)) )
             if( present(q) ) then
                 Zslqslv=spi2_Weyl(e1,spi2_Weyl(q,sp))
@@ -2946,9 +2946,9 @@ END SUBROUTINE
                   & + HDcoupl_right*(Chir_Weyl(.true.,sigv)) )    ! NOTE THAT HERE ICHIR --> CHIR
             endif
           
-          elseif (ColorlessParticle .eq. 3) then           ! this is for a scalar, e.g. Higgs
-            vVq_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.false.,sp) + coupl_right*Chir_Weyl(.true.,sp) )
-          endif
+!           elseif (ColorlessParticle .eq. 3) then           ! this is for a scalar, e.g. Higgs
+!             vVq_Weyl = -(0d0,1d0)*( coupl_left*Chir_Weyl(.false.,sp) + coupl_right*Chir_Weyl(.true.,sp) )
+!           endif
 
       RETURN
       END FUNCTION

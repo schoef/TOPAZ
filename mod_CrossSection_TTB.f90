@@ -9,7 +9,8 @@ contains
 
 
 
-
+!  ./TOPAZ Collider=1 ObsSet=3 TopDK=1 Process=7 Correction=0  for ATop decay
+!  ./TOPAZ Collider=1 ObsSet=3 TopDK=1 Process=8 Correction=0  for  Top decay
 
 FUNCTION EvalCS_TopWidth(yRnd,VgsWgt)
 use ModProcess
@@ -3196,6 +3197,346 @@ include 'vegas_common.f'
 
 return
 END FUNCTION
+
+
+
+
+
+
+
+
+
+
+
+!----------------------------- unweighted -----------------------------------
+
+
+FUNCTION GenUW_1L_ttbgg(yRnd,VgsWgt)
+use ModProcess
+use ModKinematics
+use ModAmplitudes
+use ModMyRecurrence
+use ModParameters
+implicit none
+real(8) ::  GenUW_1L_ttbgg,yRnd(1:VegasMxDim),VgsWgt
+complex(8) :: LO_Res_Pol,LO_Res_Unpol
+integer :: iHel,jHel,kHel,iPrimAmp,jPrimAmp,WHel,NRndHel
+real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,PSWgt4,ISFac,MomOffShell(1:4,1:13)
+real(8) :: MomExt(1:4,1:4),MomDK(1:4,1:6),MomP(1:4,1:4),MomJPsi(1:4)
+logical :: applyPSCut
+real(8) :: eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac
+real(8) :: pdf(-6:6,1:2),pdf_z(-6:6,1:2),xE,r_sc,xRnd
+integer :: NBin(1:NumMaxHisto),NHisto,ParityFlip,nHel(1:2),LHE_IDUP(1:2)
+include 'vegas_common.f'
+
+
+IF( TopDecays.ge.1 ) THEN
+  ParityFlip=1
+ELSE
+  ParityFlip=2
+ENDIF
+
+  GenUW_1L_ttbgg = 0d0
+
+  call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+  if( EHat.le.2d0*m_Top ) then
+      GenUW_1L_ttbgg = 0d0
+      return
+  endif
+  FluxFac = 1d0/(2d0*EHat**2)
+
+   call EvalPhaseSpace_2to2(EHat,yRnd(3:4),MomExt(1:4,1:4),PSWgt)
+   call boost2Lab(eta1,eta2,4,MomExt(1:4,1:4))
+   ISFac = MomCrossing(MomExt)
+
+!    muren= dsqrt( m_top**2 + get_pt(MomExt(1:4,3))**2 )
+!    mufac= dsqrt( m_top**2 + get_pt(MomExt(1:4,3))**2 )
+
+   NRndHel=5
+IF( TOPDECAYS.NE.0 ) THEN
+   call EvalPhasespace_TopDecay(MomExt(1:4,3),yRnd(5:8),.false.,MomDK(1:4,1:3),PSWgt2)
+   call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(9:12),.false.,MomDK(1:4,4:6),PSWgt3)
+   PSWgt = PSWgt * PSWgt2*PSWgt3
+
+   NRndHel=13
+   IF( TOPDECAYS.GE.1 .AND. .not.AnomalousInteractions ) THEN
+! top decay with spin correlations
+       call TopDecay(ExtParticle(1),DK_LO,MomDK(1:4,1:3))
+       call TopDecay(ExtParticle(2),DK_LO,MomDK(1:4,4:6))
+   ENDIF
+
+
+ENDIF
+
+   call Kinematics_TTBAR(.false.,MomExt,MomDK,applyPSCut,NBin)
+   if( applyPSCut ) then
+      GenUW_1L_ttbgg = 0d0
+      return
+   endif
+
+
+   call SetPDFs(eta1,eta2,MuFac,pdf)
+   PDFFac = pdf(0,1) * pdf(0,2)
+   PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt * VgsWgt * PDFFac
+   RunFactor = RunAlphaS(NLOParam,MuRen)
+   nHel(1:2) = getHelicity(yrnd(NRndHel))
+   PreFac = PreFac * dble(NumHelicities/(nHel(2)-nHel(1)+1))
+
+   LO_Res_Unpol             = (0d0,0d0)
+
+!------------ LO --------------
+IF( Correction.EQ.0 ) THEN
+   do iHel=nHel(1),nHel(2)
+   do jHel=-1,+1,2!  bottom quark helicities for anomalous Wtb vertex
+   do kHel=-1,+1,2   
+
+      IF( AnomalousInteractions ) THEN
+         call TopDecay(ExtParticle(1),DK_LO,MomDK(1:4,1:3),Gluon2Hel=jHel)
+         call TopDecay(ExtParticle(2),DK_LO,MomDK(1:4,4:6),Gluon2Hel=kHel)
+      ELSE
+         if( jHel.ne.-1 .or. kHel.ne.-1 ) cycle
+      ENDIF   
+   
+      call HelCrossing(Helicities(iHel,1:NumExtParticles))
+      call SetPolarizations()
+      do iPrimAmp=1,NumBornAmps
+          call EvalTree(BornAmps(iPrimAmp))
+      enddo
+      LO_Res_Pol = (0d0,0d0)
+      do jPrimAmp=1,NumBornAmps
+      do iPrimAmp=1,NumBornAmps
+          LO_Res_Pol = LO_Res_Pol + ColLO_ttbgg(iPrimAmp,jPrimAmp) * ParityFlip*BornAmps(iPrimAmp)%Result*dconjg(BornAmps(jPrimAmp)%Result)
+      enddo
+      enddo
+      LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
+   enddo!helicity loop
+   enddo!helicity loop
+   enddo!helicity loop
+ENDIF
+
+
+IF( Correction.EQ.0 ) THEN
+!  normalization
+   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * WidthExpansion
+   GenUW_1L_ttbgg = LO_Res_Unpol * PreFac
+ENDIF
+
+
+if( warmup ) then
+
+      CrossSec(iChannel)    = CrossSec(iChannel) + GenUW_1L_ttbgg
+      CrossSecMax(iChannel) = max(CrossSecMax(iChannel),GenUW_1L_ttbgg)
+
+else
+
+     call random_number(xRnd) 
+     if( GenUW_1L_ttbgg.gt.CrossSecMax(iChannel) ) then
+         write(*,"(2X,A,1PE13.6,1PE13.6)") "CrossSecMax is too small.",GenUW_1L_ttbgg, CrossSecMax(iChannel)
+         SkipCounter = SkipCounter + 1
+     elseif( GenUW_1L_ttbgg .gt. xRnd*CrossSecMax(iChannel) ) then
+         AcceptEvents(iChannel) = AcceptEvents(iChannel) + 1
+
+         call TTbar_OffShellProjection((/MomExt(1:4,1),MomExt(1:4,1),MomExt(1:4,1),MomExt(1:4,3),MomExt(1:4,4),  &
+                                         MomDK(1:4,1),MomDK(1:4,2)+MomDK(1:4,3),MomDK(1:4,2),MomDK(1:4,3),       &
+                                         MomDK(1:4,4),MomDK(1:4,5)+MomDK(1:4,6),MomDK(1:4,5),MomDK(1:4,6)/),MomOffShell,PSWgt4)
+         MomOffShell(1:4,1:2) = MomExt(1:4,1:2)  
+         call WriteLHEvent_TTB(MomOffShell,(/LHE_IDUP(1),LHE_IDUP(2)/))
+         
+         do NHisto=1,NumHistograms
+               call intoHisto(NHisto,NBin(NHisto),1d0)
+         enddo
+         if(  AcceptEvents(iChannel) .ge. RequEvents(iChannel) ) then 
+              StopVegas=.true.
+         endif         
+     endif
+     EvalCounter = EvalCounter + 1
+
+endif
+
+   GenUW_1L_ttbgg = GenUW_1L_ttbgg/VgsWgt
+
+return
+END FUNCTION
+
+
+
+
+
+FUNCTION GenUW_1L_ttbqqb(yRnd,VgsWgt)
+use ModProcess
+use ModKinematics
+use ModUCuts
+use ModUCuts_128
+use ModIntegrals
+use ModAmplitudes
+use ModMyRecurrence
+use ModParameters
+use ModIntDipoles_QQBTTBG
+use ModIntDipoles_QQBTTBG_noDK
+use ModIntDipoles_QGTTBQ
+use ModIntDipoles_QGTTBQ_noDK
+use ModJPsiFrag
+implicit none
+real(8) ::  GenUW_1L_ttbqqb,yRnd(1:VegasMxDim),VgsWgt,xE,IOp(-2:0),HOp(1:3)
+complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1)
+complex(8) :: BosonicPartAmp(1:2,-2:1),FermionPartAmp(1:2,-2:1)
+complex(8) ::  Msq_T_BWENU,M_T_BWENU,Spi(1:4),BarSpi(1:4)
+integer :: iHel,jHel,kHel,iPrimAmp,jPrimAmp
+real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac,xFrag,SpinDecorr
+real(8) :: MomExt(1:4,1:NumExtParticles),MomDK(1:4,1:6),MomP(1:4,1:4),MomJPsi(1:4)
+logical :: applyPSCut
+real(8) :: MG_MOM(0:3,1:NumExtParticles),MomTmp(1:4)
+real(8) :: MadGraph_tree,UUB_TTB,Msq_T_BW,Msq_W_ENU
+real(8),parameter :: Nc=3d0
+real(8) :: tau,eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac_a,PDFFac_b,PDFFac,AccPoles
+real(8) :: pdf(-6:6,1:2),pdf_z(-6:6,1:2),r_sc
+integer :: NHisto,NBin(1:NumMaxHisto),ParityFlip,npdf,nHel(1:2),NRndHel
+real(8) :: ThresholdCutOff = 1.0d0
+include 'misc/global_import'
+include "vegas_common.f"
+
+
+
+IF( TopDecays.ge.1 ) THEN
+  ParityFlip=1
+ELSE
+  ParityFlip=2
+ENDIF
+
+   GenUW_1L_ttbqqb = 0d0
+
+  call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+  if( EHat.le.2d0*m_Top * ThresholdCutOff ) then
+      GenUW_1L_ttbqqb = 0d0
+      return
+  endif
+  FluxFac = 1d0/(2d0*EHat**2)
+
+
+   call EvalPhaseSpace_2to2(EHat,yRnd(3:4),MomExt(1:4,1:4),PSWgt)
+   call boost2Lab(eta1,eta2,4,MomExt(1:4,1:4))
+   NRndHel=5
+   SpinDecorr = 1d0
+IF( TOPDECAYS.NE.0 ) THEN
+   call EvalPhasespace_TopDecay(MomExt(1:4,3),yRnd(5:8),.false.,MomDK(1:4,1:3),PSWgt2)
+   call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(9:12),.false.,MomDK(1:4,4:6),PSWgt3)
+   PSWgt = PSWgt * PSWgt2*PSWgt3
+   NRndHel=13
+ENDIF
+
+
+   call Kinematics_TTBAR(.false.,MomExt,MomDK,applyPSCut,NBin,xJPsiFrag=xFrag)
+   if( applyPSCut ) then
+      GenUW_1L_ttbqqb = 0d0
+      return
+   endif
+
+!    muren= dsqrt( m_top**2 + get_pt(MomExt(1:4,3))**2 )
+!    mufac= dsqrt( m_top**2 + get_pt(MomExt(1:4,3))**2 )
+
+   call setPDFs(eta1,eta2,MuFac,pdf)
+   PDFFac_a = pdf(Up_,1) *pdf(AUp_,2)  + pdf(Dn_,1) *pdf(ADn_,2)   &
+            + pdf(Chm_,1)*pdf(AChm_,2) + pdf(Str_,1)*pdf(AStr_,2)  &
+            + pdf(Bot_,1)*pdf(ABot_,2)
+   PDFFac_b = pdf(Up_,2) *pdf(AUp_,1)  + pdf(Dn_,2) *pdf(ADn_,1)   &
+            + pdf(Chm_,2)*pdf(AChm_,1) + pdf(Str_,2)*pdf(AStr_,1)  &
+            + pdf(Bot_,2)*pdf(ABot_,1)
+
+   PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt * VgsWgt
+   RunFactor = RunAlphaS(NLOParam,MuRen)
+   nHel(1:2) = getHelicity(yrnd(NRndHel))
+   PreFac = PreFac * dble(NumHelicities/(nHel(2)-nHel(1)+1))
+
+   LO_Res_Unpol             = (0d0,0d0)
+   NLO_Res_Unpol(-2:1)      = (0d0,0d0)
+   NLO_Res_Unpol_Ferm(-2:1) = (0d0,0d0)
+!------------ LO --------------
+IF( CORRECTION.EQ.0 ) THEN
+  do npdf=1,2
+    if(npdf.eq.1) then
+        PDFFac = PDFFac_a
+    elseif(npdf.eq.2) then
+        PDFFac = PDFFac_b
+        call swapMom(MomExt(1:4,1),MomExt(1:4,2))
+    endif
+    ISFac = MomCrossing(MomExt)
+
+IF( TOPDECAYS.GE.1 .and. .not.AnomalousInteractions ) THEN
+!     top decays with spin correlations
+       call TopDecay(ExtParticle(1),DK_LO,MomDK(1:4,1:3))
+       call TopDecay(ExtParticle(2),DK_LO,MomDK(1:4,4:6))
+ENDIF
+
+    call InitCurrCache()
+    call SetPropagators()
+
+    do iHel=nHel(1),nHel(2)
+    do jHel=-1,+1,2!  bottom quark helicities for anomalous Wtb vertex
+    do kHel=-1,+1,2   
+    
+        IF( AnomalousInteractions ) THEN
+           call TopDecay(ExtParticle(1),DK_LO,MomDK(1:4,1:3),Gluon2Hel=jHel)
+           call TopDecay(ExtParticle(2),DK_LO,MomDK(1:4,4:6),Gluon2Hel=kHel)
+        ELSE
+           if( jHel.ne.-1 .or. kHel.ne.-1 ) cycle
+        ENDIF   
+    
+        call HelCrossing(Helicities(iHel,1:NumExtParticles))
+        call SetPolarizations()
+        do iPrimAmp=1,NumBornAmps
+            call EvalTree(BornAmps(iPrimAmp))
+        enddo
+        LO_Res_Pol = (0d0,0d0)
+        do jPrimAmp=1,NumBornAmps
+        do iPrimAmp=1,NumBornAmps
+            LO_Res_Pol = LO_Res_Pol + ColLO_ttbqqb(iPrimAmp,jPrimAmp) * ParityFlip*BornAmps(iPrimAmp)%Result*dconjg(BornAmps(jPrimAmp)%Result)
+        enddo
+        enddo
+        LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol*PDFFac*SpinDecorr
+    enddo!helicity loop
+    enddo!helicity loop
+    enddo!helicity loop
+  enddo! npdf loop
+ENDIF
+
+
+
+
+IF( CORRECTION.EQ.0 ) THEN
+!  normalization
+   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * WidthExpansion
+   GenUW_1L_ttbqqb = LO_Res_Unpol * PreFac
+ENDIF
+
+
+IF( ObsSet.EQ.7 ) THEN
+   do NHisto=1,3
+      call intoHisto(NHisto,NBin(NHisto),GenUW_1L_ttbqqb)
+   enddo
+   call intoHisto(4,1,MInv_LB*GenUW_1L_ttbqqb)
+   call intoHisto(5,1,MInv_LB**2*GenUW_1L_ttbqqb)
+   call intoHisto(6,1,xFrag*GenUW_1L_ttbqqb)
+ELSEIF( ObsSet.EQ.5 ) THEN
+   do NHisto=1,11
+      call intoHisto(NHisto,NBin(NHisto),GenUW_1L_ttbqqb)
+   enddo
+   call intoHisto(12,1,MInv_LB*GenUW_1L_ttbqqb)
+ELSE
+   do NHisto=1,NumHistograms
+      call intoHisto(NHisto,NBin(NHisto),GenUW_1L_ttbqqb)
+   enddo
+ENDIF
+
+
+   GenUW_1L_ttbqqb = GenUW_1L_ttbqqb/VgsWgt
+   EvalCounter = EvalCounter + 1
+
+
+return
+END FUNCTION
+
+
+
 
 
 

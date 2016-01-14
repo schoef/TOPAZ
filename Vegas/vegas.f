@@ -13,52 +13,44 @@
          data wtmax/0d0/
          end
 
+         
 
-         subroutine novegas(fxn,avgi,sd,chi2a)
-         implicit none
+
+!        MARKUS compute number of calls per iteration
+         subroutine vegas_get_calls(calls)
+         implicit double precision (a-h,o-z)
+         implicit integer (i-n)
          include 'vegas_common.f'
-         double precision fxn,avgi,sd,chi2a
-         double precision x(mxdim),wgt
-         external fxn
-
-              x( 1) =0.29
-              x( 2) =0.12
-              x( 3) =0.89
-              x( 4) =0.91
-              x( 5) =0.21
-              x( 6) =0.11
-              x( 7) =0.04
-              x( 8) =0.53
-              x( 9) =0.65
-              x(10) =0.78
-              x(11) =0.11
-              x(12) =0.04
-              x(13) =0.65
-              x(14) =0.53
-              x(15) =0.29
-              x(16) =0.89
-              x(17) =0.91
-              x(18) =0.65
-              x(19) =0.78
-              x(20) =0.15
-              x(21) =0.11
-              x(22) = 0.53
-              x(23) =0.04
-              x(24) =0.65
-              x(25) =0.53
-!               x(26) =0.29
-!               x(27) =0.89
-!               x(28) =0.91
-!               x(29) =0.65
-!               x(30) =0.78
-
-              avgi = fxn(x,wgt)
-              avgi = wgt*avgi
+!          include 'gridinfo.f'
+         include 'maxwt.f'
+         parameter(mprod=50*mxdim)
+         integer jj
+         dimension d(50,mxdim),di(50,mxdim),xin(50),r(50),
+     1   dx(mxdim),dt(mxdim),x(mxdim),kg(mxdim),ia(mxdim)
+         data ndmx/50/,alph/1.5d0/,one/1d0/,mds/1/
+!          data idum/-113123/
+         
+         nd=ndmx
+         ng=1
+         if(mds.eq.0)go to 2
+         ng=int((dble(ncall)/2d0)**(1d0/dble(ndim)))
+         mds=1
+         if((2*ng-ndmx).lt.0)go to 2
+         mds=-1
+         npg=ng/ndmx+1
+         nd=ng/npg
+         ng=npg*nd
+ 2       k=ng**ndim
+         npg=ncall/k
+         if(npg.lt.2)npg=2
+         calls=dble(npg*k)
+        
          return
-         end subroutine
+         end
 
-
-
+         
+         
+         
 
 C        NCALL IS THE NUMBER OF CALLS TO VEGAS.
 C        NPRN >  0 VEGAS PRINTS THE RESULTS OF EACH ITERATION.
@@ -191,7 +183,9 @@ c        here the main loop starts around label 11 and 12
          do k=1,npg! introduced by MARKUS instead of the two lines above
          wgt=xjac
          do 15 j=1,ndim
-         xn=(dble(kg(j))-ran1(idum))*dxg+one
+         call random_number(xrandom)     
+         xn=(dble(kg(j))-xrandom)*dxg+one         
+c         xn=(dble(kg(j))-ran1(idum))*dxg+one
          ia(j)=int(xn)
          if(ia(j).gt.1)go to 13
          xo=xi(ia(j),j)
@@ -202,9 +196,14 @@ c        here the main loop starts around label 11 and 12
  14      x(j)=xl(j)+rc*dx(j)
  15      wgt=wgt*xo*xnd
 c
-         f=wgt
+c         f=wgt
 c         write(6,FMT='(a20,2F20.16)') 'xo,xnd in dvegas: ',xo,xnd
-         f=f*fxn(x,wgt)
+c         f=f*fxn(x,wgt)
+         f=fxn(x,wgt)
+c         if( stopvegas ) then
+c           return
+c         endif
+         f=f*wgt          
          f2=f*f
          fb=fb+f
          f2b=f2b+f2
@@ -370,44 +369,44 @@ c
 
 
 
-C  (C) Copr. 1986-92 Numerical Recipes Software ]2w.1,r1..
-C--- Version where idum is passed as an argument
-      double precision FUNCTION ran1(idum)
-      implicit none
-      INTEGER idum,IA,IM,IQ,IR,NTAB,NDIV
-      double precision AM,EPS,RNMX
-      PARAMETER (IA=16807,IM=2147483647,AM=1d0/IM,IQ=127773,
-     .IR=2836,NTAB=32,NDIV=1+(IM-1)/NTAB,EPS=3d-16,RNMX=1d0-EPS)
-      INTEGER j,k,iv(NTAB),iy
-      DATA iv /NTAB*0/, iy /0/
-      SAVE iv,iy
-
-      if (idum.le.0.or.iy.eq.0) then
-        idum=max(-idum,1)
-        do 11 j=NTAB+8,1,-1
-          k=idum/IQ
-          idum=IA*(idum-k*IQ)-IR*k
-          if (idum.lt.0) idum=idum+IM
-          if (j.le.NTAB) iv(j)=idum
-11      continue
-        iy=iv(1)
-      endif
-      k=idum/IQ
-      idum=IA*(idum-k*IQ)-IR*k
-      if (idum.lt.0) idum=idum+IM
-      j=1+iy/NDIV
-      iy=iv(j)
-      iv(j)=idum
-      ran1=min(AM*dble(iy),RNMX)
-
-c      write(6,*) 'idum',idum
-c      write(6,*) 'AM=',AM
-c      write(6,*) 'iy=',iy
-c      write(6,*) 'AM*dble(iy)',AM*dble(iy)
-c      write(6,*) 'ran1',ran1
-
-      return
-      end
+! C  (C) Copr. 1986-92 Numerical Recipes Software ]2w.1,r1..
+! C--- Version where idum is passed as an argument
+!       double precision FUNCTION ran1(idum)
+!       implicit none
+!       INTEGER idum,IA,IM,IQ,IR,NTAB,NDIV
+!       double precision AM,EPS,RNMX
+!       PARAMETER (IA=16807,IM=2147483647,AM=1d0/IM,IQ=127773,
+!      .IR=2836,NTAB=32,NDIV=1+(IM-1)/NTAB,EPS=3d-16,RNMX=1d0-EPS)
+!       INTEGER j,k,iv(NTAB),iy
+!       DATA iv /NTAB*0/, iy /0/
+!       SAVE iv,iy
+! 
+!       if (idum.le.0.or.iy.eq.0) then
+!         idum=max(-idum,1)
+!         do 11 j=NTAB+8,1,-1
+!           k=idum/IQ
+!           idum=IA*(idum-k*IQ)-IR*k
+!           if (idum.lt.0) idum=idum+IM
+!           if (j.le.NTAB) iv(j)=idum
+! 11      continue
+!         iy=iv(1)
+!       endif
+!       k=idum/IQ
+!       idum=IA*(idum-k*IQ)-IR*k
+!       if (idum.lt.0) idum=idum+IM
+!       j=1+iy/NDIV
+!       iy=iv(j)
+!       iv(j)=idum
+!       ran1=min(AM*dble(iy),RNMX)
+! 
+! c      write(6,*) 'idum',idum
+! c      write(6,*) 'AM=',AM
+! c      write(6,*) 'iy=',iy
+! c      write(6,*) 'AM*dble(iy)',AM*dble(iy)
+! c      write(6,*) 'ran1',ran1
+! 
+!       return
+!       end
 
 C  (C) Copr. 1986-92 Numerical Recipes Software ]2w.1,r1..
 

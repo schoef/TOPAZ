@@ -1408,8 +1408,8 @@ ELSEIF( ObsSet.EQ.5 ) THEN! set of observables for ttb production with hadr. top
 
           Histo(10)%Info   = "HT(jets+lept)"
           Histo(10)%NBins  = 40
-          Histo(10)%BinSize= 50d0*GeV
-          Histo(10)%LowVal = 150d0*GeV
+          Histo(10)%BinSize= 20d0*GeV
+          Histo(10)%LowVal = 100d0*GeV
           Histo(10)%SetScale= 100d0
 
           Histo(11)%Info   = "m(lep+bjet)"
@@ -7271,7 +7271,7 @@ real(8) :: xRnd,Mass,Width,invMass,Jacobi,MinEnergy,MaxEnergy
 real(8) :: r,rmin,rmax,BW
 
 
-IF( ZDECAYS.LT.10 ) THEN
+IF( Width.lt.(1d-6)*GeV ) THEN
    invMass = Mass
    Jacobi  = 1d0
 ELSE
@@ -10704,6 +10704,7 @@ elseif( ObsSet.eq.83) then! ttb+H production with semi-leptonic tops
    
     if( FirstTime ) then
       call NNPDFDriver("./PDFS/NNPDF30_lo_as_0130.LHgrid")
+!       call NNPDFDriver("./PDFS/NNPDF30_nlo_as_011.LHgrid")
       call NNinitPDF(0)
       call InitProcess_TTBH(m_H,m_top)
       FirstTime = .false.
@@ -15578,6 +15579,281 @@ END SUBROUTINE
 
 
 
+
+SUBROUTINE WriteLHEvent_TTB(Mom,InFlav,EventWeight)
+use ModParameters
+use ModMisc
+implicit none
+real(8) :: Mom(1:4,1:13),DKRnd(1:2)
+real(8),optional :: EventWeight
+integer :: InFlav(1:2)
+integer :: ICOLUP(1:2,1:13),LHE_IDUP(1:13),ISTUP(1:13),MOTHUP(1:2,1:13)
+integer :: NUP,IDPRUP,i
+real(8) :: XWGTUP,SCALUP,AQEDUP,AQCDUP,Lifetime,Spin,TheMass
+character(len=*),parameter :: Fmt1 = "(6X,I3,2X,I3,3X,I2,3X,I2,2X,I3,2X,I3,X,1PE18.11,X,1PE18.11,X,1PE18.11,X,1PE18.11,X,1PE18.11,1PE18.11,X,1F3.1)"
+integer, parameter :: inLeft=1,inRight=2,Xbos=3,tbar=4,t=5,  bbar=6,Wm=7,lepM=8,nubar=9,  b=10,Wp=11,lepP=12,nu=13
+integer, parameter :: io_LHEOutFile=17
+
+! For description of the LHE format see http://arxiv.org/abs/hep-ph/0109068 and http://arxiv.org/abs/hep-ph/0609017
+! The LHE numbering scheme can be found here: http://pdg.lbl.gov/mc_particle_id_contents.html and http://lhapdf.hepforge.org/manual#tth_sEcA
+
+
+
+      IDPRUP=100
+      SCALUP=MuFac * 100d0
+      AQEDUP=alpha
+      AQCDUP=alpha_s*RunAlphaS(NLOParam,MuRen)
+
+      MOTHUP(1:2,inLeft) = (/0,0/);             ISTUP(inLeft) = -1
+      MOTHUP(1:2,inRight)= (/0,0/);             ISTUP(inRight)= -1
+      MOTHUP(1:2,Xbos)   = (/t,tbar/);          ISTUP(XBos)   = +1
+      MOTHUP(1:2,tbar)   = (/inLeft,inRight/);  ISTUP(tbar)   = +2
+      MOTHUP(1:2,t)      = (/inLeft,inRight/);  ISTUP(t)      = +2
+      MOTHUP(1:2,bbar)   = (/tbar,tbar/);       ISTUP(bbar)   = +1
+      MOTHUP(1:2,Wm)     = (/tbar,tbar/);       ISTUP(Wm)     = +2
+      MOTHUP(1:2,lepM)   = (/Wm,Wm/);           ISTUP(lepM)   = +1
+      MOTHUP(1:2,nubar)  = (/Wm,Wm/);           ISTUP(nubar)  = +1
+      MOTHUP(1:2,b)      = (/t,t/);             ISTUP(b)      = +1
+      MOTHUP(1:2,Wp)     = (/t,t/);             ISTUP(Wp)     = +2
+      MOTHUP(1:2,lepP)   = (/Wp,Wp/);           ISTUP(lepP)   = +1
+      MOTHUP(1:2,nu)     = (/Wp,Wp/);           ISTUP(nu)     = +1
+      if( Process.ge.1 .and. Process.le.6 ) MOTHUP(1:2,6:13)=MOTHUP(1:2,6:13)-1
+
+      LHE_IDUP(inLeft) = InFlav(1)
+      LHE_IDUP(inRight)= InFlav(2)
+      LHE_IDUP(tbar)   = -LHE_Top_
+      LHE_IDUP(t)      = LHE_Top_
+      LHE_IDUP(bbar)   = -LHE_Bot_
+      LHE_IDUP(Wm)     = -LHE_Wp_
+      LHE_IDUP(b)      = LHE_Bot_
+      LHE_IDUP(Wp)     = LHE_Wp_
+      
+      if( InFlav(1).eq.LHE_Glu_ ) then
+          ICOLUP(1:2,inLeft)  = (/501,510/)
+          ICOLUP(1:2,inRight) = (/510,502/)    
+      elseif( InFlav(1).gt.0 ) then
+          ICOLUP(1:2,inLeft)  = (/501,000/)
+          ICOLUP(1:2,inRight) = (/000,502/)
+      else
+          ICOLUP(1:2,inLeft)  = (/000,502/)
+          ICOLUP(1:2,inRight) = (/501,000/)
+      endif
+      ICOLUP(1:2,XBos) = (/000,000/)
+      ICOLUP(1:2,tbar) = (/000,502/)
+      ICOLUP(1:2,t)    = (/501,000/)
+      ICOLUP(1:2,bbar) = (/000,502/)
+      ICOLUP(1:2,b)    = (/501,000/)
+      ICOLUP(1:2,Wm)   = (/000,000/)
+      ICOLUP(1:2,Wp)   = (/000,000/)
+      
+      call random_number(DKRnd)      
+      if( TopDecays.eq.1 ) then
+          if( DKRnd(1).lt.1d0/3d0 ) then
+            LHE_IDUP(lepM) = LHE_ElM_
+            LHE_IDUP(nubar)=-LHE_NuE_
+          elseif( DKRnd(1).lt.2d0/3d0 ) then
+            LHE_IDUP(lepM) = LHE_MuM_
+            LHE_IDUP(nubar)=-LHE_NuM_ 
+          else
+            LHE_IDUP(lepM) = LHE_TaM_
+            LHE_IDUP(nubar)=-LHE_NuT_
+          endif
+
+          if( DKRnd(2).lt.1d0/3d0 ) then
+            LHE_IDUP(lepP)=-LHE_ElM_
+            LHE_IDUP(nu)  = LHE_NuE_
+          elseif( DKRnd(2).lt.2d0/3d0 ) then
+            LHE_IDUP(lepP)=-LHE_MuM_ 
+            LHE_IDUP(nu)  = LHE_NuM_
+          else
+            LHE_IDUP(lepP)= -LHE_TaM_
+            LHE_IDUP(nu)  = LHE_NuT_
+          endif
+          ICOLUP(1:2,lepM) = (/000,000/)
+          ICOLUP(1:2,nubar)= (/000,000/)
+          ICOLUP(1:2,lepP) = (/000,000/)
+          ICOLUP(1:2,nu)   = (/000,000/)
+      
+      elseif( TopDecays.eq.4 ) then
+          if( DKRnd(1).lt.1d0/2d0 ) then
+            LHE_IDUP(lepM) = LHE_Dn_
+            LHE_IDUP(nubar)=-LHE_Up_
+          else
+            LHE_IDUP(lepM) = LHE_Str_
+            LHE_IDUP(nubar)=-LHE_Chm_
+          endif
+          if( DKRnd(2).lt.1d0/3d0 ) then
+            LHE_IDUP(lepP)=-LHE_ElM_
+            LHE_IDUP(nu)  = LHE_NuE_
+          elseif( DKRnd(2).lt.2d0/3d0 ) then
+            LHE_IDUP(lepP)=-LHE_TaM_ 
+            LHE_IDUP(nu)  = LHE_NuM_
+          else
+            LHE_IDUP(lepP)= -LHE_TaM_
+            LHE_IDUP(nu)  = LHE_NuT_
+          endif
+          ICOLUP(1:2,lepM) = (/601,000/)
+          ICOLUP(1:2,nubar)= (/000,601/)
+          ICOLUP(1:2,lepP) = (/000,000/)
+          ICOLUP(1:2,nu)   = (/000,000/)
+
+          
+      elseif( TopDecays.eq.3 ) then
+          if( DKRnd(1).lt.1d0/3d0 ) then
+            LHE_IDUP(lepM) = LHE_ElM_
+            LHE_IDUP(nubar)=-LHE_NuE_
+          elseif( DKRnd(1).lt.2d0/3d0 ) then
+            LHE_IDUP(lepM) = LHE_MuM_
+            LHE_IDUP(nubar)=-LHE_NuM_ 
+          else
+            LHE_IDUP(lepM) = LHE_TaM_
+            LHE_IDUP(nubar)=-LHE_NuT_
+          endif
+          if( DKRnd(2).lt.1d0/2d0 ) then
+            LHE_IDUP(lepP)=-LHE_Dn_
+            LHE_IDUP(nu)  = LHE_Up_
+          else
+            LHE_IDUP(lepP)=-LHE_Str_
+            LHE_IDUP(nu)  = LHE_Chm_
+          endif
+          ICOLUP(1:2,lepM) = (/000,000/)
+          ICOLUP(1:2,nubar)= (/000,000/)
+          ICOLUP(1:2,lepP) = (/000,701/)
+          ICOLUP(1:2,nu)   = (/701,000/)
+      
+      else! TopDecays.eq.2
+          if( DKRnd(1).lt.1d0/2d0 ) then
+            LHE_IDUP(lepM) = LHE_Dn_
+            LHE_IDUP(nubar)=-LHE_Up_
+          else
+            LHE_IDUP(lepM) = LHE_Str_
+            LHE_IDUP(nubar)=-LHE_Chm_
+          endif
+          if( DKRnd(2).lt.1d0/2d0 ) then
+            LHE_IDUP(lepP)=-LHE_Dn_
+            LHE_IDUP(nu)  = LHE_Up_
+          else
+            LHE_IDUP(lepP)=-LHE_Str_
+            LHE_IDUP(nu)  = LHE_Chm_
+          endif
+          ICOLUP(1:2,lepM) = (/601,000/)
+          ICOLUP(1:2,nubar)= (/000,601/)
+          ICOLUP(1:2,lepP) = (/000,701/)
+          ICOLUP(1:2,nu)   = (/701,000/)
+      endif
+      
+
+      if( TopDecays.eq.0 ) then
+        NUP = 5
+        ISTUP(tbar) = +1
+        ISTUP(t)    = +1 
+      else
+        NUP=13
+      endif
+
+      if( present(EventWeight) ) then
+          XWGTUP=EventWeight
+      else
+          XWGTUP=1.0d0
+      endif
+      Lifetime = 0.0d0
+      Spin     = 0.1d0
+
+
+      write(io_LHEOutFile,"(A)") "<event>"
+      write(io_LHEOutFile,"(I2,X,I3,2X,1PE14.7,2X,1PE14.7,2X,1PE14.7,2X,1PE14.7)") NUP,IDPRUP,XWGTUP,SCALUP,AQEDUP,AQCDUP
+      ! in order of appearance:
+      ! (*) number of particles in the event
+      ! (*) process ID (user defined)
+      ! (*) weighted or unweighted events: +1=unweighted, otherwise= see manual
+      ! (*) pdf factorization scale in GeV
+      ! (*) alpha_QED coupling for this event 
+      ! (*) alpha_s coupling for this event
+
+      do i=1,NUP
+          if( i.eq.3 .and. Process.ge.1 .and. Process.le.6 ) cycle
+      !      TheMass = GetMass( MY_IDUP(i) )*100d0
+          TheMass = get_Minv(Mom(:,i))
+          if( TheMass/Mom(1,i).lt.1d-7 ) TheMass = 0.0d0
+          write(io_LHEOutFile,fmt1) LHE_IDUP(i),ISTUP(i), MOTHUP(1,i),MOTHUP(2,i), ICOLUP(1,i),ICOLUP(2,i),Mom(2:4,i)*100d0,Mom(1,i)*100d0,TheMass*100d0,Lifetime,Spin
+      enddo
+      write(io_LHEOutFile,"(A)") "</event>"
+
+RETURN
+END SUBROUTINE
+
+
+
+
+
+
+
+
+
+
+
+SUBROUTINE TTbar_OffShellProjection(MomIn,MomOut,Jacobian)
+use modParameters
+use modMisc
+implicit none
+real(8) :: MomIn(1:4,1:13),MomOut(:,:),MomTmp(1:4),Jacobian
+real(8) :: xRndWidth(2:5),BW_Mass(2:5),BW_Jacobi(2:5)
+integer, parameter :: inLeft=1,inRight=2,Xbos=3,tbar=4,t=5,  bbar=6,Wm=7,lepM=8,nubar=9,  b=10,Wp=11,lepP=12,nu=13
+
+    call random_number(xRndWidth)
+    
+    call SmearExternal(xRndWidth(2),m_top,Ga_TopExp,m_top-6d0*Ga_TopExp,m_top+6d0*Ga_TopExp,BW_Mass(2),BW_Jacobi(2))
+    call SmearExternal(xRndWidth(3),m_top,Ga_TopExp,m_top-6d0*Ga_TopExp,m_top+6d0*Ga_TopExp,BW_Mass(3),BW_Jacobi(3))
+    call SmearExternal(xRndWidth(4),m_W,Ga_WExp,m_W-6d0*Ga_WExp,m_W+6d0*Ga_WExp,BW_Mass(4),BW_Jacobi(4))
+    call SmearExternal(xRndWidth(5),m_W,Ga_WExp,m_W-6d0*Ga_WExp,m_W+6d0*Ga_WExp,BW_Mass(5),BW_Jacobi(5))
+    Jacobian = BW_Jacobi(2) * BW_Jacobi(3) * BW_Jacobi(4) * BW_Jacobi(5)    
+
+    call ShiftMass(MomIn(1:4,tbar),MomIn(1:4,t),BW_Mass(2),BW_Mass(3),MomOut(1:4,tbar),MomOut(1:4,t))
+    
+    MomTmp(1:4) = MomOut(1:4,t) - MomIn(1:4,Wp)
+    call ShiftMass(MomTmp,MomIn(1:4,Wp),m_BotExp,BW_Mass(4),MomOut(1:4,b),MomOut(1:4,Wp))
+    
+    MomTmp(1:4) = MomOut(1:4,tbar) - MomIn(1:4,Wm)
+    call ShiftMass(MomTmp,MomIn(1:4,Wm),m_BotExp,BW_Mass(5),MomOut(1:4,bbar),MomOut(1:4,Wm))
+    
+    MomTmp(1:4) = MomOut(1:4,Wp) - MomIn(1:4,lepP)
+    MomOut(1:4,nu)   = MomTmp(1:4) - (MomTmp(1:4).dot.MomTmp(1:4))/2d0/(MomTmp(1:4).dot.MomIn(1:4,lepP)) * MomIn(1:4,lepP)
+    MomOut(1:4,lepP) = (1d0 + (MomTmp(1:4).dot.MomTmp(1:4))/2d0/(MomTmp(1:4).dot.MomIn(1:4,lepP))) * MomIn(1:4,lepP)
+    
+    MomTmp(1:4) = MomOut(1:4,Wm) - MomIn(1:4,lepM)
+    MomOut(1:4,nubar) = MomTmp(1:4) - (MomTmp(1:4).dot.MomTmp(1:4))/2d0/(MomTmp(1:4).dot.MomIn(1:4,lepM)) * MomIn(1:4,lepM)
+    MomOut(1:4,lepM)  = (1d0 + (MomTmp(1:4).dot.MomTmp(1:4))/2d0/(MomTmp(1:4).dot.MomIn(1:4,lepM))) * MomIn(1:4,lepM)
+
+return
+END SUBROUTINE
+
+
+
+
+
+SUBROUTINE ShiftMass(p1,p2,m1,m2,p1hat,p2hat)
+use ModMisc
+implicit none
+real(8),intent(in) :: p1(1:4),p2(1:4)
+real(8) :: m1,m2,p1hat(1:4),p2hat(1:4)
+real(8) :: xi,eta,a,b,c,p1sq,p2sq,p1p2
+
+  p1sq = p1(1:4).dot.p1(1:4)
+  p2sq = p2(1:4).dot.p2(1:4)
+  p1p2 = p1(1:4).dot.p2(1:4)
+
+  a = ( p1sq*p2(1:4) - p2sq*p1(1:4) + p1p2*(p2(1:4)-p1(1:4)) ).dot.( p1sq*p2(1:4) - p2sq*p1(1:4) + p1p2*(p2(1:4)-p1(1:4)) )
+  b = ( p1sq+p2sq+2d0*p1p2+m2**2-m1**2 ) * ( p1p2**2 - p1sq*p2sq )
+  c = 0.25d0*( p1sq+p2sq+2d0*p1p2+m2**2-m1**2 )**2*p1sq - (p1sq+p1p2)**2*m2**2
+  eta = 1d0/2d0/a * ( -b - dsqrt( dabs(b**2 -4d0*a*c) ) )
+  xi = ( p1sq+p2sq+2d0*p1p2 + m2**2 - m1**2 - 2d0*eta*(p2sq+p1p2) )/2d0/( p1sq + p1p2 )
+
+  p2hat(1:4) = xi*p1(1:4) + eta*p2(1:4)
+  p1hat(1:4) = (1d0-xi)*p1(1:4) + (1d0-eta)*p2(1:4)
+
+
+RETURN
+END SUBROUTINE
 
 
 

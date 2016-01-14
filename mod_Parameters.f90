@@ -14,7 +14,7 @@ logical, public :: unweighted
 logical, public :: HelSampling
 logical, public :: FirstLOThenVI
 integer, public :: DKRE_switch
-integer, public, save :: ColorlessTag=2   !  1=SM Z, 2=SM+BSM Z, 3=SM+BSM Higgs
+integer, public, save :: ColorlessTag=2   !  1=SM Z, 2=SM+BSM Z, 3=SM+BSM Higgs!     automatically set to 3 in main.f90 for ttb+H final states
 integer(8), public, save :: EvalCounter=0
 integer(8), public, save :: PSCutCounter=0
 integer(8), public, save :: SkipCounter=0
@@ -22,6 +22,15 @@ logical,public ,parameter :: TTBZ_SpeedUp=.false.  !  good idea but doesn't work
 integer, public :: TTBZ_DebugSwitch=0   !   0=disabled, 1=bosonic loops, 2=fermionic loops, 3=gamma5 renormalization
 logical, public,parameter :: LO_ReWeighting=.false.
 real, public,allocatable :: Weights(:,:)
+
+logical, public :: Seed_random
+integer, public :: TheSeeds(0:2) = (/2,700470849,476/)! only used if seed_random=.false., the first entry is the total number of seeds
+
+! Unweighted events
+integer, public :: ChannelHash(-6:6,-6:6)
+integer, parameter :: MaxChannels=1
+real(8), public :: CrossSecMax(1:MaxChannels),CrossSec(1:MaxChannels)
+integer, public :: RequEvents(1:MaxChannels),AcceptEvents(1:MaxChannels),iChannel
 
 ! PVegas (MPI) part
 integer, public :: MPI_Rank
@@ -39,6 +48,7 @@ integer, allocatable :: Crossing(:)
 real(8), public :: MuRen, MuFac, MuFrag, AvgFactor
 character, public :: HistoFile*(200)
 character, public :: GridFile*(200)
+character, public :: LHEFile*(200)
 integer, public :: GridIO
 real(8), public :: AvgValue=0d0,MinValue=1d13,MaxValue=-1d13
 real(8), public :: time_start,time_end
@@ -53,6 +63,7 @@ real(8), public, parameter :: GeV=0.01d0
 real(8), public, parameter :: GF = (1.16639d-5)/GeV**2
 real(8), public            :: m_Top, m_SMTop
 real(8), public            :: m_Bot
+real(8), public, parameter :: m_BotExp= 4.2d0*GeV
 real(8), public, parameter :: m_Chm   = 0d0
 real(8), public, parameter :: m_Str   = 0d0
 real(8), public, parameter :: m_Up    = 0d0
@@ -186,6 +197,25 @@ integer, public, parameter :: RecombPrescr = 0   ! 0 = 4-vector addition,   1 = 
 ! PDF Set
 character, public :: PDFSetString*(100)
 integer, public :: LHAPDFMember
+
+integer, parameter, public :: LHE_Up_=2
+integer, parameter, public :: LHE_Dn_=1
+integer, parameter, public :: LHE_Chm_=4
+integer, parameter, public :: LHE_Str_=3
+integer, parameter, public :: LHE_Top_=6
+integer, parameter, public :: LHE_Bot_=5
+integer, parameter, public :: LHE_Glu_=21
+integer, parameter, public :: LHE_ElM_=11
+integer, parameter, public :: LHE_MuM_=13
+integer, parameter, public :: LHE_TaM_=15
+integer, parameter, public :: LHE_NuE_=12
+integer, parameter, public :: LHE_NuM_=14
+integer, parameter, public :: LHE_NuT_=16
+integer, parameter, public :: LHE_Wp_=24
+integer, parameter, public :: LHE_Pho_=22
+integer, parameter, public :: LHE_Z_=23
+integer, parameter, public :: LHE_Hig_=25
+
 
 ! particle 0 = not defined
 integer, public, target :: Up_  = 1
@@ -504,6 +534,10 @@ Ga_Top(1) = Ga_Top(0) * ( - RUNALPHAS(2,MuRen)*alpha_sOver2Pi*4d0/3d0*(   &   ! 
 
 
 
+
+
+! careful all checks have been done for real-valued anomalous couplings only
+
 if( InputAnomalousCoupl ) then
   couplWTB_left  =1.0d0 + DelWTB_left
   couplWTB_right =DelWTB_right
@@ -594,6 +628,8 @@ if( InputEFTCoeffCoupl ) then
   couplGaTT_A = 0d0   
   couplGaTT_V2 = dsqrt(2d0)/dsqrt(alpha4Pi) * dreal(cw*EFTOP_C33_uBphi + sw*EFTOP_C33_uW) * vev*m_top/Lambda_BSM**2   /m_top
   couplGaTT_A2 = dsqrt(2d0)/dsqrt(alpha4Pi) * dimag(cw*EFTOP_C33_uBphi + sw*EFTOP_C33_uW) * vev*m_top/Lambda_BSM**2   /m_top
+  
+  if( cdabs(couplGaTT_A2).ne.0d0 ) print *, "WARNING: check Chir vs. iChir couplings in vVq_Weyl and vVq, respectively!"
 endif
 
 
