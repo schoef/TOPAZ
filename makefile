@@ -11,6 +11,11 @@ PSDir = $(Here)/PhaseSpace
 QCDLoop = $(Here)/QCDLoop-1.9
 Flags = 
 
+# For ifort support on CERN's lxplus, add the following two lines to your .bashrc
+# source /afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2016/compilers_and_libraries_2016.1.150/linux/bin/ifortvars.sh intel64
+# source /afs/cern.ch/sw/IntelSoftware/linux/setup.sh
+
+
 # ifort optimization, Yes/No
 Opt = Yes
 
@@ -18,9 +23,9 @@ Opt = Yes
 useMPI = No
 
 # link pdfs via LHA library ('Yes' or 'No')
-UseLHAPDF=Yes
-# LHAPDFDir=/afs/cern.ch/user/m/maschulz/lib/LHAPDF-6.1.5/lib/
-LHAPDFDir=/home/schulze/lib/LHAPDF-6.1.5/lib/
+UseLHAPDF=No
+LHAPDFDir=/afs/cern.ch/user/m/maschulz/lib/LHAPDF-6.1.5/lib/
+#LHAPDFDir=/home/schulze/lib/LHAPDF-6.1.5/lib/
 # LHAPDFDir=directory which contains libLHAPDF.a, libLHAPDF.la, libLHAPDF.so
 # remember to export 
 #          LD_LIBRARY_PATH=/.../LHAPDF-x.y.z/lib/:${LD_LIBRARY_PATH}
@@ -28,7 +33,7 @@ LHAPDFDir=/home/schulze/lib/LHAPDF-6.1.5/lib/
 
 
 # interface to JHUGenMELA (requires UseLHAPDF=Yes)
-useJHUGenMELA = Yes
+useJHUGenMELA = No	
 
 
 ifeq ($(useMPI),Yes)

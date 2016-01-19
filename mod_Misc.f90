@@ -993,6 +993,17 @@ END FUNCTION
 
 
 
+FUNCTION Get_Mom3Abs(Mom1)
+implicit none
+real(8) ::Mom1(1:4),Get_Mom3Abs
+
+    Get_Mom3Abs = dsqrt(Mom1(2)**2+Mom1(3)**2+Mom1(4)**2)
+
+RETURN
+END FUNCTION
+
+
+
 FUNCTION Get_R(Mom1,Mom2)
 implicit none
 real(8),parameter :: Pi=3.141592653589793d0

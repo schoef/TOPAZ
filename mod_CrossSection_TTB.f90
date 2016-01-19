@@ -128,7 +128,7 @@ ENDIF
 
   EvalCS_1L_ttbgg = 0d0
 
-  call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+  call PDFMapping(2,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top * ThresholdCutOff ) then
       EvalCS_1L_ttbgg = 0d0
       return
@@ -580,7 +580,7 @@ ENDIF
 
    EvalCS_1L_ttbqqb = 0d0
 
-  call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+  call PDFMapping(2,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top * ThresholdCutOff ) then
       EvalCS_1L_ttbqqb = 0d0
       return
@@ -1218,7 +1218,7 @@ include "vegas_common.f"
 
   EvalCS_Real_ttbggg = 0d0
 
-  call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+  call PDFMapping(2,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top * ThresholdCutOff ) then
       EvalCS_Real_ttbggg = 0d0
       return
@@ -1426,7 +1426,7 @@ include "vegas_common.f"
   EvalCS_Real_ttbqqbg = 0d0
   EvalCS_Dips_ttbqqbg = 0d0
 
-  call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+  call PDFMapping(2,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top * ThresholdCutOff ) then
       EvalCS_Real_ttbqqbg = 0d0
       return
@@ -1697,7 +1697,7 @@ ELSEIF( Process.EQ.2 ) THEN
     ColCorrLO(1:NumBornAmps,1:NumBornAmps) = ColLO_ttbqqb(1:NumBornAmps,1:NumBornAmps)
 ENDIF
 
-  call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+  call PDFMapping(2,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top * ThresholdCutOff ) then
       EvalCS_NLODK_ttb_noSC = 0d0
       return
@@ -2231,7 +2231,7 @@ ELSEIF( Process.EQ.2 ) THEN
     ColCorrLO(1:NumBornAmps,1:NumBornAmps) = ColLO_ttbqqb(1:NumBornAmps,1:NumBornAmps)
 ENDIF
 
-  call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+  call PDFMapping(2,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top * ThresholdCutOff ) then
       EvalCS_NLODK_ttb = 0d0
       return

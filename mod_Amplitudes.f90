@@ -1178,12 +1178,12 @@ END SUBROUTINE
 
 
 
-SUBROUTINE WriteLatexOutput(iPrimAmp,PrimAmps,BornAmps)
+SUBROUTINE WriteLatexOutput(iPrimAmp,PrimAmpsIn,BornAmpsIn)
 use ModProcess
 use ModParameters
 implicit none
-type(PrimitiveAmplitude) :: PrimAmps
-type(BornAmplitude) :: BornAmps
+type(PrimitiveAmplitude) :: PrimAmpsIn
+type(BornAmplitude) :: BornAmpsIn
 integer :: iPrimAmp,i,j
 character :: csign(1:5)*(5)
 character :: ctype(1:5)*(10),iPart(1:5)*(1),sign1*(1),sign2*(1)
@@ -1191,31 +1191,31 @@ character :: tex(1:5)*(100)
 
 
   do i=1,5
-    if(ExtParticle(PrimAmps%ExtLine(i))%Helicity.eq.+1) csign(i)="+"
-    if(ExtParticle(PrimAmps%ExtLine(i))%Helicity.eq.-1) csign(i)="-"
+    if(ExtParticle(PrimAmpsIn%ExtLine(i))%Helicity.eq.+1) csign(i)="+"
+    if(ExtParticle(PrimAmpsIn%ExtLine(i))%Helicity.eq.-1) csign(i)="-"
 
-    if(ExtParticle(PrimAmps%ExtLine(i))%PartType.eq.Glu_) ctype(i)="g"
-    if(ExtParticle(PrimAmps%ExtLine(i))%PartType.eq.Top_)  ctype(i)="t"
-    if(ExtParticle(PrimAmps%ExtLine(i))%PartType.eq.ATop_)  ctype(i)="\bar{t}"
-    if(ExtParticle(PrimAmps%ExtLine(i))%PartType.eq.Str_)  ctype(i)="q"
-    if(ExtParticle(PrimAmps%ExtLine(i))%PartType.eq.AStr_)  ctype(i)="\bar{q}"
-    write(iPart(i),"(I1)") PrimAmps%ExtLine(i)
+    if(ExtParticle(PrimAmpsIn%ExtLine(i))%PartType.eq.Glu_) ctype(i)="g"
+    if(ExtParticle(PrimAmpsIn%ExtLine(i))%PartType.eq.Top_)  ctype(i)="t"
+    if(ExtParticle(PrimAmpsIn%ExtLine(i))%PartType.eq.ATop_)  ctype(i)="\bar{t}"
+    if(ExtParticle(PrimAmpsIn%ExtLine(i))%PartType.eq.Str_)  ctype(i)="q"
+    if(ExtParticle(PrimAmpsIn%ExtLine(i))%PartType.eq.AStr_)  ctype(i)="\bar{q}"
+    write(iPart(i),"(I1)") PrimAmpsIn%ExtLine(i)
     tex(i) = trim(iPart(i))//"_{"//trim(ctype(i))//"}^{"//trim(csign(i))//"}"
   enddo
 
   sign1=""
   sign2=""
-  if(dimag(PrimAmps%Result(-1)/BornAmps%Result).ge.0d0) sign1="+"
-  if(dimag((PrimAmps%Result(0)+PrimAmps%Result(1))/BornAmps%Result).ge.0d0) sign2="+"
+  if(dimag(PrimAmpsIn%Result(-1)/BornAmpsIn%Result).ge.0d0) sign1="+"
+  if(dimag((PrimAmpsIn%Result(0)+PrimAmpsIn%Result(1))/BornAmpsIn%Result).ge.0d0) sign2="+"
   write(*,"(A,F9.6,A,F13.8,A,F13.8,A,F13.8,A,F13.8,A)") "$A("//trim(tex(1))//","//trim(tex(2))//","//trim(tex(3))//","//trim(tex(4))//","//trim(tex(5))//")"// &
-                 "$ & $",dreal(PrimAmps%Result(-2)/BornAmps%Result), &
-                 "$ & $",dreal(PrimAmps%Result(-1)/BornAmps%Result),sign1,dimag(PrimAmps%Result(-1)/BornAmps%Result)," \mathrm{i} $ & $", &
-                      dreal((PrimAmps%Result(0)+PrimAmps%Result(1))/BornAmps%Result),sign2,dimag((PrimAmps%Result(0)+PrimAmps%Result(1))/BornAmps%Result)," \mathrm{i}$ \\"
+                 "$ & $",dreal(PrimAmpsIn%Result(-2)/BornAmpsIn%Result), &
+                 "$ & $",dreal(PrimAmpsIn%Result(-1)/BornAmpsIn%Result),sign1,dimag(PrimAmpsIn%Result(-1)/BornAmpsIn%Result)," \mathrm{i} $ & $", &
+                      dreal((PrimAmpsIn%Result(0)+PrimAmpsIn%Result(1))/BornAmpsIn%Result),sign2,dimag((PrimAmpsIn%Result(0)+PrimAmpsIn%Result(1))/BornAmpsIn%Result)," \mathrm{i}$ \\"
 
 !   print *, "---",iPrimAmp
 !   sign1=""
-!   if(dimag(BornAmps%Result).ge.0d0) sign1="+"
-!   write(*,"(F13.8,A,F13.8,A)") dreal(BornAmps%Result),sign1,dimag(BornAmps%Result),"\mathrm{i}"
+!   if(dimag(BornAmpsIn%Result).ge.0d0) sign1="+"
+!   write(*,"(F13.8,A,F13.8,A)") dreal(BornAmpsIn%Result),sign1,dimag(BornAmpsIn%Result),"\mathrm{i}"
 
 END SUBROUTINE
 
@@ -1775,4 +1775,5 @@ END SUBROUTINE
 
 
 END MODULE ModAmplitudes
+
 
