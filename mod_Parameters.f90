@@ -27,10 +27,10 @@ logical, public :: Seed_random
 integer, public :: TheSeeds(0:2) = (/2,700470849,476/)! only used if seed_random=.false., the first entry is the total number of seeds
 
 ! Unweighted events
-integer, public :: ChannelHash(-6:6,-6:6)
-integer, parameter :: MaxChannels=1
-real(8), public :: CrossSecMax(1:MaxChannels),CrossSec(1:MaxChannels)
-integer, public :: RequEvents(1:MaxChannels),AcceptEvents(1:MaxChannels),iChannel
+! integer, public :: ChannelHash(-6:6,-6:6)
+integer, parameter :: MaxChannels=10
+real(8), public :: CrossSecMax(0:MaxChannels),CrossSec(0:MaxChannels)
+integer, public :: RequEvents(0:MaxChannels),AcceptEvents(0:MaxChannels)
 
 ! PVegas (MPI) part
 integer, public :: MPI_Rank

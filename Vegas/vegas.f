@@ -203,7 +203,8 @@ c         f=f*fxn(x,wgt)
 c         if( stopvegas ) then
 c           return
 c         endif
-         f=f*wgt          
+         f=f*wgt
+         wtmax=max(wtmax,dabs(f))          
          f2=f*f
          fb=fb+f
          f2b=f2b+f2
@@ -250,6 +251,7 @@ c      it: current iteration, ti: integral, tsi: std.dev.
 c      avgi: accum. intgreal, sd: accum. std.dev., wtmax: max weight, chi2a: chi^2
 c        write(6,201)it,ti,tsi,avgi,sd,chi2a
         write(6,201) it,ti,avgi,tsi,sd,wtmax,chi2a
+        wtmax = 0d0
 !         write(15,201)it,ti,avgi,tsi,sd,wtmax,chi2a
 !         if(nvegasrun.eq.131313) then
 !             write(15,'(A1,1X,I3,4E20.8,I)') "#",it,ti,tsi,avgi,sd

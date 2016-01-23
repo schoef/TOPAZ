@@ -1011,6 +1011,7 @@ ELSEIF( PROCESS.EQ.21 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho(in d
       NDim = NDim + 2    ! t tbar PS integration
       NDim = NDim + 3    ! photon phase space
       NDim = NDim + 2    ! shat integration
+      if( Unweighted ) NDim=NDim+1   ! variable to decide which nPhoRad
       VegasNc0_default = 100000
       VegasNc1_default = 100000
   ELSEIF( CORRECTION.EQ.4 ) THEN
@@ -1055,6 +1056,7 @@ ELSEIF( PROCESS.EQ.22 ) THEN !   3_Str  + 4_AStr --> 1_ATop + 2_Top + 5_Pho(in p
       AvgFactor = SpinAvg * QuarkColAvg**2
       NDim = NDim + 5    ! t tbar photon PS integration
       NDim = NDim + 2    ! shat integration
+      if( Unweighted ) NDim=NDim+1   ! variable to decide which partonic channel
       VegasNc0_default = 10000000
       VegasNc1_default = 10000000
   ELSEIF( CORRECTION.EQ.1 ) THEN
@@ -1112,6 +1114,7 @@ ELSEIF( PROCESS.EQ.23 ) THEN !   3_Str  + 4_AStr --> 1_ATop + 2_Top + 5_Pho(in d
       NDim = NDim + 2    ! t tbar PS integration
       NDim = NDim + 3    ! photon phase space
       NDim = NDim + 2    ! shat integration
+      if( Unweighted ) NDim=NDim+1   ! variable to decide which nPhoRad
       VegasNc0_default = 100000
       VegasNc1_default = 100000
   ELSEIF( CORRECTION.EQ.4 ) THEN

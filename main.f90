@@ -2252,40 +2252,48 @@ implicit none
 include "vegas_common.f"
 real(8) :: VG_Result,VG_Error,VG_Chi2,calls1,calls2,calls_rescale
 real(8) :: GenUW_time_end,GenUW_time_start
-integer :: i1,j1,imax,MissingEvents,MaxEvts
-
-
-
+integer :: i1,j1,imax,MissingEvents,MaxEvts,NumPartonicChannels
 
       
 
     VegasMxDim=mxdim
 
-    VegasIt0 = 5
-    VegasIt1 = 3
-
-    itmx = VegasIt0
-    ncall= VegasNc0
-    warmup = .true.
-
-    ! gridfile=trim("GenUW.grid")
-    outgridfile = GridFile(1:72)
-    ingridfile  = GridFile(1:72)
-    readin=.false.    
-    writeout=.true.
+    VegasIt0 = 10
+    VegasIt1 = 5
 
     
-iChannel=1
+    gridfile=trim("GenUW.grid")
+    outgridfile = GridFile(1:72)
+    ingridfile  = GridFile(1:72)
+    if( GridIO.eq.-1 ) then
+      readin=.false.
+      writeout=.true.
+    elseif( GridIO.eq.+1 ) then
+      readin=.true.
+      writeout=.false.
+    else
+      readin=.false.
+      writeout=.false.
+    endif
+    
 
 !------------------------------------------------------------------------------
 ! scanning the integrand
+
+!---------------------
+    warmup = .true.  !
+!---------------------
+
     write(*,"(1X,A)")  "Scanning integrand"
+    itmx = VegasIt0
+    ncall= VegasNc0
 
 IF( MASTERPROCESS.EQ.1 ) THEN
 IF( CORRECTION.EQ.0 .AND. PROCESS.EQ.1 ) THEN
   call vegas(GenUW_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
   CrossSecMax(:) = 0d0
   CrossSec(:) = 0d0 
+  NumPartonicChannels = 1
 !   if( warmup ) then
    itmx = VegasIt1
 !    ncall= VegasNc1
@@ -2294,10 +2302,11 @@ IF( CORRECTION.EQ.0 .AND. PROCESS.EQ.1 ) THEN
    call vegas1(GenUW_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
 !   endif
 ELSEIF( CORRECTION.EQ.0 .AND. PROCESS.EQ.21 ) THEN
-  if( .not. TTBPhoton_SMonly ) call Error("TTBPhoton_SMonly has to be deactivated")
+  if( TTBPhoton_SMonly ) call Error("TTBPhoton_SMonly has to be deactivated")
   call vegas(GenUW_anomcoupl_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2) 
   CrossSecMax(:) = 0d0
   CrossSec(:) = 0d0  
+  NumPartonicChannels = 1
 !   if( warmup ) then
    itmx = VegasIt1
 !    ncall= VegasNc1
@@ -2309,27 +2318,30 @@ ENDIF
 
 
 ELSEIF( MASTERPROCESS.EQ.2 ) THEN
+ndim = ndim + 1
 IF( CORRECTION.EQ.0 .AND. PROCESS.EQ.2 ) THEN
         call vegas(GenUW_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
         CrossSecMax(:) = 0d0
         CrossSec(:) = 0d0 
+        NumPartonicChannels = 10
 !         if( warmup ) then
         itmx = VegasIt1
 !         ncall= VegasNc1
 !         call InitHisto()
-   write(*,"(1X,A)")  "Finding maximum cross section"
+        write(*,"(1X,A)")  "Finding maximum cross section"
         call vegas1(GenUW_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
 !         endif
 ELSEIF( CORRECTION.EQ.0 .AND. PROCESS.EQ.23 ) THEN
-        if( .not. TTBPhoton_SMonly ) call Error("TTBPhoton_SMonly has to be deactivated")
+        if( TTBPhoton_SMonly ) call Error("TTBPhoton_SMonly has to be deactivated")
         call vegas(GenUW_anomcoupl_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)  
         CrossSecMax(:) = 0d0
         CrossSec(:) = 0d0 
+        NumPartonicChannels = 10
 !         if( warmup ) then
         itmx = VegasIt1
 !         ncall= VegasNc1
 !         call InitHisto()
-   write(*,"(1X,A)")  "Finding maximum cross section"
+        write(*,"(1X,A)")  "Finding maximum cross section"
         call vegas1(GenUW_anomcoupl_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)  
 !         endif
 ENDIF
@@ -2337,10 +2349,11 @@ ENDIF
 
 ELSEIF( MASTERPROCESS.EQ.17 ) THEN
 IF( CORRECTION.EQ.0 ) THEN
-  if( .not. TTBPhoton_SMonly ) call Error("TTBPhoton_SMonly has to be deactivated")
+  if( TTBPhoton_SMonly ) call Error("TTBPhoton_SMonly has to be deactivated")
   call vegas(GenUW_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
   CrossSecMax(:) = 0d0
   CrossSec(:) = 0d0 
+  NumPartonicChannels = 1
 !   if( warmup ) then
    itmx = VegasIt1
 !    ncall= VegasNc1
@@ -2353,10 +2366,11 @@ ENDIF
 
 ELSEIF( MASTERPROCESS.EQ.18 ) THEN
 IF( CORRECTION.EQ.0 ) THEN
-  if( .not. TTBPhoton_SMonly ) call Error("TTBPhoton_SMonly has to be deactivated")
+  if( TTBPhoton_SMonly ) call Error("TTBPhoton_SMonly has to be deactivated")
   call vegas(GenUW_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
   CrossSecMax(:) = 0d0
-  CrossSec(:) = 0d0 
+  CrossSec(:) = 0d0
+  NumPartonicChannels = 10
 !   if( warmup ) then
    itmx = VegasIt1
 !    ncall= VegasNc1
@@ -2371,31 +2385,35 @@ ENDIF! MASTERPROCESS
 !------------------------------------------------------------------------------
 
 
+    if( GridIO.eq.-1 ) then
+        open(unit=11,file=outgridfile,position='append')
+        write(11,'(PE14.6)') CrossSecMax(1:NumPartonicChannels)
+        close(11) 
+        print *, "Max.wgt.=",CrossSecMax(1:NumPartonicChannels)
+    endif
+
 
     call vegas_get_calls(calls1)
-    CrossSec(:) = CrossSec(:)/dble(itmx)    
+    CrossSec(1:NumPartonicChannels) = CrossSec(1:NumPartonicChannels)/dble(itmx)    
     write(*,"(A)")  ""
-    write(*,"(2X,A,F10.3,A,F13.3,A,F13.3)") "Total xsec: ",VG_Result, " +/-",VG_Error, " fb    vs.  ",sum(CrossSec(:))
+    write(*,"(2X,A,F10.3,A,F13.3,A,F13.3)") "Total xsec: ",VG_Result, " +/-",VG_Error, " fb    vs.  ",sum(CrossSec(1:NumPartonicChannels))
 
     RequEvents(:)=0
-    do i1=1,MaxChannels
+    do i1=1,NumPartonicChannels
         RequEvents(i1) = RequEvents(i1) + nint( CrossSec(i1)/VG_Result * VegasNc1 )
     enddo
 
 
-    do i1=1,MaxChannels
+    do i1=1,NumPartonicChannels
          if( RequEvents(i1).gt.0 ) write(*,"(1X,A,I3,3X,A,3X,F8.3,I9)") "Channel: ",i1," Cross section:",CrossSec(i1)/VG_Result,RequEvents(i1) 
     enddo
-!     write(*,"(2X,A,F8.3,I9)") "Total partonic xsec ",sum(CrossSec(:))/VG_Result,sum(RequEvents(:))
-  
-  
   
 !   add some events that got lost due to rounding errors
 !   distribute them according to the partonic cross section fractions and finally add the last pieces to the largest partonic contribution
-    MissingEvents = VegasNc1 - sum(RequEvents(:))
+    MissingEvents = VegasNc1 - sum(RequEvents(1:NumPartonicChannels))
     if( MissingEvents.ne.0 ) then
         MaxEvts = -10000
-        do i1=1,MaxChannels
+        do i1=1,NumPartonicChannels
             RequEvents(i1) = RequEvents(i1) + nint( CrossSec(i1)/VG_Result * MissingEvents )
             if( RequEvents(i1).gt.MaxEvts ) then
               MaxEvts = RequEvents(i1)
@@ -2403,98 +2421,98 @@ ENDIF! MASTERPROCESS
             endif
 !             print *, "adding",i1,j1,nint( CrossSec(i1,j1)/VG_Result * MissingEvents )
         enddo       
-        MissingEvents = VegasNc1 - sum(RequEvents(:))
+        MissingEvents = VegasNc1 - sum(RequEvents(1:NumPartonicChannels))
 !         print *, "MISSING EVENTS",MissingEvents
         RequEvents(imax) = RequEvents(imax) + MissingEvents
-        write(*,"(2X,A,I9)") "Adjusting number of events. New event count=",sum(RequEvents(:))
+        write(*,"(2X,A,I9)") "Adjusting number of events. New event count=",sum(RequEvents(1:NumPartonicChannels))
     endif
     
-      
 
 
 
 
+!------------------------------------------------------------------------------
+! event generation
 
 
-    
+!---------------------
+    warmup = .false. !
+!---------------------    
     write(*,"(A)")  ""
     write(*,"(1X,A)")  "Event generation"
     call InitHisto()
     AcceptEvents(:) = 0
-    warmup = .false.
     itmx = 1
-!     nprn = 0  
+    nprn = 1
     writeout=.false.
-    readin=.true.
-
+!     readin=.true.
     
-    CrossSecMax(:) = 1.0d0 * CrossSecMax(:)    !  adjustment factor
+    CrossSecMax(1:NumPartonicChannels) = 1.0d0 * CrossSecMax(1:NumPartonicChannels)    !  adjustment factor
     call cpu_time(GenUW_time_start)    
     
 
     itmx=20000
-    ncall= VegasNc0 !min(5*VegasNc0,VegasNc1)!   if this ncall is too high (e.g. when VegasNc0 is high) then there is less than one iteration and the histogram comes out wrong
+    ncall= VegasNc0/10 !min(5*VegasNc0,VegasNc1)!   if this ncall is too high (e.g. when VegasNc0 is high) then there is less than one iteration and the histogram comes out wrong
     call vegas_get_calls(calls2)
     calls_rescale = calls1/calls2
-    CrossSecMax(:) = CrossSecMax(:) * calls_rescale    
+    CrossSecMax(1:NumPartonicChannels) = CrossSecMax(1:NumPartonicChannels) * calls_rescale    
 
 !     print *, " Rescale factor",calls_rescale,calls1,calls2
     
 
 !------------------------------------------------------------------------------
 
-itmx=1
-do while ( .not. stopvegas ) 
-print *, "status: ",dble(AcceptEvents(iChannel))/dble(RequEvents(iChannel))*100d0
+
+    itmx=1
+    do while ( .not. stopvegas ) ! maybe stopvegas is not required, just check the status bar
+    print *, "status: ",dble(sum(AcceptEvents(1:NumPartonicChannels)))/(dble(sum(RequEvents(1:NumPartonicChannels)))+1d-6)*100d0
 
 
+    IF( MASTERPROCESS.EQ.1 ) THEN
+    IF( CORRECTION.EQ.0 .AND. PROCESS.EQ.1 ) THEN
+      call vegas1(GenUW_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
+    ELSEIF( CORRECTION.EQ.0 .AND. PROCESS.EQ.21 ) THEN
+      if( TTBPhoton_SMonly ) call Error("TTBPhoton_SMonly has to be deactivated")
+      call vegas1(GenUW_anomcoupl_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)  
+    ENDIF
 
 
-IF( MASTERPROCESS.EQ.1 ) THEN
-IF( CORRECTION.EQ.0 .AND. PROCESS.EQ.1 ) THEN
-   call vegas(GenUW_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
-ELSEIF( CORRECTION.EQ.0 .AND. PROCESS.EQ.21 ) THEN
-  if( .not. TTBPhoton_SMonly ) call Error("TTBPhoton_SMonly has to be deactivated")
-   call vegas1(GenUW_anomcoupl_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)  
-ENDIF
+    ELSEIF( MASTERPROCESS.EQ.2 ) THEN
+    IF( CORRECTION.EQ.0 .AND. PROCESS.EQ.2 ) THEN
+            call vegas1(GenUW_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+    ELSEIF( CORRECTION.EQ.0 .AND. PROCESS.EQ.23 ) THEN
+            call vegas1(GenUW_anomcoupl_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)  
+    ENDIF
 
 
-ELSEIF( MASTERPROCESS.EQ.2 ) THEN
-IF( CORRECTION.EQ.0 .AND. PROCESS.EQ.2 ) THEN
-        call vegas1(GenUW_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
-ELSEIF( CORRECTION.EQ.0 .AND. PROCESS.EQ.23 ) THEN
-        call vegas1(GenUW_anomcoupl_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)  
-ENDIF
+    ELSEIF( MASTERPROCESS.EQ.17 ) THEN
+    IF( CORRECTION.EQ.0 ) THEN
+      if( TTBPhoton_SMonly ) call Error("TTBPhoton_SMonly has to be deactivated")
+      call vegas1(GenUW_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+    ENDIF
 
 
-ELSEIF( MASTERPROCESS.EQ.17 ) THEN
-IF( CORRECTION.EQ.0 ) THEN
-  if( .not. TTBPhoton_SMonly ) call Error("TTBPhoton_SMonly has to be deactivated")
-   call vegas1(GenUW_anomcoupl_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
-ENDIF
+    ELSEIF( MASTERPROCESS.EQ.18 ) THEN
+    IF( CORRECTION.EQ.0 ) THEN
+      call vegas1(GenUW_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+    ENDIF
 
+    ENDIF! MASTERPROCESS
 
-ELSEIF( MASTERPROCESS.EQ.18 ) THEN
-IF( CORRECTION.EQ.0 ) THEN
-   call vegas1(GenUW_anomcoupl_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
-ENDIF
+    !------------------------------------------------------------------------------
 
-ENDIF! MASTERPROCESS
-
-!------------------------------------------------------------------------------
-
-enddo
+    enddo
     
     call cpu_time(GenUW_time_end)  
     
     
     print *, " Skip Counter: ",SkipCounter
-    if( dble(SkipCounter)/dble(AcceptEvents(iChannel)+1d-10) .gt. 0.01d0 ) then
+    if( dble(SkipCounter)/dble(sum(AcceptEvents(1:NumPartonicChannels))+1d-10) .gt. 0.01d0 ) then
         write(*, *) "ALERT: The number of rejected events with too small CrossSecMax exceeds 1%."
         write(*, *) "       Increase VegasNc0 or CrossSecMax in main.F90."
     endif
-    write(*,*)  " generated ",AcceptEvents(iChannel)," events"
-    write(*,*)  " event generation rate (events/sec)",dble(AcceptEvents(iChannel))/(GenUW_time_end-GenUW_time_start+1d-10)
+    write(*,*)  " generated ",sum(AcceptEvents(1:NumPartonicChannels))," events"
+    write(*,*)  " event generation rate (events/sec)",dble(sum(AcceptEvents(1:NumPartonicChannels)))/(GenUW_time_end-GenUW_time_start+1d-10)
 
     
     call WriteHisto(14,it,VG_Result,VG_Error,VG_Result,VG_Error,VG_Chi2,GenUW_time_end-GenUW_time_start)
@@ -3412,7 +3430,7 @@ character :: filename*(200)
 
 
     if( unweighted ) then
-        filename = trim(HistoFile)//'.lhe'
+        filename = trim(LHEFile)//'.lhe'
         open(unit=17,file=trim(filename),form='formatted',access= 'sequential',status='replace')            ! lhe file
         
         write(17 ,'(A)') '<LesHouchesEvents version="1.0">'
