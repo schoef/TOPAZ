@@ -2314,9 +2314,10 @@ elseif( Process.eq.20212223 ) then
    WhatProc(1:4) = (/20,21,22,23/)
    NumPartonicChannels(1:4) = (/1,1,10,10/)
    
-! NumProcs = 1
-! WhatProc(1:4) = (/20,0,0,0/)   
-   
+NumProcs = 2
+WhatProc(1:4) = (/21,23,0,0/)   
+NumPartonicChannels(1:4) = (/1,10,0,0/)
+
 else
    call Error("Can not find process",Process)
 endif
@@ -2466,8 +2467,8 @@ ENDIF! MASTERPROCESS
     write(*,"(1X,A,I3,A,I3,A)") "Process: ",WhatProc(nProcSel)," (",NumPartonicChannels(nProcSel)," sub channel(s) )"
     write(*,"(3X,A,F15.6,A,F10.3,A)") "Total XSEC from adaptive integr.: ",TheVegasRes(nProcSel,1), " +/-",TheVegasRes(nProcSel,2),  " fb"
     write(*,"(3X,A,F15.6,A)")         "Total XSEC from sampling integr.: ",sum(TheCrossSec(nProcSel,:))," fb"
-    if( dabs(TheVegasRes(nProcSel,1)-sum(TheCrossSec(nProcSel,:)))/TheVegasRes(nProcSel,1) .gt. 1d-3 ) write(*,"(3X,A)") "WARNING: Increase statistics!! Deviation larger than 1 permille"
-    if( dabs(TheVegasRes(nProcSel,2)/TheVegasRes(nProcSel,1)-1d0) .gt. 1d-3 ) write(*,"(3X,A)") "WARNING: Increase statistics!! Error larger than 1 permille:"
+    if( dabs(TheVegasRes(nProcSel,1)-sum(TheCrossSec(nProcSel,:)))/TheVegasRes(nProcSel,1) .gt. 1d-3 ) write(*,"(3X,A)") "WARNING1: Increase statistics!! Deviation larger than 1 permille"
+    if( dabs(TheVegasRes(nProcSel,2)/TheVegasRes(nProcSel,1)) .gt. 5d-3 ) write(*,"(3X,A)") "WARNING2: Increase statistics!! Error larger than 5 permille:"
     Write(*,"(3X,A,A)") "Vegas grid file   : ",trim(OutGridFile)
     Write(*,"(3X,A,A)") "Sampling grid file: ",trim(OutSampFile)
 

@@ -15595,12 +15595,13 @@ END SUBROUTINE
 
 
 
-SUBROUTINE WriteLHEvent_TTB(Mom,InFlav,EventWeight)
+SUBROUTINE WriteLHEvent_TTB(Mom,InFlav,EventWeight,nPhoRad)
 use ModParameters
 use ModMisc
 implicit none
 real(8) :: Mom(1:4,1:13),DKRnd(1:2)
 real(8),optional :: EventWeight
+integer,optional :: nPhoRad
 integer :: InFlav(1:2)
 integer :: ICOLUP(1:2,1:13),LHE_IDUP(1:13),ISTUP(1:13),MOTHUP(1:2,1:13)
 integer :: NUP,IDPRUP,i
@@ -15613,7 +15614,6 @@ integer, parameter :: io_LHEOutFile=17
 ! The LHE numbering scheme can be found here: http://pdg.lbl.gov/mc_particle_id_contents.html and http://lhapdf.hepforge.org/manual#tth_sEcA
 
 
-
       IDPRUP=100
       SCALUP=MuFac * 100d0
       AQEDUP=alpha
@@ -15621,7 +15621,6 @@ integer, parameter :: io_LHEOutFile=17
 
       MOTHUP(1:2,inLeft) = (/0,0/);             ISTUP(inLeft) = -1
       MOTHUP(1:2,inRight)= (/0,0/);             ISTUP(inRight)= -1
-      MOTHUP(1:2,Xbos)   = (/t,tbar/);          ISTUP(XBos)   = +1
       MOTHUP(1:2,tbar)   = (/inLeft,inRight/);  ISTUP(tbar)   = +2
       MOTHUP(1:2,t)      = (/inLeft,inRight/);  ISTUP(t)      = +2
       MOTHUP(1:2,bbar)   = (/tbar,tbar/);       ISTUP(bbar)   = +1
@@ -15633,9 +15632,23 @@ integer, parameter :: io_LHEOutFile=17
       MOTHUP(1:2,lepP)   = (/Wp,Wp/);           ISTUP(lepP)   = +1
       MOTHUP(1:2,nu)     = (/Wp,Wp/);           ISTUP(nu)     = +1
       if( Process.ge.1 .and. Process.le.6 ) MOTHUP(1:2,6:13)=MOTHUP(1:2,6:13)-1
+      
+      if( .not.present(nPhoRad) .or. nPhoRad.eq.0 ) then 
+          MOTHUP(1:2,Xbos) = (/t,tbar/);    ISTUP(XBos) = +1
+      elseif( nPhoRad.eq.1 ) then
+          MOTHUP(1:2,Xbos) = (/t,t/);       ISTUP(XBos) = +1
+      elseif( nPhoRad.eq.2 ) then
+          MOTHUP(1:2,Xbos) = (/Wp,Wp/);     ISTUP(XBos) = +1
+      elseif( nPhoRad.eq.3 ) then
+          MOTHUP(1:2,Xbos) = (/tbar,tbar/); ISTUP(XBos) = +1
+      elseif( nPhoRad.eq.4 ) then
+          MOTHUP(1:2,Xbos) = (/Wm,Wm/);     ISTUP(XBos) = +1
+      endif
+
 
       LHE_IDUP(inLeft) = InFlav(1)
       LHE_IDUP(inRight)= InFlav(2)
+      LHE_IDUP(Xbos)   = LHE_Pho_
       LHE_IDUP(tbar)   = -LHE_Top_
       LHE_IDUP(t)      = LHE_Top_
       LHE_IDUP(bbar)   = -LHE_Bot_

@@ -3337,7 +3337,8 @@ else
 
      call random_number(xRnd) 
      if( GenUW_1L_ttbgg.gt.CrossSecMax(iPartChannel) ) then
-         write(*,"(2X,A,1PE13.6,1PE13.6)") "CrossSecMax is too small.",GenUW_1L_ttbgg, CrossSecMax(iPartChannel)
+         write(*,"(2X,A,1PE13.6,1PE13.6)") "WARNING: CrossSecMax is too small.",GenUW_1L_ttbgg, CrossSecMax(iPartChannel)
+         CrossSecMax(iPartChannel) = CrossSecMax(iPartChannel) * 1.5d0
          SkipCounter = SkipCounter + 1
      elseif( GenUW_1L_ttbgg .gt. xRnd*CrossSecMax(iPartChannel) ) then
          AcceptEvents(iPartChannel) = AcceptEvents(iPartChannel) + 1
@@ -3497,7 +3498,8 @@ else
 
      call random_number(xRnd) 
      if( GenUW_1L_ttbqqb.gt.CrossSecMax(iPartChannel) ) then
-         write(*,"(2X,A,1PE13.6,1PE13.6)") "CrossSecMax is too small.",GenUW_1L_ttbqqb, CrossSecMax(iPartChannel)
+         write(*,"(2X,A,1PE13.6,1PE13.6)") "WARNING: CrossSecMax is too small.",GenUW_1L_ttbqqb, CrossSecMax(iPartChannel)
+         CrossSecMax(iPartChannel) = CrossSecMax(iPartChannel) * 1.5d0
          SkipCounter = SkipCounter + 1
      elseif( GenUW_1L_ttbqqb .gt. xRnd*CrossSecMax(iPartChannel) ) then
          AcceptEvents(iPartChannel) = AcceptEvents(iPartChannel) + 1

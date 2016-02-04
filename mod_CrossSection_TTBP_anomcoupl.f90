@@ -5336,7 +5336,8 @@ else
 
      call random_number(xRnd) 
      if( GenUW_anomcoupl_1L_ttbggp.gt.CrossSecMax(iPartChannel) ) then
-         write(*,"(2X,A,1PE13.6,1PE13.6)") "CrossSecMax is too small.",GenUW_anomcoupl_1L_ttbggp, CrossSecMax(iPartChannel)
+         write(*,"(2X,A,1PE13.6,1PE13.6)") "WARNING: CrossSecMax is too small.",GenUW_anomcoupl_1L_ttbggp, CrossSecMax(iPartChannel)
+         CrossSecMax(iPartChannel) = CrossSecMax(iPartChannel) * 1.5d0
          SkipCounter = SkipCounter + 1
      elseif( GenUW_anomcoupl_1L_ttbggp .gt. xRnd*CrossSecMax(iPartChannel) ) then
          AcceptEvents(iPartChannel) = AcceptEvents(iPartChannel) + 1
@@ -5484,7 +5485,8 @@ else
 
      call random_number(xRnd) 
      if( GenUW_anomcoupl_1L_ttbqqbp.gt.CrossSecMax(iPartChannel) ) then
-         write(*,"(2X,A,1PE13.6,1PE13.6)") "CrossSecMax is too small.",GenUW_anomcoupl_1L_ttbqqbp, CrossSecMax(iPartChannel)
+         write(*,"(2X,A,1PE13.6,1PE13.6)") "WARNING: CrossSecMax is too small.",GenUW_anomcoupl_1L_ttbqqbp, CrossSecMax(iPartChannel)
+         CrossSecMax(iPartChannel) = CrossSecMax(iPartChannel) * 1.5d0
          SkipCounter = SkipCounter + 1
      elseif( GenUW_anomcoupl_1L_ttbqqbp .gt. xRnd*CrossSecMax(iPartChannel) ) then
          AcceptEvents(iPartChannel) = AcceptEvents(iPartChannel) + 1
@@ -5586,16 +5588,29 @@ include 'vegas_common.f'
 
 
 !  yRnd(16) = 0 ..atop.. 0.25 ..top.. 0.50 ..W-.. 0.75 ..W+.. 1.0   
-   if( yRnd(16).lt.0.50d0) then
+!    if( yRnd(16).lt.0.50d0) then
+!       nPhoRad = 1
+!    else
+!       nPhoRad = 2
+!    endif   
+   
+   
+   
+   if( yRnd(16).lt.0.25d0 ) then
       nPhoRad = 1
-   else
+   elseif( yRnd(16).gt.0.25d0 .and. yRnd(16).lt.0.50d0 ) then
       nPhoRad = 2
-   endif   
+   elseif( yRnd(16).gt.0.50d0 .and. yRnd(16).lt.0.75d0 ) then
+      nPhoRad = 3
+   else
+      nPhoRad = 4
+   endif
    
 !----------------------------------
 ! photon emission off anti-top    |
 !----------------------------------
-if( yRnd(16).lt.0.25d0 .or. (yRnd(16).gt.0.5d0 .and. yRnd(16).lt.0.75d0) ) then
+! if( yRnd(16).lt.0.25d0 .or. (yRnd(16).gt.0.5d0 .and. yRnd(16).lt.0.75d0) ) then
+if( nPhoRad.le.2 ) then
 ! do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoRad=2: photon radiation off W/lep
    LO_Res_Unpol = (0d0,0d0)
    if( nPhoRad.eq.1 ) then
@@ -5649,7 +5664,8 @@ GenUW_anomcoupl_DKP_1L_ttbgg_1 = GenUW_anomcoupl_DKP_1L_ttbgg_1 + GenUW_anomcoup
 ! enddo! nPhoRad loop
 
 
-elseif( (yRnd(16).gt.0.25d0 .and. yRnd(16).lt.0.5d0) .or. yRnd(16).gt.0.75d0 ) then!     this could probably be just an "ELSE"
+! elseif( (yRnd(16).gt.0.25d0 .and. yRnd(16).lt.0.5d0) .or. yRnd(16).gt.0.75d0 ) then!     this could probably be just an "ELSE"
+else
 
 !----------------------------------
 ! photon emission off top         |
@@ -5657,7 +5673,7 @@ elseif( (yRnd(16).gt.0.25d0 .and. yRnd(16).lt.0.5d0) .or. yRnd(16).gt.0.75d0 ) t
 ! do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W,nPhoRad=2: photon radiation off W/lep
    LO_Res_Unpol = (0d0,0d0)
    call EvalPhasespace_TopDecay(MomExt(1:4,3),yRnd(5:8),.false.,MomExt(1:4,5:7),PSWgt2)
-   if( nPhoRad.eq.1 ) then
+   if( nPhoRad.eq.3 ) then
       call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(9:15),.true.,MomExt(1:4,8:11),PSWgt3)
    else
       call EvalPhasespace_TopDecay2(MomExt(1:4,4),yRnd(9:15),.true.,MomExt(1:4,8:11),PSWgt3)
@@ -5677,7 +5693,7 @@ elseif( (yRnd(16).gt.0.25d0 .and. yRnd(16).lt.0.5d0) .or. yRnd(16).gt.0.75d0 ) t
       call HelCrossing(Helicities(iHel,1:NumExtParticles))
       call SetPolarizations()
       call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,5:7),Gluon2Hel=jHel)
-      if( nPhoRad.eq.1 ) then
+      if( nPhoRad.eq.3 ) then
          call TopDecay(ExtParticle(2),DKP_LO_T,MomExt(1:4,8:11),PhotonHel=PhoHel,Gluon2Hel=kHel)
       else
          call TopDecay(ExtParticle(2),DKP_LO_L,MomExt(1:4,8:11),PhotonHel=PhoHel,Gluon2Hel=kHel)
@@ -5724,7 +5740,8 @@ else
 
      call random_number(xRnd) 
      if( GenUW_anomcoupl_DKP_1L_ttbgg.gt.CrossSecMax(iPartChannel) ) then
-         write(*,"(2X,A,1PE13.6,1PE13.6)") "CrossSecMax is too small.",GenUW_anomcoupl_DKP_1L_ttbgg, CrossSecMax(iPartChannel)
+         write(*,"(2X,A,1PE13.6,1PE13.6)") "WARNING: CrossSecMax is too small.",GenUW_anomcoupl_DKP_1L_ttbgg, CrossSecMax(iPartChannel)
+         CrossSecMax(iPartChannel) = CrossSecMax(iPartChannel) * 1.5d0
          SkipCounter = SkipCounter + 1
      elseif( GenUW_anomcoupl_DKP_1L_ttbgg .gt. xRnd*CrossSecMax(iPartChannel) ) then
          AcceptEvents(iPartChannel) = AcceptEvents(iPartChannel) + 1
@@ -5733,7 +5750,7 @@ else
                                          MomExt(1:4,6),MomExt(1:4,7)+MomExt(1:4,8),MomExt(1:4,7),MomExt(1:4,8),       &
                                          MomExt(1:4,9),MomExt(1:4,10)+MomExt(1:4,11),MomExt(1:4,10),MomExt(1:4,11)/),MomOffShell,PSWgt4)
          MomOffShell(1:4,1:3) = MomExt(1:4,1:3)  
-         call WriteLHEvent_TTB(MomOffShell,(/LHE_IDUP(1),LHE_IDUP(2)/))
+         call WriteLHEvent_TTB(MomOffShell,(/LHE_IDUP(1),LHE_IDUP(2)/),nPhoRad=nPhoRad)
          
          do NHisto=1,NumHistograms
                call intoHisto(NHisto,NBin(NHisto),1d0)
@@ -5811,16 +5828,28 @@ include "vegas_common.f"
 
 
 !  yRnd(16) = 0 ..atop.. 0.25 ..top.. 0.50 ..W-.. 0.75 ..W+.. 1.0   
-   if( yRnd(16).lt.0.50d0) then
+!    if( yRnd(16).lt.0.50d0) then
+!       nPhoRad = 1
+!    else
+!       nPhoRad = 2
+!    endif   
+   
+
+   if( yRnd(16).lt.0.25d0 ) then
       nPhoRad = 1
-   else
+   elseif( yRnd(16).gt.0.25d0 .and. yRnd(16).lt.0.50d0 ) then
       nPhoRad = 2
+   elseif( yRnd(16).gt.0.50d0 .and. yRnd(16).lt.0.75d0 ) then
+      nPhoRad = 3
+   else
+      nPhoRad = 4
    endif   
    
 !----------------------------------
 ! photon emission off anti-top    |
 !----------------------------------
-if( yRnd(16).lt.0.25d0 .or. (yRnd(16).gt.0.5d0 .and. yRnd(16).lt.0.75d0) ) then
+! if( yRnd(16).lt.0.25d0 .or. (yRnd(16).gt.0.5d0 .and. yRnd(16).lt.0.75d0) ) then
+if( nPhoRad.le.2 ) then
 ! do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoRad=2: photon radiation off W/lep
    LO_Res_Unpol = (0d0,0d0)
    if( nPhoRad.eq.1 ) then
@@ -5888,7 +5917,8 @@ GenUW_anomcoupl_DKP_1L_ttbqqb_1 = GenUW_anomcoupl_DKP_1L_ttbqqb_1 + GenUW_anomco
 
 
 
-elseif( (yRnd(16).gt.0.25d0 .and. yRnd(16).lt.0.5d0) .or. yRnd(16).gt.0.75d0 ) then!     this could probably be just an "ELSE"
+! elseif( (yRnd(16).gt.0.25d0 .and. yRnd(16).lt.0.5d0) .or. yRnd(16).gt.0.75d0 ) then!     this could probably be just an "ELSE"
+else
 
 !----------------------------------
 ! photon emission off top    |
@@ -5896,7 +5926,7 @@ elseif( (yRnd(16).gt.0.25d0 .and. yRnd(16).lt.0.5d0) .or. yRnd(16).gt.0.75d0 ) t
 ! do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoRad=2: photon radiation off W/lep
    LO_Res_Unpol = (0d0,0d0)
    call EvalPhasespace_TopDecay(MomExt(1:4,3),yRnd(5:8),.false.,MomExt(1:4,5:7),PSWgt2)
-   if( nPhoRad.eq.1 ) then
+   if( nPhoRad.eq.3 ) then
       call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(9:15),.true.,MomExt(1:4,8:11),PSWgt3)
    else
       call EvalPhasespace_TopDecay2(MomExt(1:4,4),yRnd(9:15),.true.,MomExt(1:4,8:11),PSWgt3)
@@ -5926,7 +5956,7 @@ elseif( (yRnd(16).gt.0.25d0 .and. yRnd(16).lt.0.5d0) .or. yRnd(16).gt.0.75d0 ) t
         call HelCrossing(Helicities(iHel,1:NumExtParticles))
         call SetPolarizations()
         call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,5:7),Gluon2Hel=jHel)
-        if( nPhoRad.eq.1 ) then
+        if( nPhoRad.eq.3 ) then
           call TopDecay(ExtParticle(2),DKP_LO_T,MomExt(1:4,8:11),PhotonHel=PhoHel,Gluon2Hel=kHel)
         else
           call TopDecay(ExtParticle(2),DKP_LO_L,MomExt(1:4,8:11),PhotonHel=PhoHel,Gluon2Hel=kHel)
@@ -5973,7 +6003,8 @@ else
 
      call random_number(xRnd) 
      if( GenUW_anomcoupl_DKP_1L_ttbqqb.gt.CrossSecMax(iPartChannel) ) then
-         write(*,"(2X,A,1PE13.6,1PE13.6)") "CrossSecMax is too small.",GenUW_anomcoupl_DKP_1L_ttbqqb, CrossSecMax(iPartChannel)
+         write(*,"(2X,A,1PE13.6,1PE13.6)") "WARNING: CrossSecMax is too small.",GenUW_anomcoupl_DKP_1L_ttbqqb, CrossSecMax(iPartChannel)
+         CrossSecMax(iPartChannel) = CrossSecMax(iPartChannel) * 1.5d0
          SkipCounter = SkipCounter + 1
      elseif( GenUW_anomcoupl_DKP_1L_ttbqqb .gt. xRnd*CrossSecMax(iPartChannel) ) then
          AcceptEvents(iPartChannel) = AcceptEvents(iPartChannel) + 1
@@ -5982,7 +6013,7 @@ else
                                          MomExt(1:4,6),MomExt(1:4,7)+MomExt(1:4,8),MomExt(1:4,7),MomExt(1:4,8),       &
                                          MomExt(1:4,9),MomExt(1:4,10)+MomExt(1:4,11),MomExt(1:4,10),MomExt(1:4,11)/),MomOffShell,PSWgt4)
          MomOffShell(1:4,1:3) = MomExt(1:4,1:3)  
-         call WriteLHEvent_TTB(MomOffShell,(/iPart_sel,jPart_sel/))
+         call WriteLHEvent_TTB(MomOffShell,(/iPart_sel,jPart_sel/),nPhoRad=nPhoRad)
          
          do NHisto=1,NumHistograms
                call intoHisto(NHisto,NBin(NHisto),1d0)
