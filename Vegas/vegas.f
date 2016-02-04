@@ -24,7 +24,6 @@
 !          include 'gridinfo.f'
          include 'maxwt.f'
          parameter(mprod=50*mxdim)
-         integer jj
          dimension d(50,mxdim),di(50,mxdim),xin(50),r(50),
      1   dx(mxdim),dt(mxdim),x(mxdim),kg(mxdim),ia(mxdim)
          data ndmx/50/,alph/1.5d0/,one/1d0/,mds/1/
@@ -68,7 +67,6 @@ c
          include 'vegas_common.f'
 !          include 'gridinfo.f'
          include 'maxwt.f'
-!          integer nvegasrun! added by Markus
          parameter(mprod=50*mxdim)
          dimension d(50,mxdim),di(50,mxdim),xin(50),r(50),
      1   dx(mxdim),dt(mxdim),x(mxdim),kg(mxdim),ia(mxdim)
@@ -85,7 +83,6 @@ c
          ndo=1
          do 1 j=1,ndim
  1       xi(1,j)=one
-!          nvegasrun=131313
 c
          entry vegas1(fxn,avgi,sd,chi2a)
 c        initialises  cumulative  variables but not grid
@@ -131,7 +128,7 @@ c--- read-in grid if necessary
         write(6,*)'****************************************************'
            call flush(6)
            do j=1,ndim
-             read(11,203) jj,(xi(i,j),i=1,nd)
+             read(11,203) (xi(i,j),i=1,nd)
            enddo
            close(11)
            ndo=nd
@@ -245,19 +242,13 @@ c
         chi2a=sd*(schi/swgt-avgi*avgi)/(dble(it)-.999d0)
         sd=dsqrt(one/sd)
 c
-        if(nprn.eq.0)go to 21
+        if(nprn.le.0) go to 21
         tsi=dsqrt(tsi)
 c      it: current iteration, ti: integral, tsi: std.dev.
 c      avgi: accum. intgreal, sd: accum. std.dev., wtmax: max weight, chi2a: chi^2
 c        write(6,201)it,ti,tsi,avgi,sd,chi2a
         write(6,201) it,ti,avgi,tsi,sd,wtmax,chi2a
         wtmax = 0d0
-!         write(15,201)it,ti,avgi,tsi,sd,wtmax,chi2a
-!         if(nvegasrun.eq.131313) then
-!             write(15,'(A1,1X,I3,4E20.8,I)') "#",it,ti,tsi,avgi,sd
-!         else
-!             write(15,'(2X,I3,4E20.8,I)') it,ti,tsi,avgi,sd
-!         endif
         call flush(6)
 !         call flush(15)
 !DEC$ IF(_WriteTmpHisto .EQ.1)
@@ -319,7 +310,7 @@ c--- write-out grid if necessary
         write(6,*)'****************************************************'
            call flush(6)
            do j=1,ndim
-             write(11,203) jj,(xi(i,j),i=1,nd)
+             write(11,203) (xi(i,j),i=1,nd)
            enddo
            close(11)
          endif
@@ -355,8 +346,10 @@ c     3  24x,'std dev =',g14.8 / 24x,'chi**2 per it''n =',g10.4)
         include 'vegas_common.f'
 c       stores vegas data   (unit 7) for later initialisation
 c
+        if(nprn.ge.0) then
         write(7,200) ndo,it,si,si2,swgt,schi,
      1       ((xi(i,j),i=1,ndo),j=1,mdim)
+        endif
         return
         entry restr(mdim)
 c

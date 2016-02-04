@@ -46,9 +46,8 @@ real(8), public      :: opp_err
 real(8),public,save :: maxWgt=0d0
 integer, allocatable :: Crossing(:)
 real(8), public :: MuRen, MuFac, MuFrag, AvgFactor
-character, public :: HistoFile*(200)
-character, public :: GridFile*(200)
-character, public :: LHEFile*(200)
+character, public :: HistoFile*(200),FileTag*(50),DataDir*(200)
+character, public :: GridFile*(200),LHEFile*(200)
 integer, public :: GridIO
 real(8), public :: AvgValue=0d0,MinValue=1d13,MaxValue=-1d13
 real(8), public :: time_start,time_end
@@ -655,7 +654,7 @@ endif
    elseif( Process.ge.101 .and. Process.le.106 ) then
       couplZTT_left_dyn  = -m_top/vev * ( kappaTTBH - (0d0,1d0)*kappaTTBH_tilde )   
       couplZTT_right_dyn = -m_top/vev * ( kappaTTBH + (0d0,1d0)*kappaTTBH_tilde ) 
-   elseif( Process.ge.20 .and. Process.le.31 ) then
+   elseif( (Process.ge.20 .and. Process.le.31) .or. Process.eq.20212223 ) then
       couplZTT_left_dyn  = couplGaTT_left
       couplZTT_right_dyn = couplGaTT_right
       couplZTT_left2_dyn = couplGaTT_left2

@@ -3329,6 +3329,10 @@ if( warmup ) then
       CrossSec(iPartChannel)    = CrossSec(iPartChannel) + GenUW_1L_ttbgg
       CrossSecMax(iPartChannel) = max(CrossSecMax(iPartChannel),GenUW_1L_ttbgg)
 
+      do NHisto=1,NumHistograms
+           call intoHisto(NHisto,NBin(NHisto),GenUW_1L_ttbgg)
+      enddo
+
 else
 
      call random_number(xRnd) 
@@ -3484,6 +3488,10 @@ if( warmup ) then
 
       CrossSec(iPartChannel)    = CrossSec(iPartChannel) + GenUW_1L_ttbqqb
       CrossSecMax(iPartChannel) = max(CrossSecMax(iPartChannel),GenUW_1L_ttbqqb)
+
+      do NHisto=1,NumHistograms
+           call intoHisto(NHisto,NBin(NHisto),GenUW_1L_ttbqqb)
+      enddo
 
 else
 

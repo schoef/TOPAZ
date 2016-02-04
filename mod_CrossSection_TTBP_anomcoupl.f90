@@ -5361,6 +5361,7 @@ endif
 
    GenUW_anomcoupl_1L_ttbggp = GenUW_anomcoupl_1L_ttbggp/VgsWgt
    
+      
 RETURN
 END FUNCTION
 

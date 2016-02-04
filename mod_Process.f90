@@ -3123,7 +3123,6 @@ ELSEIF( PROCESS.EQ.111 ) THEN !   3_Up  + 4_Bot  --> 1_Top + 5_Hig + 2_Dn
       NDim = NDim + 2    ! shat integration                                                                                                                                 
       VegasNc0_default = 100000
       VegasNc1_default = 100000
-      print *, "done InitProcess"
   ELSE
       call Error("Correction to this process is not available")
   ENDIF
@@ -3143,13 +3142,14 @@ ELSEIF( PROCESS.EQ.112 ) THEN !   3_Up  + 4_ABot  --> 1_ATop + 5_Hig + 2_Dn
  
      VegasNc0_default = 100000
       VegasNc1_default = 100000
-      print *, "done InitProcess"
   ELSE
       call Error("Correction to this process is not available")
   ENDIF
 
-  
 
+ELSEIF( Unweighted .and. Process.gt.01000000 ) then 
+  RETURN
+  
 ELSE
     call Error("Process not available")
 ENDIF
@@ -3157,6 +3157,7 @@ ENDIF
   call InitMasterProcess()
 
 END SUBROUTINE
+
 
 
 
@@ -5503,9 +5504,6 @@ ELSEIF( MASTERPROCESS.EQ.73 ) THEN    ! t+H
 
 
 
-
-
-
 ELSE
     call Error("MasterProcess not implemented in InitMasterProcess")
 
@@ -5523,6 +5521,45 @@ ENDIF
 
 END SUBROUTINE
 
+
+
+
+
+SUBROUTINE RemoveProcess()
+use modParameters
+implicit none
+
+
+      deallocate(Crossing)
+      deallocate(ExtParticle)
+
+      deallocate(PrimAmps)
+      deallocate(BornAmps)
+
+!         allocate(BornAmps(NAmp)%ExtLine(1:NumExtParticles))
+!         allocate(PrimAmps(NAmp)%ExtLine(1:NumExtParticles))
+!         allocate(PrimAmps(NAmp)%IntPart(1:NumExtParticles))
+      deallocate(Helicities)
+
+!       deallocate( TheTree%PartType(1:NumExtParticles), stat=AllocStatus )
+
+!             allocate( TheTree%PartRef(1:NumExtParticles), stat=AllocStatus )
+
+!                allocate( TheTree%NumGlu(0:TheTree%NumQua+TheTree%NumSca), stat=AllocStatus )
+!                TheTree%NumGlu(0:TheTree%NumQua+TheTree%NumSca) = 0
+!             elseif( TheTree%PartType(1).eq.Glu_ ) then
+!                allocate( TheTree%NumGlu(0:TheTree%NumQua+TheTree%NumSca+1), stat=AllocStatus )
+
+
+!            allocate( TheTree%Quarks(1:TheTree%NumQua), stat=AllocStatus )
+!            allocate( TheTree%Scalars(1:TheTree%NumSca), stat=AllocStatus )
+!            allocate( TheTree%Gluons(1:TheTree%NumGlu(0)), stat=AllocStatus )
+            
+
+
+
+
+END SUBROUTINE
 
 
 
@@ -5550,6 +5587,8 @@ integer :: NPoint,NCut
 ! AmpType = 2/d:  1,2,3,4 (closed fermion loop)
 !  the ordering of the first PrimAmps should match the BornAmps because of the MassCT contribution
 
+
+IF( Unweighted .and. Process.gt.01000000 ) RETURN
 
   do nPrimAmp = 1,NumPrimAmps
     PrimAmps(nPrimAmp)%NumSisters = 0

@@ -2622,7 +2622,6 @@ END SUBROUTINE
               & *( coupl_left*Chir(.false.,spb2_(sp,e1)) + coupl_right*Chir(.true.,spb2_(sp,e1))  &
               & + HDcoupl_left*( iChir(.false.,ubarsig) ) &
               & + HDcoupl_right*(iChir(.true.,ubarsig)) )
-              
       elseif (ColorlessParticle .eq. 3) then              ! this is for a scalar, e.g. Higgs
          vbqV = -(0d0,1d0)*( coupl_left*Chir(.false.,sp) + coupl_right*Chir(.true.,sp) )  
       endif
@@ -4800,7 +4799,20 @@ END SUBROUTINE
     end subroutine convert_to_MCFM
 
 
+    SUBROUTINE PrintStatusBar(StatusPercent)
+    implicit none
+    integer :: StatusPercent
+    integer,parameter :: io_stdout=6
+    integer,save :: LastPercent=0
 
+        if( mod(StatusPercent,10).eq.0 .and. LastPercent.ne.StatusPercent ) then
+            write(io_stdout,"(X,I3,A)",advance='no') StatusPercent,"% "
+            flush(io_stdout)
+            LastPercent = StatusPercent
+        endif
+
+    return
+    END SUBROUTINE
 
 END MODULE
 
