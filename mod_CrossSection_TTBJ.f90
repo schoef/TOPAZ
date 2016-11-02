@@ -1709,7 +1709,7 @@ use ModDipoles_GGTTBGG
 use ifport
 implicit none
 real(8) ::  EvalCS_Real_ttbgggg,yRnd(1:VegasMxDim),VgsWgt,DipoleResult
-complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol
+complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,Res2(1:24),Pol2Ext3(1:4)
 integer :: iHel,iPrimAmp,jPrimAmp,ParityFlip,NHisto,NBin(1:NumMaxHisto)
 real(8) :: SpinAvg,ColorAvg,EHat,PSWgt,PSWgt2,PSWgt3,ISFac,RunFactor,PreFac
 real(8) :: eta1,eta2,sHatJacobi,FluxFac,PDFFac
@@ -1762,7 +1762,7 @@ ENDIF
 
 
   EvalCS_Real_ttbgggg = 0d0
-  call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+  call PDFMapping(2,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top * ThresholdCutOff ) then
       EvalCS_Real_ttbgggg = 0d0
       return
@@ -1804,18 +1804,22 @@ ENDIF
        EvalCS_Real_ttbgggg = 0d0
    else
         LO_Res_Unpol = (0d0,0d0)
-        do iHel=1,NumHelicities
+        do iHel=1,NumHelicities  /2  !  getting the other half of the gluon(3) helicities from Res2 (see below)
           call HelCrossing(Helicities(iHel,1:NumExtParticles))
-          call SetPolarizations()
-
+!           call SetPolarizations()
+          call SetPolarizations(3,Pol2Ext3(1:4))
+          
           do iPrimAmp=1,NumBornAmps
-              call EvalTree(BornAmps(iPrimAmp))
+!               call EvalTree(BornAmps(iPrimAmp))
+              call EvalTree(BornAmps(iPrimAmp),Pol2Ext3(1:4),Res2(iPrimAmp))
           enddo
 
           LO_Res_Pol = (0d0,0d0)
           do jPrimAmp=1,NumBornAmps
           do iPrimAmp=1,NumBornAmps
-              LO_Res_Pol = LO_Res_Pol + ParityFlip*ColLO_ttbgggg(iPrimAmp,jPrimAmp) * BornAmps(iPrimAmp)%Result * dconjg(BornAmps(jPrimAmp)%Result)
+!               LO_Res_Pol = LO_Res_Pol + ParityFlip*ColLO_ttbgggg(iPrimAmp,jPrimAmp) * BornAmps(iPrimAmp)%Result * dconjg(BornAmps(jPrimAmp)%Result)
+              LO_Res_Pol = LO_Res_Pol + ParityFlip*ColLO_ttbgggg(iPrimAmp,jPrimAmp) * BornAmps(iPrimAmp)%Result * dconjg(BornAmps(jPrimAmp)%Result)     &
+                                      + ParityFlip*ColLO_ttbgggg(iPrimAmp,jPrimAmp) * Res2(iPrimAmp)            * dconjg(Res2(jPrimAmp))
           enddo
           enddo
           LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
@@ -1930,7 +1934,7 @@ include "vegas_common.f"
   EvalCS_Real_ttbqqbgg = 0d0
   EvalCS_Dips_ttbqqbgg = 0d0
 
-  call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+  call PDFMapping(2,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
   if( EHat.le.2d0*m_Top * ThresholdCutOff ) then
       EvalCS_Real_ttbqqbgg = 0d0
       return
