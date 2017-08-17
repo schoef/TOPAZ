@@ -23,7 +23,7 @@ Opt = Yes
 useMPI = No
 
 # link pdfs via LHA library ('Yes' or 'No')
-UseLHAPDF=No
+UseLHAPDF=Yes
 LHAPDFDir=/afs/cern.ch/user/m/maschulz/lib/LHAPDF-6.1.5/lib/
 #LHAPDFDir=/home/schulze/lib/LHAPDF-6.1.5/lib/
 # LHAPDFDir=directory which contains libLHAPDF.a, libLHAPDF.la, libLHAPDF.so

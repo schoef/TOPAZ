@@ -327,20 +327,24 @@ ELSEIF( ObsSet.EQ.22 ) THEN! set of observables for ttbgamma production with di-
     eta_lep_cut = 2.5d0
     pT_miss_cut = 40d0*GeV
 
-ELSEIF( ObsSet.EQ.23 ) THEN! set of observables for ttbgamma production with di-lept.decays at LHC
-    pT_pho_cut  = 10d0*GeV
-    eta_pho_cut = 5.0d0
-    Rsep_Pj     = 0.2d0
-    Rsep_Pbj    = 0.2d0
-    Rsep_Plep   = 0.5d0
+ELSEIF( ObsSet.EQ.23 ) THEN! set of observables for ttbgamma production with di-lept.decays at LHC    (CMS 13 TeV Analysis)
+    pT_pho_cut  = 13d0*GeV
+    eta_pho_cut = 3.0d0
+    Rsep_Pj     = 0.3d0
+    Rsep_Pbj    = 0.3d0
+    Rsep_Plep   = 0.3d0
 
-    pT_bjet_cut = 10d0*GeV  ! added this to define a jet 
+    pT_bjet_cut = 20d0*GeV  ! added this to define a jet 
     eta_bjet_cut= 5.0d0     ! added this to define a jet
+    pT_jet_cut = 20d0*GeV  ! added this to define a jet 
+    eta_jet_cut= 5.0d0     ! added this to define a jet
     Rsep_jet    = 0.4d0
 
-    pT_lep_cut  = 15d0*GeV
-    eta_lep_cut = 5d0
+    pT_lep_cut  = 0d0*GeV
+    eta_lep_cut = 2.5d0
     pT_miss_cut = 0d0*GeV
+    Rsep_LepJet = 0.4d0
+    
 
 ELSEIF( ObsSet.EQ.24 ) THEN! set of observables for ttbgamma production with semi-lept.decays(hadr.Atop, lept.top decay) at Tevatron
 
@@ -2683,14 +2687,14 @@ ELSEIF( ObsSet.EQ.23 ) THEN! set of observables for ttbgamma production di-lept.
           endif
 
           Histo(1)%Info   = "pT_ATop"
-          Histo(1)%NBins  = 40
-          Histo(1)%BinSize= 25d0*GeV
+          Histo(1)%NBins  = 100
+          Histo(1)%BinSize= 10d0*GeV
           Histo(1)%LowVal = 0d0
           Histo(1)%SetScale= 100d0
 
           Histo(2)%Info   = "pT_Top"
-          Histo(2)%NBins  = 40
-          Histo(2)%BinSize= 25d0*GeV
+          Histo(2)%NBins  = 100
+          Histo(2)%BinSize= 10d0*GeV
           Histo(2)%LowVal = 0d0
           Histo(2)%SetScale= 100d0
 
@@ -2725,26 +2729,26 @@ ELSEIF( ObsSet.EQ.23 ) THEN! set of observables for ttbgamma production di-lept.
           Histo(7)%SetScale= 100d0
 
           Histo(8)%Info   = "eta_Photon"
-          Histo(8)%NBins  = 40
-          Histo(8)%BinSize= 0.25d0
+          Histo(8)%NBins  = 100
+          Histo(8)%BinSize= 0.1d0
           Histo(8)%LowVal =-5.0d0
           Histo(8)%SetScale= 1d0
 
           Histo(9)%Info   = "pT_LepP"
-          Histo(9)%NBins  = 50
-          Histo(9)%BinSize= 2d0*GeV
+          Histo(9)%NBins  = 200
+          Histo(9)%BinSize= 5d0*GeV
           Histo(9)%LowVal =  0d0*GeV
           Histo(9)%SetScale= 100d0
 
           Histo(10)%Info   = "eta_LepP"
-          Histo(10)%NBins  = 40
-          Histo(10)%BinSize= 0.25d0
+          Histo(10)%NBins  = 100
+          Histo(10)%BinSize= 0.1d0
           Histo(10)%LowVal =-5.0d0
           Histo(10)%SetScale= 1d0
 
           Histo(11)%Info   = "ET_miss"
-          Histo(11)%NBins  = 40
-          Histo(11)%BinSize= 20d0*GeV
+          Histo(11)%NBins  = 100
+          Histo(11)%BinSize= 5d0*GeV
           Histo(11)%LowVal = 0d0*GeV
           Histo(11)%SetScale= 100d0
 
@@ -8862,6 +8866,7 @@ if( ObsSet.eq.20 .or. ObsSet.eq.21) then! ttb+photon production without top deca
 elseif( ObsSet.eq.22 .or. ObsSet.eq.23 ) then! set of observables for ttb+gamma production with di-lept. decays at the Tevatron & LHC
     call pT_order(NumHadr,MomJet(1:4,1:NumHadr))
 
+    
 !   determine observable jets
     NObsJet = 0
     do k=1,NJet
@@ -8874,11 +8879,13 @@ elseif( ObsSet.eq.22 .or. ObsSet.eq.23 ) then! set of observables for ttb+gamma 
         endif
     enddo
 
-!     NObsJet_Tree = 4! request two b-jets and at least two light jets
-!     if( NObsJet.lt.NObsJet_Tree ) then
-!         applyPSCut = .true.
-!         RETURN
-!     endif
+    
+    NObsJet_Tree = 2! request two b-jets 
+    if( NObsJet.lt.NObsJet_Tree ) then
+        applyPSCut = .true.
+        RETURN
+    endif
+
 
 
 
@@ -8921,8 +8928,17 @@ phi_ll=0.5d0
             applyPSCut = .true.
             RETURN
         endif
+        if( get_R(MomJet(1:4,k),Mom(1:4,lepM)).lt.Rsep_lepjet .or. get_R(MomJet(1:4,k),Mom(1:4,lepP)).lt.Rsep_lepjet )then
+            applyPSCut = .true.
+            RETURN
+        endif
     enddo
 
+    if( Correction.eq.0 .and. NLOParam.le.1 ) then! setting dynamic scale at LO
+      MuFac = 0.5d0*( get_Mperp(Mom(1:4,t)) + get_Mperp(Mom(1:4,tbar)) )
+      MuRen = MuFac
+    endif    
+    
 
 !    if( pT_lepM.gt.pT_lepP .and. pT_lepM.lt.pT_lep_cut ) then
 !        applyPSCut = .true.

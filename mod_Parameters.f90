@@ -46,8 +46,9 @@ real(8), public      :: opp_err
 real(8),public,save :: maxWgt=0d0
 integer, allocatable :: Crossing(:)
 real(8), public :: MuRen, MuFac, MuFrag, AvgFactor
-character, public :: HistoFile*(200),FileTag*(50),DataDir*(200)
-character, public :: GridFile*(200),LHEFile*(200)
+character, public :: HistoFile*(200)
+character, public :: GridFile*(200)
+character, public :: LHEFile*(200)
 integer, public :: GridIO
 real(8), public :: AvgValue=0d0,MinValue=1d13,MaxValue=-1d13
 real(8), public :: time_start,time_end
@@ -57,9 +58,40 @@ real(8), public, parameter :: sqrt2 = 1.4142135623730950488016887242096980786d0
 real(8), public, parameter :: GeV=0.01d0
 
 
-!orig real(8), public, parameter :: alpha = 1d0/(137d0)
-!orig real(8), public, parameter :: alpha4Pi = alpha*4d0*DblPi
+!------------------------------------------------------------------------
+! EW scheme 1 (useful for ttb and ttb+Z,H)
+!
+! ! input: MZ, MW, GF
+! real(8), public, parameter :: m_Z     = 91.1876*GeV
+! real(8), public, parameter :: m_W     = 80.399d0*GeV  !80.385d0*GeV
+! real(8), public, parameter :: GF      = (1.16639d-5)/GeV**2
+! ! output: e,sw
+! real(8), public, parameter :: g2_weak = 4d0*dsqrt(2d0)*m_W**2*GF
+! real(8), public, parameter :: sw2     = 1d0 - m_W**2/m_Z**2
+! real(8), public, parameter :: alpha   = (g2_weak*sw2)/(4d0*DblPi)
+
+
+!------------------------------------------------------------------------
+! EW scheme 2 (useful for ttb and ttb+gamma,H)
+
+! input: MW,GF,alpha
+ real(8), public, parameter :: m_W     = 80.419d0*GeV     ! 80.419d0*Gev! for old ttbp reproduction !
+ real(8), public, parameter :: alpha   = 1d0/137d0
 real(8), public, parameter :: GF = (1.16639d-5)/GeV**2
+ ! output: sw,MZ
+ real(8), public, parameter :: g2_weak = 4d0*dsqrt(2d0)*m_W**2*GF
+ real(8), public, parameter :: sw2     = 4.d0*DblPi*alpha/g2_weak
+ real(8), public, parameter :: m_Z     = m_W/dsqrt(1d0-sw2)
+!------------------------------------------------------------------------
+
+
+
+real(8), public, parameter :: g_weak = dsqrt(g2_weak)
+real(8), public, parameter :: alpha4Pi = alpha*4d0*DblPi
+real(8), public, parameter :: sw = dsqrt(sw2)
+real(8), public, parameter :: cw = dsqrt(1d0-sw2)
+real(8), public, parameter :: EL = dsqrt(4.d0*DblPi*alpha)
+
 real(8), public            :: m_Top, m_SMTop
 real(8), public            :: m_Bot
 real(8), public, parameter :: m_BotExp= 4.2d0*GeV
@@ -67,26 +99,21 @@ real(8), public, parameter :: m_Chm   = 0d0
 real(8), public, parameter :: m_Str   = 0d0
 real(8), public, parameter :: m_Up    = 0d0
 real(8), public, parameter :: m_Dn    = 0d0
-real(8), public, parameter :: m_Z     = 91.1876*GeV
-real(8), public, parameter :: m_W     = 80.399d0*GeV
-real(8), public, parameter :: m_H     = 125.0d0*GeV
+real(8), public, parameter :: m_H     = 125.0d0*GeV !!! FOR eeTT comparison !!!  125.0d0*GeV
 real(8), public, parameter :: m_e     = 0d0
 real(8), public, parameter :: m_nu    = 0d0
 real(8), public            :: m_HTop
-real(8), public, parameter :: g2_weak = 4d0*dsqrt(2d0)*m_W**2*GF
-real(8), public, parameter :: g_weak = dsqrt(g2_weak)
-!orig real(8), public, parameter :: sw = dsqrt(4.d0*DblPi*alpha/g2_weak)
-!orig real(8), public, parameter :: sw2 = sw**2
-real(8), public, parameter :: sw2 = 1d0 - m_W**2/m_Z**2
-real(8), public, parameter :: sw = dsqrt(sw2)
-real(8), public, parameter :: alpha4Pi = g2_weak*sw2
-real(8), public, parameter :: alpha = alpha4Pi/4d0/DblPi
-real(8), public, parameter :: cw = dsqrt(1d0-sw2)
-real(8), public, parameter :: EL = dsqrt(4.d0*DblPi*alpha)
+
+
+
+
+
+
+
 real(8), public            :: Ga_Top(0:1)
 real(8), public            :: Ga_W(0:1)
 real(8), public            :: Ga_TopExp = 1.99d0*GeV
-real(8), public            :: Ga_WExp   = 2.14d0*GeV
+real(8), public            :: Ga_WExp   = 2.441404d0*GeV
 real(8), public            :: Ga_ZExp   = 2.4952d0*GeV
 real(8), public            :: Ga_H      = 0.0000d0*GeV
 real(8), public            :: Ga_HTop(0:1)
@@ -99,7 +126,7 @@ real(8), public            :: Ga_Stop_ChiTop(0:1)
 real(8), public, parameter :: m_A0    = 50d0*GeV! (scalar)
 real(8), public, parameter :: m_BH    = 50d0*GeV! (vector)
 real(8), public, parameter :: m_Chi   = 25d0*GeV! (Majorana)
-real(8), public, parameter :: Vev  = 246.218458102d0*GeV!  =1.0d0/sqrt(Gf*sqrt(2.0d0))
+real(8), public, parameter :: Vev = 1.0d0/dsqrt(GF*dsqrt(2.0d0)) !  = 246.218458102d0*GeV!
 !real(8), public, parameter :: Vev  = 250.618249228543d0*GeV   ! MadGraph value
 
 ! BSM top-Z couplings
@@ -108,7 +135,7 @@ real(8), public :: AbsDelF1A, AbsDelF1V    !, DeltaF2A, DeltaF2V    ! later
 real(8), public :: RelDelF1A, RelDelF1V, RelDelF2A, RelDelF2V   !, DeltaF2A, DeltaF2V    ! later
 real(8), public :: DelGam2V,DelGam2A       ! q-dependent coupling for the photon
 
-logical, parameter :: TTBPhoton_SMonly = .false.  ! true: no anomalous ttb+gamma couplings,  false: anomalous ttb+gamma couplings
+logical, parameter :: TTBPhoton_SMonly = .true.  ! true: no anomalous ttb+gamma couplings,  false: anomalous ttb+gamma couplings
 logical :: AnomalousInteractions
 
 ! top-H couplings
@@ -568,7 +595,7 @@ endif
 
 
 
-WWidthChoice = 1!          0=experimental W width,    1=calculated W width
+WWidthChoice = 0!          0=experimental W width,    1=calculated W width
 IF( WWidthChoice.eq. 1 ) THEN
 !   calculated W width:
     Ga_W(0) = (2d0*3d0+3d0)*GF*M_W**3/(6d0*dsqrt(2d0)*DblPi)
@@ -1053,10 +1080,19 @@ END FUNCTION
 FUNCTION RunAlphaS(Loop,Q)! for alphas(MZ) and Nf=5
 implicit none
 integer :: Loop
-real(8) :: Q,w,RunAlphaS
+real(8) :: Q,w,RunAlphaS,alphasPDF
 integer, parameter :: NF=5
 real(8), parameter :: beta0=11d0-2d0/3d0*NF
 real(8) :: beta1=17d0*3d0-4d0/3d0*NF-5d0*NF
+
+
+
+
+#if _UseLHAPDF==1
+
+  RunAlphaS = alphasPDF(Q*100d0) / alphasPDF(M_Z*100d0)
+
+#else
 
 
 
@@ -1083,6 +1119,9 @@ real(8) :: beta1=17d0*3d0-4d0/3d0*NF-5d0*NF
 !    else
 !      RunAlphaS = 1d0   ! no running
 !    endif
+
+#endif
+
 
 
 

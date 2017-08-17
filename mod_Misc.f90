@@ -235,6 +235,20 @@ END FUNCTION VectorCross
 
 
 
+SUBROUTINE NormalizeVector(p1)
+implicit none
+real(8) :: p1(1:3)
+real(8) :: Norm
+
+   Norm = dsqrt(dabs(p1(1)**2+p1(2)**2+p1(3)**2) + 1d-16)
+   p1(1:3) = p1(1:3)/Norm
+   
+
+END SUBROUTINE
+
+
+
+
 FUNCTION MinkowskyProduct(p1,p2)
 implicit none
 real(8), intent(in) :: p1(1:4),p2(1:4)
@@ -1024,6 +1038,21 @@ real(8) :: eta1,eta2,phi1,phi2,DeltaPhi,r2,delphi
 RETURN
 END FUNCTION
 
+
+
+
+FUNCTION Get_Mperp(Mom)
+implicit none
+real(8) :: Get_Mperp
+real(8) :: Mom(1:4)
+
+
+!     Get_Mperp = (Mom(2)**2 + Mom(3)**2) + ( Mom(1)**2 - Mom(2)**2- Mom(3)**2- Mom(4)**2 ) ! pT^2 + m^2
+    Get_Mperp = Mom(1)**2 - Mom(4)**2
+    Get_Mperp = dsqrt(dabs(Get_Mperp))
+    
+RETURN
+END FUNCTION
 
 
 

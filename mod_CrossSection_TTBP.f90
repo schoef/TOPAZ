@@ -1228,6 +1228,7 @@ endif!applyPSCut
     PreFac = PreFac * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi*PhotonCouplCorr /PSWgt2/PSWgt3
     call EvalDipoles_GGTTBGP((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),-MomExt(1:4,1),-MomExt(1:4,2),MomExt(1:4,3)/),yRnd(11:18),PreFac,DipoleResult)
 
+    
 !      sij = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,3))
 !      sij = MomExt(1,3)**2
 !      print *,  sij/EHat**2,EvalCS_Real_ttbgggp,DipoleResult,(1d0+EvalCS_Real_ttbgggp/(DipoleResult))

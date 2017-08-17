@@ -19,7 +19,6 @@ integer ::ierror
 
 
    call GetCommandlineArgs()
-   call SetFileNames()
    call Init_cur_2_2f(4)
    call setDim(4,4)
    call InitPDFs()
@@ -71,10 +70,12 @@ SUBROUTINE GetCommandlineArgs()
 use ModParameters
 use ModKinematics
 use ModMisc
+use ifport
 implicit none
 character :: arg*(100)
-character :: env*(31)
+character :: env*(31),ColliderStr*(10),ColliderDirStr*(10),ProcessStr*(3),CorrectionStr*(10),FileTag*(50),DataDir*(80),SeedStr*(20),MuStr*(7),ObsStr*(6)
 integer :: NumArgs,NArg,IDipAlpha(1:5),iDKAlpha(1:3),DipAlpha2
+logical :: dirresult
 
 
    Collider=-1
@@ -113,6 +114,8 @@ integer :: NumArgs,NArg,IDipAlpha(1:5),iDKAlpha(1:3),DipAlpha2
    HistoFile=""
    FileTag=""
    DataDir="./"
+   MuStr=""
+   ObsStr=""
    GridFile="grid"
    VegasSeed=19
    DKRE_switch=0
@@ -156,6 +159,7 @@ integer :: NumArgs,NArg,IDipAlpha(1:5),iDKAlpha(1:3),DipAlpha2
         read(arg(12:13),*) Correction
     elseif( arg(1:7).eq."ObsSet=" ) then
         read(arg(8:9),*) ObsSet
+        write(ObsStr,"(I2)") ObsSet
     elseif( arg(1:5).eq."MTop=" ) then
         read(arg(6:10),*) m_Top
         MuRen=m_Top
@@ -293,6 +297,7 @@ integer :: NumArgs,NArg,IDipAlpha(1:5),iDKAlpha(1:3),DipAlpha2
         read(arg(6:7),*) DKRE_switch
     endif
    enddo
+   write(MuStr,"(F5.2)") MuRen
 
    if( DipAlpha2.eq.0d0 ) then
        print *, "DipAlpha2 cannot ne zero"
@@ -393,45 +398,21 @@ integer :: NumArgs,NArg,IDipAlpha(1:5),iDKAlpha(1:3),DipAlpha2
           print *, "Helicity sampling is not allowed here. This is simpliy due to assignments of random numbers in mod_CrossSection.f90"
     endif
 
+    if(Process.lt.10) then
+      write(ProcessStr,"(I1)") Process
+      ProcessStr="0"//trim(ProcessStr)
+    elseif(Process.lt.100) then
+      write(ProcessStr,"(I2)") Process
+    else
+      write(ProcessStr,"(I3)") Process
+    endif
+
     if( Collider.eq.2 ) then
          AlgoType = +1       ! kT
     else
          AlgoType = -1       ! anti-kT    
     endif
 
-
-    if(VegasSeed.eq.19) then
-    elseif(VegasSeed.lt.10) then
-      Seed_random=.true.
-      TheSeeds(0:2)=(/2,VegasSeed*123410,VegasSeed*100/)
-    elseif(VegasSeed.lt.100) then
-      Seed_random=.true.       
-      TheSeeds(0:2)=(/2,VegasSeed*12341,VegasSeed*10/)
-    elseif(VegasSeed.lt.1000) then
-      Seed_random=.true.    
-      TheSeeds(0:2)=(/2,VegasSeed*12341,VegasSeed*10/)   
-    else
-      print *, "Vegas seed too big"
-      stop
-    endif    
-    
-return
-END SUBROUTINE
-
-
-
-
-
-SUBROUTINE SetFileNames()
-use ModParameters
-use ifport
-implicit none
-character :: ColliderStr*(10),ColliderDirStr*(10),ProcessStr*(3),CorrectionStr*(10),SeedStr*(20),MuStr*(7),ObsStr*(6)
-logical DirResult
-
-
-    write(MuStr,"(F5.2)") MuRen
-    write(ObsStr,"(I2)") ObsSet    
 
     if(Correction.eq.0) then
         if(NLOParam.le.1) then
@@ -441,6 +422,8 @@ logical DirResult
         endif
     elseif(Correction.eq.1) then
         CorrectionStr = "1L"
+    elseif(Correction.eq.11) then
+        CorrectionStr = "1LWE"
     elseif(Correction.eq.2) then
         CorrectionStr = "RE"
     elseif(Correction.eq.3) then
@@ -455,21 +438,28 @@ logical DirResult
         CorrectionStr = "DKRE"
     endif
 
+
     if(VegasSeed.eq.19) then
       SeedStr=""
     elseif(VegasSeed.lt.10) then
       write(SeedStr,"(I1)") VegasSeed
       SeedStr="_00"//trim(SeedStr)
+      Seed_random=.true.
+      TheSeeds(0:2)=(/2,VegasSeed*123410,VegasSeed*100/)
     elseif(VegasSeed.lt.100) then
       write(SeedStr,"(I2)") VegasSeed
       SeedStr="_0"//trim(SeedStr)
+      Seed_random=.true.       
+      TheSeeds(0:2)=(/2,VegasSeed*12341,VegasSeed*10/)
     elseif(VegasSeed.lt.1000) then
       write(SeedStr,"(I3)") VegasSeed
       SeedStr="_"//trim(SeedStr)
+      Seed_random=.true.    
+      TheSeeds(0:2)=(/2,VegasSeed*12341,VegasSeed*10/)   
     else
       print *, "Vegas seed too big"
       stop
-    endif
+    endif    
     if( TTBZ_DebugSwitch.eq.1 ) then  
        SeedStr=trim(seedStr)//"_bos"
     elseif( TTBZ_DebugSwitch.eq.2 ) then  
@@ -495,6 +485,9 @@ logical DirResult
     elseif( Collider.eq.13 ) then
         ColliderDirStr="LHC13"
         ColliderStr="LHC"
+    elseif( Collider.eq.15 ) then
+        ColliderDirStr="LHC100"
+        ColliderStr="LHC"
     elseif( Collider.eq.2 ) then
         ColliderDirStr="TEV"
         ColliderStr="TEV"
@@ -509,25 +502,19 @@ logical DirResult
         ColliderStr="ee"
     endif
 
+
     if( Q_top.ne.Q_up ) then
         MuStr=trim(MuStr)//"_XQ"
     endif
 
-    if(Process.lt.10) then
-          write(ProcessStr,"(I1)") Process
-          ProcessStr="0"//trim(ProcessStr)
-    elseif(Process.lt.100) then
-          write(ProcessStr,"(I2)") Process
-    else
-          write(ProcessStr,"(I3)") Process
-    endif    
-    
+
     dirresult = makedirqq(trim(DataDir)//trim(ColliderDirStr)//"_"//trim(ObsStr)//"_"//trim(adjustl(MuStr)))! need adjustl to cut off leading spaces for Mu<10.00 (=1TeV)
-    if( dirresult ) print *, "created directory "//trim(DataDir)//trim(ColliderDirStr)//"_"//trim(ObsStr)//"_"//trim(adjustl(MuStr))
-    if( Process.lt.01000000 ) then
-      dirresult = makedirqq(trim(DataDir)//trim(ColliderDirStr)//"_"//trim(ObsStr)//"_"//trim(adjustl(MuStr))//"/"//trim(ProcessStr))
-      if( dirresult ) print *, "created directory "//trim(DataDir)//trim(ColliderDirStr)//"_"//trim(ObsStr)//"_"//trim(adjustl(MuStr))//"/"//trim(ProcessStr)
-    endif
+    dirresult = makedirqq(trim(DataDir)//trim(ColliderDirStr)//"_"//trim(ObsStr)//"_"//trim(adjustl(MuStr))//"/"//trim(ProcessStr))
+    if(dirresult) print *, "created directory "//trim(DataDir)//trim(ColliderDirStr)//"_"//trim(ObsStr)//"_"//trim(adjustl(MuStr))//"/"//trim(ProcessStr)
+
+    dirresult = makedirqq(trim(DataDir)//"./Grids")
+    if(dirresult) print *, "created directory "//trim(DataDir)//"./Grids"
+    
 
     if( ObsSet.eq.8 ) then!   spin correlations with R
             if(TopDecays.eq.+1) FileTag=trim(FileTag)//"_c"
@@ -535,25 +522,23 @@ logical DirResult
             print *, "Remember: MRST PDFs, Ellis-Soper Recombination"
     endif
 
+
     if(HistoFile.eq."") then
-        if( Process.lt.01000000 ) then 
-            HistoFile = trim(DataDir)//trim(ColliderDirStr)//"_"//trim(ObsStr)//"_"//trim(adjustl(MuStr))//"/"//trim(ProcessStr)//"/"//trim(ColliderStr)//"."//trim(ProcessStr)//"."//trim(CorrectionStr)//trim(SeedStr)//trim(FileTag)
-!         else
-!             HistoFile = trim(DataDir)//trim(ColliderDirStr)//"_"//trim(ObsStr)//"_"//trim(adjustl(MuStr))//"/"//trim(ColliderStr)//"."//trim(CorrectionStr)//trim(SeedStr)//trim(FileTag)
-        endif
+        HistoFile = trim(DataDir)//trim(ColliderDirStr)//"_"//trim(ObsStr)//"_"//trim(adjustl(MuStr))//"/"//trim(ProcessStr)//"/"//trim(ColliderStr)//"."//trim(ProcessStr)//"."//trim(CorrectionStr)//trim(SeedStr)//trim(FileTag)
     endif
-    LHEFile = trim(DataDir)//trim(ColliderDirStr)//"_"//trim(ObsStr)//"_"//trim(adjustl(MuStr))//"/"//trim(ColliderStr)//"."//trim(CorrectionStr)//trim(SeedStr)//trim(FileTag)
 
-   if( .not. Unweighted .and. trim(GridFile).eq."grid" ) then
-      GridFile = trim(DataDir)//trim(ColliderDirStr)//"_"//trim(ObsStr)//"_"//trim(adjustl(MuStr))//"/"//trim(ProcessStr)//"/"//trim(ColliderStr)//"."//trim(ProcessStr)//trim(FileTag)//".1L."//trim(GridFile)
-   elseif( Unweighted ) then
-      GridFile=trim("GenUW."//trim(ProcessStr))
-   endif
-
-
-
-RETURN
+   if( Correction.eq.1 .and. GridIO.eq.+1 ) then 
+!     for virt corrections with read grid option, take the LO grid
+      GridFile = trim(DataDir)//"./Grids"//"/"//trim(ColliderDirStr)//"_"//trim(ObsStr)//"_"//trim(adjustl(MuStr))//"."//trim(ProcessStr)//"."//trim("LO")//trim(FileTag)//"."//trim(GridFile)
+   else
+      GridFile = trim(DataDir)//"./Grids"//"/"//trim(ColliderDirStr)//"_"//trim(ObsStr)//"_"//trim(adjustl(MuStr))//"."//trim(ProcessStr)//"."//trim(CorrectionStr)//trim(FileTag)//"."//trim(GridFile)   
+   endif   
+   LHEFile = trim(DataDir)//trim(ColliderDirStr)//"_"//trim(ObsStr)//"_"//trim(adjustl(MuStr))//"/"//trim(ColliderStr)//trim(FileTag)//".LO."//trim(FileTag)
+    
+return
 END SUBROUTINE
+
+
 
 
 
@@ -572,7 +557,7 @@ integer TheUnit
    write(TheUnit,"(A)") "# Program parameters:"
    write(TheUnit,"(A,I2,A,F8.3,A)") "# Collider=",Collider," (",Collider_Energy*1d-1," TeV)"
    write(TheUnit,"(A,I2)") "# ObsSet=",ObsSet
-   write(TheUnit,"(A,I9)") "# Process=",Process
+   write(TheUnit,"(A,I3)") "# Process=",Process
    write(TheUnit,"(A,I2)") "# Master Process=",MasterProcess
    write(TheUnit,"(A,I2)") "# Correction=",Correction
    if(Unweighted) write(TheUnit,"(A)") "# Unweighted event generation"
@@ -665,6 +650,7 @@ integer TheUnit
        write(TheUnit,'(A,F10.5,A)') "# vev=",Vev*100d0, " GeV"
        write(TheUnit,"(A,F10.5)") "# kappa=",kappaTTBH  
        write(TheUnit,"(A,F10.5)") "# kappa_tilde=",kappaTTBH_tilde
+       
     endif    
     if( m_Top.eq.m_SMTop ) then 
         write(TheUnit,'(A,F8.3,A)') "# m(top)=",m_Top *100d0, " GeV"
@@ -750,7 +736,7 @@ integer TheUnit
    write(TheUnit,"(A,I15)") "# VegasNc1 =",VegasNc1
    write(TheUnit,"(A)") "# Histo file:        "//trim(HistoFile)//'.dat'
    write(TheUnit,"(A)") "# Vegas status file: "//trim(HistoFile)//'.status'
-   if(unweighted) write(TheUnit,"(A)") "# LHE file:          "//trim(LHEFile)//'.lhe'
+   write(TheUnit,"(A)") "# Grid file:         "//trim(GridFile) 
 !    write(TheUnit,"(A)") "# Histo status file: "//trim(HistoFile)//'.tmp_histo'
 
 
@@ -782,11 +768,11 @@ real(8) :: VG_Result,VG_Error,VG_Chi2
 if( GridIO.eq.-1 ) then
   readin=.false.
   writeout=.true.
-  OutGridFile=GridFile(1:72)
+  outgridfile=GridFile(1:200)
 elseif( GridIO.eq.+1 ) then
   readin=.true.
   writeout=.false.
-  InGridFile=GridFile(1:72)
+  ingridfile=GridFile(1:200)
 elseif( GridIO.eq.+2 ) then
   FirstLOThenVI = .true.
 else
@@ -832,7 +818,7 @@ ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.1 .AND. TOPDECAYS.EQ.101) THEN! this is
    call InitHisto()
    call vegas1(EvalCS_LO_bbbWWgg,VG_Result,VG_Error,VG_Chi2)
   endif
-ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.21 ) THEN
+ELSEIF( CORRECTION.EQ.0 .AND. PROCESS.EQ.21 ) THEN
   if( TTBPhoton_SMonly ) then 
      call vegas(EvalCS_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
   else
@@ -848,7 +834,49 @@ ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.21 ) THEN
       call vegas1(EvalCS_anomcoupl_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)  
     endif
   endif
-ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.33 ) THEN
+ELSEIF( CORRECTION.EQ.1 .AND. PROCESS.EQ.21 ) THEN
+  if( FirstLOThenVI ) then
+      CORRECTION=0     
+      if( TTBPhoton_SMonly ) then 
+         call vegas(EvalCS_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
+      else
+         call vegas(EvalCS_anomcoupl_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)  
+      endif   
+      if( warmup ) then
+        itmx = VegasIt1
+        ncall= VegasNc0
+        if( TTBPhoton_SMonly ) then 
+           call vegas1(EvalCS_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
+        else
+           call vegas1(EvalCS_anomcoupl_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)  
+        endif   
+      endif
+      call InitHisto()
+      EvalCounter = 0
+      itmx = 1
+      ncall= VegasNc1
+      CORRECTION=1
+      if( TTBPhoton_SMonly ) then 
+         call vegas1(EvalCS_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
+      else
+         call vegas1(EvalCS_anomcoupl_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)  
+      endif   
+  else
+        if( TTBPhoton_SMonly ) then 
+           call vegas(EvalCS_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
+        else
+           call vegas(EvalCS_anomcoupl_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)  
+        endif      
+        itmx = VegasIt1
+        ncall= VegasNc1
+        call InitHisto()
+        if( TTBPhoton_SMonly ) then 
+           call vegas1(EvalCS_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
+        else
+           call vegas1(EvalCS_anomcoupl_DKP_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)  
+        endif       
+  endif
+ELSEIF( CORRECTION.EQ.0 .AND. PROCESS.EQ.33 ) THEN
   call vegas(EvalCS_DKJ_1L_ttbgg,VG_Result,VG_Error,VG_Chi2)
   if( warmup ) then
    itmx = VegasIt1
@@ -971,7 +999,7 @@ ENDIF
 
 
 IF( MASTERPROCESS.EQ.2 ) THEN
-IF( CORRECTION.LE.1 .AND. PROCESS.EQ.2 ) THEN
+IF( CORRECTION.EQ.0 .AND. PROCESS.EQ.2 ) THEN
         call vegas(EvalCS_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
         if( warmup ) then
         itmx = VegasIt1
@@ -979,7 +1007,34 @@ IF( CORRECTION.LE.1 .AND. PROCESS.EQ.2 ) THEN
         call InitHisto()
         call vegas1(EvalCS_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
         endif
-ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.23 ) THEN
+ELSEIF( CORRECTION.EQ.1 .AND. PROCESS.EQ.2 ) THEN
+  if( FirstLOThenVI ) then
+      CORRECTION=0
+      call vegas(EvalCS_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+      if( warmup ) then
+        itmx = VegasIt1
+        ncall= VegasNc0
+        call vegas1(EvalCS_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+      endif
+
+      call InitHisto()
+      EvalCounter = 0
+      itmx = 1
+      ncall= VegasNc1
+      CORRECTION=1
+      call vegas1(EvalCS_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+      if( warmup ) then
+        itmx = VegasIt1
+        ncall= VegasNc1
+        call InitHisto()
+        call vegas1(EvalCS_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+      endif
+  endif   
+        
+        
+ELSEIF( CORRECTION.EQ.0 .AND. PROCESS.EQ.23 ) THEN
         if( TTBPhoton_SMonly ) then 
           call vegas(EvalCS_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
         else
@@ -995,7 +1050,53 @@ ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.23 ) THEN
           call vegas1(EvalCS_anomcoupl_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)  
         endif
         endif
-ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.34 ) THEN
+ELSEIF( CORRECTION.EQ.1 .AND. PROCESS.EQ.23 ) THEN
+        if( FirstLOThenVI ) then
+            CORRECTION=0
+            if( TTBPhoton_SMonly ) then 
+              call vegas(EvalCS_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+            else
+              call vegas(EvalCS_anomcoupl_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)  
+            endif            
+            if( warmup ) then
+              itmx = VegasIt1
+              ncall= VegasNc0
+              if( TTBPhoton_SMonly ) then 
+                call vegas1(EvalCS_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+              else
+                call vegas1(EvalCS_anomcoupl_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)  
+              endif
+            endif
+
+            call InitHisto()
+            EvalCounter = 0
+            itmx = 1
+            ncall= VegasNc1
+            CORRECTION=1
+            if( TTBPhoton_SMonly ) then 
+              call vegas1(EvalCS_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+            else
+              call vegas1(EvalCS_anomcoupl_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)  
+            endif
+        else
+            if( TTBPhoton_SMonly ) then 
+              call vegas(EvalCS_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+            else
+              call vegas(EvalCS_anomcoupl_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)  
+            endif
+            if( warmup ) then
+              itmx = VegasIt1
+              ncall= VegasNc1
+              call InitHisto()
+              if( TTBPhoton_SMonly ) then 
+                call vegas1(EvalCS_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
+              else
+                call vegas1(EvalCS_anomcoupl_DKP_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)  
+              endif
+            endif
+        endif                               
+        
+ELSEIF( CORRECTION.EQ.0 .AND. PROCESS.EQ.34 ) THEN
         call vegas(EvalCS_DKJ_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
         if( warmup ) then
         itmx = VegasIt1
@@ -1119,13 +1220,38 @@ ENDIF
 
 
 IF( MASTERPROCESS.EQ.3 ) THEN
-IF( CORRECTION   .LE.1 ) THEN
+IF( CORRECTION.EQ.0 ) THEN
   call vegas(EvalCS_1L_ttbggg,VG_Result,VG_Error,VG_Chi2)
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
    call vegas1(EvalCS_1L_ttbggg,VG_Result,VG_Error,VG_Chi2)
+      endif
+ELSEIF( CORRECTION.EQ.1 ) THEN
+  if( FirstLOThenVI ) then
+      CORRECTION=0
+      call vegas(EvalCS_1L_ttbggg,VG_Result,VG_Error,VG_Chi2)
+      if( warmup ) then
+        itmx = VegasIt1
+        ncall= VegasNc0
+        call vegas1(EvalCS_1L_ttbggg,VG_Result,VG_Error,VG_Chi2)
+      endif
+
+      call InitHisto()
+      EvalCounter = 0
+      itmx = 1
+      ncall= VegasNc1
+      CORRECTION=1
+      call vegas1(EvalCS_1L_ttbggg,VG_Result,VG_Error,VG_Chi2)
+  else
+      call vegas(EvalCS_1L_ttbggg,VG_Result,VG_Error,VG_Chi2)
+      if( warmup ) then
+      itmx = VegasIt1
+      ncall= VegasNc1
+      call InitHisto()
+      call vegas1(EvalCS_1L_ttbggg,VG_Result,VG_Error,VG_Chi2)
+      endif
   endif
 ELSEIF( CORRECTION.EQ.2 .AND. PROCESS.EQ.5) THEN
   call vegas(EvalCS_Real_ttbggg,VG_Result,VG_Error,VG_Chi2)
@@ -1298,7 +1424,7 @@ ENDIF
 
 
 IF( MASTERPROCESS.EQ.8 ) THEN
-IF( CORRECTION   .LE.1 ) THEN
+IF( CORRECTION .EQ.0 ) THEN
   if( TTBPhoton_SMonly ) then 
       call vegas(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
   else 
@@ -1314,6 +1440,53 @@ IF( CORRECTION   .LE.1 ) THEN
       call Error("Wrong Masterprocess for TTBPhoton_SMonly")
   endif
   endif
+ELSEIF( CORRECTION .EQ.1 ) THEN
+  if( FirstLOThenVI ) then
+      CORRECTION=0     
+      if( TTBPhoton_SMonly ) then 
+         call vegas(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+      else
+         call Error("Wrong Masterprocess for TTBPhoton_SMonly")
+      endif   
+      if( warmup ) then
+        itmx = VegasIt1
+        ncall= VegasNc0
+        if( TTBPhoton_SMonly ) then 
+           call vegas1(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+        else
+           call Error("Wrong Masterprocess for TTBPhoton_SMonly")
+        endif   
+      endif
+      call InitHisto()
+      EvalCounter = 0
+      itmx = 1
+      ncall= VegasNc1
+      CORRECTION=1
+      if( TTBPhoton_SMonly ) then 
+         call vegas1(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+      else
+         call Error("Wrong Masterprocess for TTBPhoton_SMonly")
+      endif   
+  else
+      if( TTBPhoton_SMonly ) then 
+          call vegas(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+      else 
+          call Error("Wrong Masterprocess for TTBPhoton_SMonly")
+      endif
+      if( warmup ) then
+       itmx = VegasIt1
+       ncall= VegasNc1
+       call InitHisto()
+       if( TTBPhoton_SMonly ) then 
+          call vegas1(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
+      else
+          call Error("Wrong Masterprocess for TTBPhoton_SMonly")
+      endif
+      endif  
+  endif
+  
+  
+  
 ELSEIF( CORRECTION.EQ.3 ) THEN
   if( TTBPhoton_SMonly ) then 
       call vegas(EvalCS_1L_ttbggp,VG_Result,VG_Error,VG_Chi2)
@@ -1369,7 +1542,7 @@ ENDIF
 
 
 IF( MASTERPROCESS.EQ.9 ) THEN
-IF( CORRECTION   .LE.1 ) THEN
+IF( CORRECTION .EQ.0 ) THEN
   if( TTBPhoton_SMonly ) then 
       call vegas(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
   else
@@ -1383,6 +1556,51 @@ IF( CORRECTION   .LE.1 ) THEN
       call vegas1(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
   else
       call Error("Wrong Masterprocess for TTBPhoton_SMonly")
+   endif
+  endif
+  
+ELSEIF( CORRECTION .EQ.1 ) THEN
+  if( FirstLOThenVI ) then
+      CORRECTION=0     
+      if( TTBPhoton_SMonly ) then 
+         call vegas(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+      else
+         call Error("Wrong Masterprocess for TTBPhoton_SMonly")
+      endif   
+      if( warmup ) then
+        itmx = VegasIt1
+        ncall= VegasNc0
+        if( TTBPhoton_SMonly ) then 
+           call vegas1(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+        else
+           call Error("Wrong Masterprocess for TTBPhoton_SMonly")
+        endif   
+      endif
+      call InitHisto()
+      EvalCounter = 0
+      itmx = 1
+      ncall= VegasNc1
+      CORRECTION=1
+      if( TTBPhoton_SMonly ) then 
+         call vegas1(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+      else
+         call Error("Wrong Masterprocess for TTBPhoton_SMonly")
+      endif   
+  else  
+     if( TTBPhoton_SMonly ) then 
+         call vegas(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+     else
+         call Error("Wrong Masterprocess for TTBPhoton_SMonly")
+     endif
+     if( warmup ) then
+      itmx = VegasIt1
+      ncall= VegasNc1
+      call InitHisto()
+      if( TTBPhoton_SMonly ) then 
+         call vegas1(EvalCS_1L_ttbqqbp,VG_Result,VG_Error,VG_Chi2)
+      else
+         call Error("Wrong Masterprocess for TTBPhoton_SMonly")
+      endif
   endif
   endif
 ELSEIF( CORRECTION.EQ.3 ) THEN
@@ -2339,7 +2557,7 @@ endif
   call InitProcess()
   call InitAmps()
   HistoFile=""
-  call SetFileNames()
+!  call SetFileNames()
   
   readin=.false.
   writeout=.true.
@@ -2449,7 +2667,7 @@ ENDIF! MASTERPROCESS
  do nProcSel = 1,NumProcs
     PROCESS = WhatProc(nProcSel)
     HistoFile=""
-    call SetFileNames()
+!    call SetFileNames()
 !     if(Process.lt.10) then
 !         write(ProcessStr,"(I1)") Process
 !         ProcessStr="0"//trim(ProcessStr)
@@ -2532,14 +2750,14 @@ ENDIF! MASTERPROCESS
     call vegas_get_calls(calls2)
     calls_rescale = calls1/calls2
     
-    FileTag="_UW"//trim(FileTag)
+!    FileTag="_UW"//trim(FileTag)
         
  do nProcSel = 1,NumProcs
     PROCESS = WhatProc(nProcSel)
     call InitProcess()
     call InitAmps()
     HistoFile=""
-    call SetFileNames()
+!    call SetFileNames()
     call InitHisto()
     
     if( MASTERPROCESS.EQ.2 ) ndim = ndim + 1
@@ -2651,11 +2869,11 @@ nprn=3
 if( GridIO.eq.-1 ) then
   readin=.false.
   writeout=.true.
-  OutGridFile=GridFile(1:72)
+  outgridfile=GridFile(1:200)
 elseif( GridIO.eq.+1 ) then
   readin=.true.
   writeout=.false.
-  InGridFile=GridFile(1:72)
+  ingridfile=GridFile(1:200)
 elseif( GridIO.eq.+2 ) then
   FirstLOThenVI = .true.
 else
@@ -3449,10 +3667,14 @@ implicit none
      IF( NLOPARAM.EQ.0 .OR. NLOPARAM.EQ.1 ) THEN
          PDFSetString(:) = "NNPDF30_lo_as_0130"
 !          PDFSetString(:) = "MSTW2008lo68cl"
+!          PDFSetString(:) = "CT14llo"
+!          PDFSetString(:) = "MMHT2014lo68cl"
      ELSEIF( NLOPARAM.EQ.2) THEN
          PDFSetString(:) = "NNPDF30_nlo_as_0118"
 
 !          PDFSetString(:) = "MSTW2008nlo68cl"
+!          PDFSetString(:) = "CT14nlo"
+!          PDFSetString(:) = "MMHT2014nlo68cl"
      ENDIF
      
      call InitPDFset(trim(PDFSetString))
