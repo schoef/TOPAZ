@@ -7,6 +7,8 @@ integer,private,parameter :: NumMaxHisto=45
 
 integer,private,parameter :: nPhoRad1=1,nPhoRad2=2
 
+integer,private,parameter :: DynamicLOScale=-1
+
 
 contains
 
@@ -86,6 +88,11 @@ ENDIF
       EvalCS_1L_ttbggp = 0d0
       return
    endif
+
+!    if( CORRECTION.eq.0 .and. DynamicLOScale.gt.0 ) then
+!      MuRen = DynamicLOScale * 0.5d0*(get_PT(MomExt(1:4,6))+get_PT(MomExt(1:4,7))+get_PT(MomExt(1:4,8))+get_PT(MomExt(1:4,9))+get_PT(MomExt(1:4,10))+get_PT(MomExt(1:4,11)))
+!      MuFac = MuRen
+!    endif
 
    call SetPropagators()
    call SetPDFs(eta1,eta2,MuFac,pdf)
@@ -599,6 +606,12 @@ ENDIF
       return
    endif
 
+
+!    if( CORRECTION.eq.0  .and. DynamicLOScale.gt.0 ) then
+!      MuRen = DynamicLOScale * 0.5d0*(get_PT(MomExt(1:4,6))+get_PT(MomExt(1:4,7))+get_PT(MomExt(1:4,8))+get_PT(MomExt(1:4,9))+get_PT(MomExt(1:4,10))+get_PT(MomExt(1:4,11)))
+!      MuFac = MuRen
+!    endif   
+   
    call setPDFs(eta1,eta2,MuFac,pdf)
    IF( PROCESS.EQ.22 ) THEN
       PDFFac_a(up) = pdf(Up_,1)*pdf(AUp_,2) + pdf(Chm_,1)*pdf(AChm_,2)
@@ -3644,6 +3657,16 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
    if( applyPSCut ) then
       cycle
    endif
+   
+
+!    if( CORRECTION.eq.0  .and. DynamicLOScale.gt.0 ) then
+!      MuRen = DynamicLOScale * 0.5d0*(get_PT(MomExt(1:4,5))+get_PT(MomExt(1:4,6))+get_PT(MomExt(1:4,7))+get_PT(MomExt(1:4,9))+get_PT(MomExt(1:4,10))+get_PT(MomExt(1:4,11)))
+!      MuFac = MuRen
+!      call SetPDFs(eta1,eta2,MuFac,pdf)
+!      PDFFac = pdf(0,1) * pdf(0,2)
+!      RunFactor = RunAlphaS(NLOParam,MuRen)
+!    endif   
+   
 !------------ LO --------------
 IF( Correction.EQ.0 ) THEN
    do iHel=nHel(1),nHel(2)
@@ -3860,6 +3883,15 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W,nPhoRa
       cycle
    endif
 
+
+!    if( CORRECTION.eq.0  .and. DynamicLOScale.gt.0 ) then
+!      MuRen = DynamicLOScale * 0.5d0*(get_PT(MomExt(1:4,5))+get_PT(MomExt(1:4,6))+get_PT(MomExt(1:4,7))+get_PT(MomExt(1:4,8))+get_PT(MomExt(1:4,9))+get_PT(MomExt(1:4,10)))
+!      MuFac = MuRen
+!      call SetPDFs(eta1,eta2,MuFac,pdf)
+!      PDFFac = pdf(0,1) * pdf(0,2)
+!      RunFactor = RunAlphaS(NLOParam,MuRen)
+!    endif      
+   
 !------------ LO --------------
 IF( Correction.EQ.0 ) THEN
    do iHel=nHel(1),nHel(2)
@@ -4135,6 +4167,21 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
    if( applyPSCut ) then
       cycle
    endif
+   
+
+!    if( CORRECTION.eq.0  .and. DynamicLOScale.gt.0 ) then
+!      MuRen = DynamicLOScale * 0.5d0*(get_PT(MomExt(1:4,5))+get_PT(MomExt(1:4,6))+get_PT(MomExt(1:4,7))+get_PT(MomExt(1:4,9))+get_PT(MomExt(1:4,10))+get_PT(MomExt(1:4,11)))
+!      MuFac = MuRen
+!      call SetPDFs(eta1,eta2,MuFac,pdf)
+!      PDFFac_a = pdf(Up_,1) *pdf(AUp_,2)  + pdf(Dn_,1) *pdf(ADn_,2)   &
+!               + pdf(Chm_,1)*pdf(AChm_,2) + pdf(Str_,1)*pdf(AStr_,2)  &
+!               + pdf(Bot_,1)*pdf(ABot_,2)
+!      PDFFac_b = pdf(Up_,2) *pdf(AUp_,1)  + pdf(Dn_,2) *pdf(ADn_,1)   &
+!               + pdf(Chm_,2)*pdf(AChm_,1) + pdf(Str_,2)*pdf(AStr_,1)  &
+!               + pdf(Bot_,2)*pdf(ABot_,1)
+!      RunFactor = RunAlphaS(NLOParam,MuRen)
+!    endif   
+   
 !------------ LO --------------
 IF( CORRECTION.EQ.0 ) THEN
   do npdf=1,2
@@ -4407,6 +4454,20 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
    if( applyPSCut ) then
       cycle
    endif
+
+
+!    if( CORRECTION.eq.0  .and. DynamicLOScale.gt.0 ) then
+!      MuRen = DynamicLOScale * 0.5d0*(get_PT(MomExt(1:4,5))+get_PT(MomExt(1:4,6))+get_PT(MomExt(1:4,7))+get_PT(MomExt(1:4,8))+get_PT(MomExt(1:4,9))+get_PT(MomExt(1:4,10)))
+!      MuFac = MuRen
+!      call SetPDFs(eta1,eta2,MuFac,pdf)
+!      PDFFac_a = pdf(Up_,1) *pdf(AUp_,2)  + pdf(Dn_,1) *pdf(ADn_,2)   &
+!               + pdf(Chm_,1)*pdf(AChm_,2) + pdf(Str_,1)*pdf(AStr_,2)  &
+!               + pdf(Bot_,1)*pdf(ABot_,2)
+!      PDFFac_b = pdf(Up_,2) *pdf(AUp_,1)  + pdf(Dn_,2) *pdf(ADn_,1)   &
+!               + pdf(Chm_,2)*pdf(AChm_,1) + pdf(Str_,2)*pdf(AStr_,1)  &
+!               + pdf(Bot_,2)*pdf(ABot_,1)
+!      RunFactor = RunAlphaS(NLOParam,MuRen)
+!    endif   
 
 !------------ LO --------------
 IF( CORRECTION.EQ.0 ) THEN
