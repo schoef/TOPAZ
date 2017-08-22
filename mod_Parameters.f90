@@ -45,7 +45,7 @@ real(8), public      :: opp_err
 
 real(8),public,save :: maxWgt=0d0
 integer, allocatable :: Crossing(:)
-real(8), public :: MuRen, MuFac, MuFrag, AvgFactor
+real(8), public :: MuRen, MuFac, MuFrag, AvgFactor,DynamicScaleMultiplier
 character, public :: HistoFile*(200)
 character, public :: GridFile*(200)
 character, public :: LHEFile*(200)

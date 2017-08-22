@@ -100,6 +100,7 @@ logical :: dirresult
    MuRen=m_Top
    MuFac=m_Top
    MuFrag=m_Top
+   DynamicScaleMultiplier=-1d0
    Fragm_Func_Type=2
    alpha_frag=0.66d0
    beta_frag =12.39d0
@@ -204,6 +205,8 @@ logical :: dirresult
         read(arg(7:11),*) MuFac
     elseif( arg(1:7).eq."MuFrag=" ) then
         read(arg(8:11),*) MuFrag
+    elseif( arg(1:10).eq."DynMuMult=" ) then
+        read(arg(11:13),*) DynamicScaleMultiplier        
     elseif( arg(1:6).eq."TopDK=" ) then
         read(arg(7:9),*) TopDecays
     elseif( arg(1:7).eq."XTopDK=" ) then
@@ -296,8 +299,12 @@ logical :: dirresult
     elseif( arg(1:5).eq."DKRE=" ) then
         read(arg(6:7),*) DKRE_switch
     endif
-   enddo
-   write(MuStr,"(F5.2)") MuRen
+   enddo  
+   if( DynamicScaleMultiplier.ne.-1d0 .and. NLOParam.le.1 ) then
+       write(MuStr,"(F3.1)") DynamicScaleMultiplier
+   else
+       write(MuStr,"(F5.2)") MuRen
+   endif
 
    if( DipAlpha2.eq.0d0 ) then
        print *, "DipAlpha2 cannot ne zero"
@@ -570,6 +577,9 @@ integer TheUnit
    write(TheUnit,"(A,I2)") "# Top Decays=",TopDecays
    write(TheUnit,"(A,F9.3,A)") "# MuRen=",MuRen*100," GeV"
    write(TheUnit,"(A,F9.3,A)") "# MuFac=",MuFac*100," GeV"
+   if( NLOParam.le.1 .and. DynamicScaleMultiplier.ne.-1d0 ) then
+        write(TheUnit,"(A,F13.6)") "# Dynamic scale multiplier=",DynamicScaleMultiplier   
+   endif
    if( Q_top.ne.Q_up ) write(TheUnit,"(A,F13.9)") "# Q_top=",Q_top
    if( Correction.eq.2 .or. Correction.eq.3 .or. Correction.eq.4 .or. Correction.eq.5 ) then
         write(TheUnit,"(A,PE9.2,PE9.2,PE9.2,PE9.2,PE9.2,A)") "# Alpha Parameters (ii if fi ff DK)=(",alpha_ii,alpha_if,alpha_fi,alpha_ff,alpha_DK,")"
