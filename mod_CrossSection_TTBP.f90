@@ -3663,6 +3663,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
       MuFac = MuRen
       call SetPDFs(eta1,eta2,MuFac,pdf)
       PDFFac = pdf(0,1) * pdf(0,2)
+      PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt*PSWgt2*PSWgt3 * VgsWgt * PDFFac * dble(NumHelicities/(nHel(2)-nHel(1)+1))   
       RunFactor = RunAlphaS(NLOParam,MuRen)
     endif   
    
@@ -3889,6 +3890,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W,nPhoRa
       call SetPDFs(eta1,eta2,MuFac,pdf)
       PDFFac = pdf(0,1) * pdf(0,2)
       RunFactor = RunAlphaS(NLOParam,MuRen)
+      PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt*PSWgt2*PSWgt3 * VgsWgt * PDFFac * dble(NumHelicities/(nHel(2)-nHel(1)+1))   
     endif      
    
 !------------ LO --------------
