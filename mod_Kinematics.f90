@@ -8795,7 +8795,8 @@ ENDIF
 
 !------------------ Frixione photon isolation ----------------------------
 
-    isolated = FrixioneIsolated(Mom(1:4,pho),Rsep_Pj,NumHadr,MomHadr(1:4,1:NumHadr))
+!     isolated = FrixioneIsolated(Mom(1:4,pho),Rsep_Pj,NumHadr,MomHadr(1:4,1:NumHadr))
+    isolated = FrixioneIsolated(Mom(1:4,pho),Rsep_jet,NumHadr,MomHadr(1:4,1:NumHadr))! using Rsep_jet here because it is supposed to be 0.4(=Rsep_jet) and not Rsep_Pj=0.3
     if( .not. isolated ) then
         applyPSCut = .true.
         RETURN
@@ -8933,11 +8934,6 @@ phi_ll=0.5d0
             RETURN
         endif
     enddo
-
-    if( Correction.eq.0 .and. NLOParam.le.1 ) then! setting dynamic scale at LO
-      MuFac = 0.5d0*( get_Mperp(Mom(1:4,t)) + get_Mperp(Mom(1:4,tbar)) )
-      MuRen = MuFac
-    endif    
     
 
 !    if( pT_lepM.gt.pT_lepP .and. pT_lepM.lt.pT_lep_cut ) then
