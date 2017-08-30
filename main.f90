@@ -803,6 +803,8 @@ else
    warmup = .true.
 endif
 
+
+
 IF( MASTERPROCESS.EQ.0 ) THEN
 IF( CORRECTION   .EQ.1 ) THEN
   call vegas(EvalCS_1L_gggggg,VG_Result,VG_Error,VG_Chi2)
@@ -1130,7 +1132,7 @@ ELSEIF( CORRECTION.EQ.3 .AND. PROCESS.LE.6 ) THEN
         call InitHisto()
         call vegas1(EvalCS_1L_ttbqqb,VG_Result,VG_Error,VG_Chi2)
         endif
-ELSEIF( CORRECTION.EQ.3 .AND. (PROCESS.LE.43 .OR. PROCESS.LE.44 .OR. PROCESS.LE.46) ) THEN
+ELSEIF( CORRECTION.EQ.3 .AND. (PROCESS.EQ.43 .OR. PROCESS.EQ.44 .OR. PROCESS.EQ.46) ) THEN
         call vegas(EvalCS_1L_HtHtbqqb,VG_Result,VG_Error,VG_Chi2)
         if( warmup ) then
         itmx = VegasIt1
