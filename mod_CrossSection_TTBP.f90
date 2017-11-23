@@ -11,17 +11,6 @@ contains
 
 
 
-FUNCTION EvalCS_1L_ttbggp_MPI(yRnd,VgsWgt,res)
-implicit none
-integer :: EvalCS_1L_ttbggp_MPI
-real(8) ::  yRnd(*),res(*),VgsWgt
-
-res(1) = EvalCS_1L_ttbggp(yRnd,VgsWgt)
-EvalCS_1L_ttbggp_MPI=0
-RETURN
-END FUNCTION
-
-
 
 
 
@@ -61,14 +50,14 @@ include 'vegas_common.f'
 
    
    NRndHel=32
-IF( TOPDECAYS.NE.0 ) THEN
-   call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(8:11),.false.,MomExt(1:4,6:8),PSWgt2)
-   call EvalPhasespace_TopDecay(MomExt(1:4,5),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
-   PSWgt = PSWgt * PSWgt2*PSWgt3
-   call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8))
-   call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11))
-   NRndHel=8
-ENDIF
+   IF( TOPDECAYS.NE.0 ) THEN
+      call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(8:11),.false.,MomExt(1:4,6:8),PSWgt2)
+      call EvalPhasespace_TopDecay(MomExt(1:4,5),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
+      PSWgt = PSWgt * PSWgt2*PSWgt3
+      call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8))
+      call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11))
+      NRndHel=8
+   ENDIF
 
    call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
    if( applyPSCut ) then
@@ -106,13 +95,13 @@ ENDIF
    EvalCS_1L_ttbggp = LO_Res_Unpol * PreFac
 
 
+!  filling histograms
    do NHisto=1,NumHistograms
       call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbggp)
    enddo
 
-
+!  return value for integator
    EvalCS_1L_ttbggp = EvalCS_1L_ttbggp/VgsWgt
-
 RETURN
 END FUNCTION
 
@@ -144,24 +133,24 @@ include "vegas_common.f"
 
 
 
-  EvalCS_1L_ttbqqbp = 0d0
-  call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
-  if( EHat.le.2d0*m_Top+pT_pho_cut ) then
-      EvalCS_1L_ttbqqbp = 0d0
-      return
-  endif
-  FluxFac = 1d0/(2d0*EHat**2)
+   EvalCS_1L_ttbqqbp = 0d0
+   call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
+   if( EHat.le.2d0*m_Top+pT_pho_cut ) then
+       EvalCS_1L_ttbqqbp = 0d0
+       return
+   endif
+   FluxFac = 1d0/(2d0*EHat**2)
 
    call EvalPhaseSpace_2to3(EHat,yRnd(3:7),MomExt(1:4,1:5),PSWgt)
    call boost2Lab(eta1,eta2,5,MomExt(1:4,1:5))
 
    NRndHel=32
-IF( TOPDECAYS.NE.0 ) THEN
-   call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(8:11),.false.,MomExt(1:4,6:8),PSWgt2)
-   call EvalPhasespace_TopDecay(MomExt(1:4,5),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
-   PSWgt = PSWgt * PSWgt2*PSWgt3
-   NRndHel=8
-ENDIF
+   IF( TOPDECAYS.NE.0 ) THEN
+      call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(8:11),.false.,MomExt(1:4,6:8),PSWgt2)
+      call EvalPhasespace_TopDecay(MomExt(1:4,5),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
+      PSWgt = PSWgt * PSWgt2*PSWgt3
+      NRndHel=8
+   ENDIF
 
    call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
    if( applyPSCut ) then
@@ -180,52 +169,52 @@ ENDIF
 
    LO_Res_Unpol = (0d0,0d0)
    do npdf=1,2
-    if(npdf.eq.1) then
-        PDFFac(1:2) = PDFFac_a(1:2)
-    elseif(npdf.eq.2) then
-        PDFFac(1:2) = PDFFac_b(1:2)
-        call swapMom(MomExt(1:4,1),MomExt(1:4,2))
-    endif
-    ISFac = MomCrossing(MomExt)
-    IF( TOPDECAYS.GE.1 ) THEN
-          call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8))
-          call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11))
-    ENDIF
-    call SetPropagators()
+     if(npdf.eq.1) then
+         PDFFac(1:2) = PDFFac_a(1:2)
+     elseif(npdf.eq.2) then
+         PDFFac(1:2) = PDFFac_b(1:2)
+         call swapMom(MomExt(1:4,1),MomExt(1:4,2))
+     endif
+     ISFac = MomCrossing(MomExt)
+     IF( TOPDECAYS.GE.1 ) THEN
+           call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8))
+           call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11))
+     ENDIF
+     call SetPropagators()
 
-    do iHel=1,NRndHel
-        call HelCrossing(Helicities(iHel,1:NumExtParticles))
-        call SetPolarizations()
-        do iPrimAmp=1,NumBornAmps
-            call EvalTree(BornAmps(iPrimAmp))
-        enddo
+     do iHel=1,NRndHel
+         call HelCrossing(Helicities(iHel,1:NumExtParticles))
+         call SetPolarizations()
+         do iPrimAmp=1,NumBornAmps
+             call EvalTree(BornAmps(iPrimAmp))
+         enddo
 
-        LOPartAmp(up) = BornAmps(1)%Result + Q_up/Q_top * BornAmps(2)%Result
-        LOPartAmp(dn) = BornAmps(1)%Result + Q_dn/Q_top * BornAmps(2)%Result
-        LO_Res_Pol = ColLO_ttbqqb(1,1) * ( LOPartAmp(up)*dconjg(LOPartAmp(up))*PDFFac(up) + LOPartAmp(dn)*dconjg(LOPartAmp(dn))*PDFFac(dn))
-        LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
-    enddo!helicity loop
+         LOPartAmp(up) = BornAmps(1)%Result + Q_up/Q_top * BornAmps(2)%Result
+         LOPartAmp(dn) = BornAmps(1)%Result + Q_dn/Q_top * BornAmps(2)%Result
+         LO_Res_Pol = ColLO_ttbqqb(1,1) * ( LOPartAmp(up)*dconjg(LOPartAmp(up))*PDFFac(up) + LOPartAmp(dn)*dconjg(LOPartAmp(dn))*PDFFac(dn))
+         LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
+     enddo!helicity loop
    enddo! npdf loop
 
+   
+   
 !  normalization
    LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * WidthExpansion
    EvalCS_1L_ttbqqbp = LO_Res_Unpol * PreFac
 
+   
+!  filling histograms
    do NHisto=1,NumHistograms
       call intoHisto(NHisto,NBin(NHisto),EvalCS_1L_ttbqqbp)
    enddo
 
+
+!  return value for integrator   
    EvalCS_1L_ttbqqbp = EvalCS_1L_ttbqqbp/VgsWgt
 
    
 RETURN
 END FUNCTION
-
-
-
-
-
-
 
 
 
