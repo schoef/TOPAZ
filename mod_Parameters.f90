@@ -14,7 +14,7 @@ logical, public :: unweighted
 logical, public :: HelSampling
 logical, public :: FirstLOThenVI
 integer, public :: DKRE_switch
-integer, public, save :: ColorlessTag=2   !  1=SM Z, 2=SM+BSM Z, 3=SM+BSM Higgs!     automatically set to 3 in main.f90 for ttb+H final states
+integer, public, save :: ColorlessTag=1   !  1=SM Z, 2=SM+BSM Z, 3=SM+BSM Higgs!     automatically set to 3 in main.f90 for ttb+H final states
 integer(8), public, save :: EvalCounter=0
 integer(8), public, save :: PSCutCounter=0
 integer(8), public, save :: SkipCounter=0
@@ -108,7 +108,7 @@ real(8), public :: AbsDelF1A, AbsDelF1V    !, DeltaF2A, DeltaF2V    ! later
 real(8), public :: RelDelF1A, RelDelF1V, RelDelF2A, RelDelF2V   !, DeltaF2A, DeltaF2V    ! later
 real(8), public :: DelGam2V,DelGam2A       ! q-dependent coupling for the photon
 
-logical, parameter :: TTBPhoton_SMonly = .false.  ! true: no anomalous ttb+gamma couplings,  false: anomalous ttb+gamma couplings
+logical, parameter :: TTBPhoton_SMonly = .true.  ! true: no anomalous ttb+gamma couplings,  false: anomalous ttb+gamma couplings
 logical :: AnomalousInteractions
 
 ! top-H couplings
@@ -644,7 +644,7 @@ endif
 
 
 ! initialize _dyn couplings which are used in the currents
-! the _dyn variables will be overwritten in mod_ZDecay.f90 if the Z-boson decays
+! the _dyn variables will be overwritten in mod_ZDecay.f90 if the Z-boson decays: e.g.   couplZTT_left_dyn = couplZTT_left*PropZ*couplZFF
 ! it would be good to rename this in the future (or maybe couplXTT ? )
    if( Process.ge.71 .and. Process.le.76 ) then
       couplZTT_left_dyn  = couplZTT_left
@@ -682,15 +682,9 @@ endif
                                 +((couplZEE_left+couplZEE_right)**2 + (couplZEE_left-couplZEE_right)**2 *1d0 )*3d0 &! el+mu+tau
                                 +((couplZNN_left+couplZNN_right)**2 + (couplZNN_left-couplZNN_right)**2 *1d0 )*3d0 &! 3nu                      
                              )
-!      print *, "1",alpha/12d0*M_Z 
-!      print *, "2",((couplZEE_left+couplZEE_right)**2 + (couplZEE_left-couplZEE_right)**2 *1d0 )
-!      print *, "3",((couplZNN_left+couplZNN_right)**2 + (couplZNN_left-couplZNN_right)**2 *1d0 )
-!      print *, "4",((couplZUU_left+couplZUU_right)**2 + (couplZUU_left-couplZUU_right)**2 *1d0 )*3d0
-!      print *, "5",((couplZDD_left+couplZDD_right)**2 + (couplZDD_left-couplZDD_right)**2 *1d0 )*3d0
 !     BrZtoEE = alpha/12d0*M_Z *( (couplZEE_left+couplZEE_right)**2 + (couplZEE_left-couplZEE_right)**2 )/ZWidth
 !     print *, "Z->ee branching using calculated LO total width",BrZtoEE
 !     print *, "Z->ee branching using experimental  total width",alpha/12d0*M_Z *( (couplZEE_left+couplZEE_right)**2 + (couplZEE_left-couplZEE_right)**2 )/Ga_ZExp
-!     print *, "sw2",sw**2
 
 
 !  chiral couplings for stop-Chi^0-top

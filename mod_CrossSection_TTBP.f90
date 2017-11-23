@@ -3,8 +3,6 @@ use ModTopDecay
 implicit none
 
 integer,private,parameter :: NumMaxHisto=45
-
-
 integer,private,parameter :: nPhoRad1=1,nPhoRad2=2
 
 
@@ -36,24 +34,21 @@ use ModMyRecurrence
 use ModParameters
 implicit none
 real(8) ::  EvalCS_1L_ttbggp,yRnd(1:VegasMxDim),VgsWgt
-complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol
-complex(8) :: BosonicPartAmp(1:3,-2:1)
+complex(8) :: LO_Res_Pol,LO_Res_Unpol
 integer :: iHel,jHel,kHel,iPrimAmp,jPrimAmp
 real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac
 real(8) :: MomExt(1:4,1:12)
 logical :: applyPSCut
-real(8),parameter :: Nc=3d0
-real(8) :: eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac,AccPoles
-real(8) :: pdf(-6:6,1:2),pdf_z(-6:6,1:2),xE,HOp(1:3)
+real(8) :: eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac
+real(8) :: pdf(-6:6,1:2)
 integer :: NBin(1:NumMaxHisto),NHisto,PhotonCouplCorr=2d0,nHel(1:2),NRndHel
-include 'misc/global_import'
 include 'vegas_common.f'
 
 
    EvalCS_1L_ttbggp = 0d0
 
    call PDFMapping(1,yRnd(1:2),eta1,eta2,Ehat,sHatJacobi)
-   if( EHat.le.(2d0*m_Top+pT_pho_cut)  ) then
+   if( EHat.le.(2d0*m_Top+pT_pho_cut) ) then
       EvalCS_1L_ttbggp = 0d0
       return
    endif
@@ -65,14 +60,14 @@ include 'vegas_common.f'
    ISFac = MomCrossing(MomExt)
 
    
-   NRndHel=8
+   NRndHel=32
 IF( TOPDECAYS.NE.0 ) THEN
    call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(8:11),.false.,MomExt(1:4,6:8),PSWgt2)
    call EvalPhasespace_TopDecay(MomExt(1:4,5),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
    PSWgt = PSWgt * PSWgt2*PSWgt3
    call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,6:8))
    call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,9:11))
-   NRndHel=16
+   NRndHel=8
 ENDIF
 
    call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
@@ -86,13 +81,10 @@ ENDIF
    PDFFac = pdf(0,1) * pdf(0,2)
    PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt * VgsWgt * PDFFac
    RunFactor = RunAlphaS(NLOParam,MuRen)
-   nHel(1:2) = getHelicity(yrnd(NRndHel))
-   PreFac = PreFac * dble(NumHelicities/(nHel(2)-nHel(1)+1))
-
    
-   
+  
    LO_Res_Unpol = (0d0,0d0)
-   do iHel=nHel(1),nHel(2)
+   do iHel=1,NRndHel
       call HelCrossing(Helicities(iHel,1:NumExtParticles))
       call SetPolarizations()
       do iPrimAmp=1,NumBornAmps
@@ -138,19 +130,16 @@ use ModAmplitudes
 use ModMyRecurrence
 use ModParameters
 implicit none
-real(8) ::  EvalCS_1L_ttbqqbp,yRnd(1:VegasMxDim),VgsWgt,xE
-complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol
+real(8) ::  EvalCS_1L_ttbqqbp,yRnd(1:VegasMxDim),VgsWgt
+complex(8) :: LO_Res_Pol,LO_Res_Unpol
 complex(8) :: LOPartAmp(1:2)
 integer :: iHel,iPrimAmp,jPrimAmp
 real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac
 real(8) :: MomExt(1:4,1:12)
 logical :: applyPSCut
-real(8) :: y13,y14,y15,y23,y24,y25,y34,y35,y45,M1sq,M2sq,M3sq,MAsymSq
-real(8),parameter :: Nc=3d0
-real(8) :: tau,eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac_a(1:2),PDFFac_b(1:2),PDFFac(1:2),pdf(-6:6,1:2)
-integer :: NHisto,NBin(1:NumMaxHisto),npdf,ParityFlip=1,PhotonCouplCorr=2d0,nHel(1:2),NRndHel
+real(8) :: eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac_a(1:2),PDFFac_b(1:2),PDFFac(1:2),pdf(-6:6,1:2)
+integer :: NHisto,NBin(1:NumMaxHisto),npdf,PhotonCouplCorr=2d0,nHel(1:2),NRndHel
 integer,parameter :: up=1,dn=2
-include 'misc/global_import'
 include "vegas_common.f"
 
 
@@ -166,12 +155,12 @@ include "vegas_common.f"
    call EvalPhaseSpace_2to3(EHat,yRnd(3:7),MomExt(1:4,1:5),PSWgt)
    call boost2Lab(eta1,eta2,5,MomExt(1:4,1:5))
 
-   NRndHel=8
+   NRndHel=32
 IF( TOPDECAYS.NE.0 ) THEN
    call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(8:11),.false.,MomExt(1:4,6:8),PSWgt2)
    call EvalPhasespace_TopDecay(MomExt(1:4,5),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
    PSWgt = PSWgt * PSWgt2*PSWgt3
-   NRndHel=16
+   NRndHel=8
 ENDIF
 
    call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
@@ -181,24 +170,18 @@ ENDIF
    endif
 
    call setPDFs(eta1,eta2,MuFac,pdf)
-   IF( PROCESS.EQ.22 ) THEN
-      PDFFac_a(up) = pdf(Up_,1)*pdf(AUp_,2) + pdf(Chm_,1)*pdf(AChm_,2)
-      PDFFac_a(dn) = pdf(Dn_,1)*pdf(ADn_,2) + pdf(Str_,1)*pdf(AStr_,2) + pdf(Bot_,1)*pdf(ABot_,2)
-      PDFFac_b(up) = pdf(Up_,2)*pdf(AUp_,1) + pdf(Chm_,2)*pdf(AChm_,1)
-      PDFFac_b(dn) = pdf(Dn_,2)*pdf(ADn_,1) + pdf(Str_,2)*pdf(AStr_,1) + pdf(Bot_,2)*pdf(ABot_,1)
-   ENDIF
-
+   PDFFac_a(up) = pdf(Up_,1)*pdf(AUp_,2) + pdf(Chm_,1)*pdf(AChm_,2)
+   PDFFac_a(dn) = pdf(Dn_,1)*pdf(ADn_,2) + pdf(Str_,1)*pdf(AStr_,2) + pdf(Bot_,1)*pdf(ABot_,2)
+   PDFFac_b(up) = pdf(Up_,2)*pdf(AUp_,1) + pdf(Chm_,2)*pdf(AChm_,1)
+   PDFFac_b(dn) = pdf(Dn_,2)*pdf(ADn_,1) + pdf(Str_,2)*pdf(AStr_,1) + pdf(Bot_,2)*pdf(ABot_,1)
 
    PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt * VgsWgt
    RunFactor = RunAlphaS(NLOParam,MuRen)
-   nHel(1:2) = getHelicity(yrnd(NRndHel))
-   PreFac = PreFac * dble(NumHelicities/(nHel(2)-nHel(1)+1))
 
    LO_Res_Unpol = (0d0,0d0)
    do npdf=1,2
     if(npdf.eq.1) then
         PDFFac(1:2) = PDFFac_a(1:2)
-!         PDFFac(1:2) = PDFFac_a(1:2)+PDFFac_b(1:2)
     elseif(npdf.eq.2) then
         PDFFac(1:2) = PDFFac_b(1:2)
         call swapMom(MomExt(1:4,1),MomExt(1:4,2))
@@ -210,8 +193,7 @@ ENDIF
     ENDIF
     call SetPropagators()
 
-    do iHel=nHel(1),nHel(2)
-!     do iHel=27,27; print *, "helicity 27"
+    do iHel=1,NRndHel
         call HelCrossing(Helicities(iHel,1:NumExtParticles))
         call SetPolarizations()
         do iPrimAmp=1,NumBornAmps
@@ -223,60 +205,7 @@ ENDIF
         LO_Res_Pol = ColLO_ttbqqb(1,1) * ( LOPartAmp(up)*dconjg(LOPartAmp(up))*PDFFac(up) + LOPartAmp(dn)*dconjg(LOPartAmp(dn))*PDFFac(dn))
         LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
     enddo!helicity loop
-    
-!     y13 = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,5))/EHat**2
-!     y14 = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,4))/EHat**2
-!     y15 = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,3))/EHat**2
-!     y23 = 2d0*(MomExt(1:4,2).dot.MomExt(1:4,5))/EHat**2
-!     y24 = 2d0*(MomExt(1:4,2).dot.MomExt(1:4,4))/EHat**2
-!     y25 = 2d0*(MomExt(1:4,2).dot.MomExt(1:4,3))/EHat**2
-!     y34 = 2d0*(MomExt(1:4,5).dot.MomExt(1:4,4))/EHat**2
-!     y35 = 2d0*(MomExt(1:4,5).dot.MomExt(1:4,3))/EHat**2
-!     y45 = 2d0*(MomExt(1:4,4).dot.MomExt(1:4,3))/EHat**2
-!        
-!     M1sq = (16*(2*m_top**2*(2 + (-2 + y15)*y15 + (-2 + y25)*y25) -   &
-!            Ehat**2*(y14*(-2*y13*y25 + y23*(-2 + y15 + y25) + y35 - y15*y35) +   &
-!               y24*(-2*y15*y23 + y13*(-2 + y15 + y25) + y35 - y25*y35) + (y13 - y13*y15 + y23 - y23*y25)*y45))  &
-!          )/(Ehat**4*y15*y25*(-1 + y15 + y25)**2)           
-!               
-!     M2sq = (16*(-4*m_top**4*(y35**2 + y45**2) + 2*m_top**2*Ehat**2*   &
-!             (-(((y14 + y15)*y23 + y13*(y24 + y25))*y35**2) + 2*(-(y15*y25) + y34)*y35*y45 -    &
-!               ((y13 + y15)*y24 + y14*(y23 + y25))*y45**2) +    &
-!            Ehat**4*y35*y45*(y15*(y23*(y34 + y35) + y24*(y34 + y45)) +    &
-!               y14*(-2*y24*y35 + y25*(y34 + y45) + y23*(2*y34 + y35 + y45)) +    &
-!               y13*(y25*(y34 + y35) - 2*y23*y45 + y24*(2*y34 + y35 + y45)))))/(Ehat**6*y35**2*y45**2)
-!            
-!     M3sq =(16*(Ehat**2*(y35*(2*y14**2*y23*y25 - y15*y24*(y15*y23 + 2*y13*y24 + y13*y25 - y25*y34) +    &
-!                  y14*(y25*(2*y13*y24 + y13*y25 - y24*y35) + y15*(-2*y23*y24 + y23*y25 - y25*y34 + y24*y35)))   &
-!                + (-2*y13**2*y24*y25 + y14*(2*y23 + y25)*(y15*y23 - y13*y25) + y15*y23*(y15*y24 - y25*y34) +    &
-!                  y13*y15*(2*y23*y24 - y24*y25 + y25*y34) - y15*(y23 - y24)*(-1 + 2*y25)*y35 -    &
-!                  y14*(y15*y23 + (-1 + 2*y15 + y23)*y25)*y35 + y13*(y15*y24 + (-1 + 2*y15 + y24)*y25)*y35)*y45   &
-!                 + y13*y23*(-y15 + y25)*y45**2) +    &
-!            2*m_top**2*(y15*(y24*(-2 + y25) - y25*(y13 + y14 - y23 + y25))*y35 +    &
-!               y15*(-(y23*(-2 + y25)) + y25*(y13 + y14 - y24 + y25))*y45 -    &
-!               (-2 + y25)*y25*(y14*y35 - y13*y45) + y15**2*((y24 + y25)*y35 - (y23 + y25)*y45))))/   &
-!        (Ehat**4*y15*y25*(-1 + y15 + y25)*y35*y45)
-!     
-!     
-! !     MAsymSq = (16*(y15*(y35*(-2*y13*y24**2 + y24*(-(y25*(-1 + y13 + y35)) + y14*(-2*y23 + y35) + 2*(-1 + y34 + y35)) + y25*(y14*(-1 + y23 + y35) + y13*(-1 + y34 + y35) - (y23 - y25)*(-1 + y34 + y35))) +  &
-! !               (2*y14*y23**2 + y25*(y13 - y13*y24 - (y14 - y24 + y25)*(-1 + y34)) + ((1 + y13)*y24 + 2*(y13 - y14 + y24)*y25)*y35 + y23*(2 + 2*y13*y24 - y25 + y14*y25 - 2*y34 - (1 + y14 + 2*y25)*y35))*y45 -   &
-! !               (y23*(2 + y13 - y25) + y25*(y13 + y14 - y24 + y25))*y45**2) + y15**2*(-(y24*y35*(-1 + y23 + y34 + y35)) + y24*(y23 - y35)*y45 - (-1 + y34 + y35 + y45)*(y25*y35 - (y23 + y25)*y45)) +   &
-! !            y25*(2*y14**2*y23*y35 + y14*y35*(y13*(2*y24 + y25) + (-2 + y25)*(-1 + y34) + (-2 - y24 + y25)*y35) - y14*(y13*(2*y23 + y25) + (1 + y23 - y25)*y35)*y45 +   &
-! !               y13*y45*(-2 - 2*y13*y24 + 2*y34 + y35 + y24*y35 + (2 + y23)*y45 - y25*(-1 + y34 + y35 + y45)))))/(Ehat**2*y15*y25*(-1 + y15 + y25)*y35*y45)
-! !     M1sq=0d0
-! !     M2sq=0d0
-! !     M3sq=MAsymSq
-! !     if( MomExt(4,5).lt.0d0 ) return
-! 
-!     NLO_Res_Unpol(0) = NLO_Res_Unpol(0) & 
-!                      + 1d0/Q_Top**2*( M1sq*(Q_up)**2 + M2sq*(Q_top**2) + M3sq*(Q_top*Q_up) )*PDFFac(up) & 
-!                      + 1d0/Q_Top**2*( M1sq*(Q_dn)**2 + M2sq*(Q_top**2) + M3sq*(Q_top*Q_dn) )*PDFFac(dn)     
-!     LO_Res_UnPol = NLO_Res_Unpol(0)
-    
-
-    
    enddo! npdf loop
-   call swapMom(MomExt(1:4,1),MomExt(1:4,2))   ! swap back to original order
 
 !  normalization
    LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 * Q_top**2*alpha4Pi*PhotonCouplCorr * WidthExpansion
@@ -293,6 +222,25 @@ RETURN
 END FUNCTION
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+! ----------------------------------------------------------------------------------------------
 
 
 
