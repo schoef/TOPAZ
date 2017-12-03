@@ -9841,7 +9841,11 @@ elseif( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58 ) then! set of observab
     eta_top  = get_ETA(Mom(1:4,t))
     eta_atop = get_ETA(Mom(1:4,tbar))
 
-
+!   cosThetaStar 
+!   cosTheta    = The 3D angle between the leptons from the Z in the lab frame
+!   gamma_boost = sqrt(1. + (pT_Z/Minv_Z)**2*cosh(eta_Z)**2)
+!   beta_boost  = sqrt(1. - 1./gamma_boost**2)
+!   cosThetaStar= (-beta_boost + cosTheta) / (1-beta_boost*cosTheta)
 
     DphiLL = dabs( Get_PHI(Mom(1:4,ferm_Z)) - Get_PHI(Mom(1:4,Aferm_Z))  )
     if( DphiLL.gt.Pi ) DphiLL=dabs(2d0*Pi-DphiLL)
