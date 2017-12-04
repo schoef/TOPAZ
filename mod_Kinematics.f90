@@ -9461,7 +9461,7 @@ integer :: tbar,t,Zbos,inLeft,inRight,realp,bbar,lepM,nubar,b,lepP,nu,qdn,qbup,q
 real(8) :: pT_ll,HT_jet,WithinCone(1:3),RLept,Minv_Z,sqrtshat
 integer :: iLept,jLept,jJet,JetIndex(1:4),LepIndex(1:3)
 real(8) :: mT2,pA(2:4),pB(2:4),pTInvis(2:4),mA,mB,mInvis! this is for MT2 calculation
-real(8) :: pseudoEta_Z,cosTheta,gamma_boost,beta_boost,cosThetaStar 
+real(8) :: pseudoEta_Z,cosTheta,gamma_boost,beta_boost,myCosThetaStar 
 
 applyPSCut = .false.
 if( Process.eq.81 ) return!  return for Z => photon
@@ -9852,7 +9852,7 @@ elseif( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58 ) then! set of observab
     cosTheta    = Get_CosAlpha(Mom(1:4,ferm_Z), MomZ(1:4)) 
     gamma_boost = dsqrt(1. + (pT_Z/Minv_Z)**2*cosh(pseudoEta_Z)**2)
     beta_boost  = dsqrt(1. - 1./gamma_boost**2)
-    cosThetaStar= (-beta_boost + cosTheta) / (1-beta_boost*cosTheta)
+    myCosThetaStar= (-beta_boost + cosTheta) / (1-beta_boost*cosTheta)
 
     DphiLL = dabs( Get_PHI(Mom(1:4,ferm_Z)) - Get_PHI(Mom(1:4,Aferm_Z))  )
     if( DphiLL.gt.Pi ) DphiLL=dabs(2d0*Pi-DphiLL)
@@ -9987,7 +9987,7 @@ elseif( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58 ) then! set of observab
     NBin(24) = WhichBin(24,DphiZt)
     NBin(25) = WhichBin(25,Dphittbar)
     NBin(26) = WhichBin(26,Minv_Z)
-    NBin(28) = WhichBin(28,CosThetaStar)
+    NBin(28) = WhichBin(28,myCosThetaStar)
 
 
     if( present(PObs) ) then
@@ -10018,7 +10018,7 @@ elseif( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58 ) then! set of observab
       PObs(24) = DphiZt
       PObs(25) = Dphittbar
       PObs(26) = Minv_Z
-      PObs(28) = CosThetaStar
+      PObs(28) = myCosThetaStar
     endif
 
 
