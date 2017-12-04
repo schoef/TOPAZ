@@ -698,16 +698,16 @@ ELSEIF( ObsSet.EQ.52 ) THEN! set of observables for ttb+Z ( di-lept. ttbar decay
 ELSEIF( ObsSet.EQ.53 ) THEN! set of observables for ttb+Z ( semi-lept. ttbar decays and di-lept. Z decay )
 
     Rsep_jet    = 0.4d0
-    pT_bjet_cut = 20d0*GeV
-    eta_bjet_cut= 2.0d0
-    pT_jet_cut  = 20d0*GeV
+    pT_bjet_cut = 40d0*GeV
+    eta_bjet_cut= 2.4d0
+    pT_jet_cut  = 40d0*GeV
     eta_jet_cut = 2.5d0
 
     pT_lep_cut  = 20d0*GeV
     pT_miss_cut = 20d0*GeV
-    eta_lep_cut = 2.5d0
-    Rsep_jetlep = 0.0d0
-    MZ_window   = 10d0*GeV
+    eta_lep_cut = 2.4d0
+    Rsep_jetlep = 0.4d0
+    MZ_window   = 15d0*GeV
 
 ELSEIF( ObsSet.EQ.54 ) THEN! set of observables for ttb+Z ( semi-lept. ttbar decays and di-lept. Z decay from 7 TeV CMS data)
 
@@ -3909,7 +3909,7 @@ ELSEIF( ObsSet.EQ.52 .or. ObsSet.EQ.55 ) THEN! set of observables for ttb+Z ( di
 ELSEIF( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58  ) THEN! set of observables for ttb+Z ( semi-lept. ttbar decays and di-lept. Z decay )
           if(abs(TopDecays).ne.4)  call Error("TopDecays needs to be 4")
           if(abs(ZDecays).ne.1 .and. abs(ZDecays).ne.11)    call Error("ZDecays needs to be 1 or 11")
-          NumHistograms = 27
+          NumHistograms = 28
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
@@ -4037,7 +4037,7 @@ ELSEIF( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58  ) THEN! set of observa
 
           Histo(18)%Info   = "CosAlpha*(Z,mu-)"
           Histo(18)%NBins  = 50
-          Histo(18)%BinSize= 0.25d0/4d0
+          Histo(18)%BinSize= 2d0/50d0 
           Histo(18)%LowVal = -1d0
           Histo(18)%SetScale= 1d0
 
@@ -4070,7 +4070,7 @@ ELSEIF( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58  ) THEN! set of observa
 
           Histo(23)%Info   = "CosAlpha*(Z,mu-) smeared"
           Histo(23)%NBins  = 50
-          Histo(23)%BinSize= 0.25d0/2d0
+          Histo(23)%BinSize= 2d0/50d0
           Histo(23)%LowVal = -1d0
           Histo(23)%SetScale= 1d0
           Histo(22)%BinSmearing=.true.
@@ -4104,6 +4104,12 @@ ELSEIF( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58  ) THEN! set of observa
           Histo(27)%BinSize= 10000d0*GeV
           Histo(27)%LowVal = 0d0
           Histo(27)%SetScale=0.01d0
+
+          Histo(28)%Info   = "CosThetaStar"
+          Histo(28)%NBins  = 50
+          Histo(28)%BinSize= 2d0/50d0 
+          Histo(28)%LowVal = -1d0
+          Histo(28)%SetScale= 1d0
 
 
 !       ELSEIF( ObsSet.EQ.54 .or. ObsSet.EQ.58 ) THEN
@@ -9455,7 +9461,7 @@ integer :: tbar,t,Zbos,inLeft,inRight,realp,bbar,lepM,nubar,b,lepP,nu,qdn,qbup,q
 real(8) :: pT_ll,HT_jet,WithinCone(1:3),RLept,Minv_Z,sqrtshat
 integer :: iLept,jLept,jJet,JetIndex(1:4),LepIndex(1:3)
 real(8) :: mT2,pA(2:4),pB(2:4),pTInvis(2:4),mA,mB,mInvis! this is for MT2 calculation
-
+real(8) :: pseudoEta_Z,cosTheta,gamma_boost,beta_boost,cosThetaStar 
 
 applyPSCut = .false.
 if( Process.eq.81 ) return!  return for Z => photon
@@ -9842,10 +9848,11 @@ elseif( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58 ) then! set of observab
     eta_atop = get_ETA(Mom(1:4,tbar))
 
 !   cosThetaStar 
-!   cosTheta    = The 3D angle between the leptons from the Z in the lab frame
-!   gamma_boost = sqrt(1. + (pT_Z/Minv_Z)**2*cosh(eta_Z)**2)
-!   beta_boost  = sqrt(1. - 1./gamma_boost**2)
-!   cosThetaStar= (-beta_boost + cosTheta) / (1-beta_boost*cosTheta)
+    pseudoEta_Z = get_PseudoETA(MomZ(1:4))
+    cosTheta    = Get_CosAlpha(Mom(1:4,ferm_Z), MomZ(1:4)) 
+    gamma_boost = dsqrt(1. + (pT_Z/Minv_Z)**2*cosh(pseudoEta_Z)**2)
+    beta_boost  = dsqrt(1. - 1./gamma_boost**2)
+    cosThetaStar= (-beta_boost + cosTheta) / (1-beta_boost*cosTheta)
 
     DphiLL = dabs( Get_PHI(Mom(1:4,ferm_Z)) - Get_PHI(Mom(1:4,Aferm_Z))  )
     if( DphiLL.gt.Pi ) DphiLL=dabs(2d0*Pi-DphiLL)
