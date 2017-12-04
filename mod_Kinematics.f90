@@ -9987,6 +9987,7 @@ elseif( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58 ) then! set of observab
     NBin(24) = WhichBin(24,DphiZt)
     NBin(25) = WhichBin(25,Dphittbar)
     NBin(26) = WhichBin(26,Minv_Z)
+    NBin(28) = WhichBin(28,CosThetaStar)
 
 
     if( present(PObs) ) then
@@ -10017,6 +10018,7 @@ elseif( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58 ) then! set of observab
       PObs(24) = DphiZt
       PObs(25) = Dphittbar
       PObs(26) = Minv_Z
+      PObs(28) = CosThetaStar
     endif
 
 
