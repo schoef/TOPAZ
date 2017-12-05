@@ -9852,7 +9852,7 @@ elseif( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58 ) then! set of observab
     cosTheta    = Get_CosAlpha(Mom(1:4,ferm_Z), MomZ(1:4)) 
     gamma_boost = dsqrt(1. + (pT_Z/Minv_Z)**2*cosh(pseudoEta_Z)**2)
     beta_boost  = dsqrt(1. - 1./gamma_boost**2)
-    myCosThetaStar= (-beta_boost + cosTheta) / (1-beta_boost*cosTheta)
+    myCosThetaStar= (-beta_boost + cosTheta) / (1. - beta_boost*cosTheta)
 
     DphiLL = dabs( Get_PHI(Mom(1:4,ferm_Z)) - Get_PHI(Mom(1:4,Aferm_Z))  )
     if( DphiLL.gt.Pi ) DphiLL=dabs(2d0*Pi-DphiLL)
