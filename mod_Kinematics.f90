@@ -3909,7 +3909,7 @@ ELSEIF( ObsSet.EQ.52 .or. ObsSet.EQ.55 ) THEN! set of observables for ttb+Z ( di
 ELSEIF( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58  ) THEN! set of observables for ttb+Z ( semi-lept. ttbar decays and di-lept. Z decay )
           if(abs(TopDecays).ne.4)  call Error("TopDecays needs to be 4")
           if(abs(ZDecays).ne.1 .and. abs(ZDecays).ne.11)    call Error("ZDecays needs to be 1 or 11")
-          NumHistograms = 28
+          NumHistograms = 31
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
@@ -3927,97 +3927,97 @@ ELSEIF( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58  ) THEN! set of observa
 !           Histo(2)%LowVal =  0d0*GeV
 !           Histo(2)%SetScale= 100d0
 
-          Histo(1)%Info   = "(pT_Top+pT_ATop)/2"
-          Histo(1)%NBins  = 4
-          Histo(1)%BinSize= 60d0*GeV
-          Histo(1)%LowVal = 40d0*GeV
+          Histo(1)%Info    = "pT_top_avg"
+          Histo(1)%NBins   = 30
+          Histo(1)%BinSize = 30d0*GeV
+          Histo(1)%LowVal  = 0d0*GeV
           Histo(1)%SetScale= 100d0
 
-          Histo(2)%Info   = "(y_ATop+y_Top)/2"
-          Histo(2)%NBins  = 40
-          Histo(2)%BinSize= 0.25d0
-          Histo(2)%LowVal =-5.0d0
+          Histo(2)%Info    = "y_top_avg"
+          Histo(2)%NBins   = 40
+          Histo(2)%BinSize = 0.25d0
+          Histo(2)%LowVal  = -5.0d0
           Histo(2)%SetScale= 1d0
 
-          Histo(3)%Info   = "pT(mu+)"
+          Histo(3)%Info   = "pT_lep_plus"
           Histo(3)%NBins  = 50
           Histo(3)%BinSize= 20d0*GeV
           Histo(3)%LowVal =  0d0*GeV
           Histo(3)%SetScale= 100d0
 
-          Histo(4)%Info   = "pT(b1)"
+          Histo(4)%Info   = "pT_b1"
           Histo(4)%NBins  = 50
           Histo(4)%BinSize= 20d0*GeV
           Histo(4)%LowVal =  0d0*GeV
           Histo(4)%SetScale= 100d0
 
-          Histo(5)%Info   = "pT(b2)"
+          Histo(5)%Info   = "pT_b2"
           Histo(5)%NBins  = 50
           Histo(5)%BinSize= 20d0*GeV
           Histo(5)%LowVal =  0d0*GeV
           Histo(5)%SetScale= 100d0
 
-          Histo(6)%Info   = "pT(j1)"
+          Histo(6)%Info   = "pT_j1"
           Histo(6)%NBins  = 50
           Histo(6)%BinSize= 20d0*GeV
           Histo(6)%LowVal =  0d0*GeV
           Histo(6)%SetScale= 100d0
 
-          Histo(7)%Info   = "pT(j2)"
+          Histo(7)%Info   = "pT_j2"
           Histo(7)%NBins  = 50
           Histo(7)%BinSize= 20d0*GeV
           Histo(7)%LowVal =  0d0*GeV
           Histo(7)%SetScale= 100d0
 
-          Histo(8)%Info   = "pT(miss)"
+          Histo(8)%Info   = "pT_miss"
           Histo(8)%NBins  = 50
           Histo(8)%BinSize= 20d0*GeV
           Histo(8)%LowVal =  0d0*GeV
           Histo(8)%SetScale= 100d0
 
-          Histo(9)%Info   = "y(lep+)"
+          Histo(9)%Info   = "y_lep_plus"
           Histo(9)%NBins  = 50
           Histo(9)%BinSize= 0.5d0
           Histo(9)%LowVal =-5.0d0
           Histo(9)%SetScale= 1d0
 
-          Histo(10)%Info   = "y(mu-)"
+          Histo(10)%Info   = "y_lep_minus"
           Histo(10)%NBins  = 20
           Histo(10)%BinSize= 0.5d0
           Histo(10)%LowVal =-5.0d0
           Histo(10)%SetScale= 1d0
 
-          Histo(11)%Info   = "y(mu+)"
+          Histo(11)%Info   = "y_lep_plus"
           Histo(11)%NBins  = 20
           Histo(11)%BinSize= 0.5d0
           Histo(11)%LowVal =-5.0d0
           Histo(11)%SetScale= 1d0
 
-          Histo(12)%Info   = "pT(Z)"
+          Histo(12)%Info   = "pT_Z"
           Histo(12)%NBins  = 50
           Histo(12)%BinSize= 20d0*GeV
           Histo(12)%LowVal =  0d0*GeV
           Histo(12)%SetScale= 100d0
 
-          Histo(13)%Info   = "y(Z)"
+          Histo(13)%Info   = "y_Z"
           Histo(13)%NBins  = 20
           Histo(13)%BinSize= 0.5d0
           Histo(13)%LowVal =-5.0d0
           Histo(13)%SetScale= 1d0
 
-          Histo(14)%Info   = "pT(top)"
+          Histo(14)%Info   = "pT_top"
           Histo(14)%NBins  = 50
           Histo(14)%BinSize= 20d0*GeV
           Histo(14)%LowVal =  0d0*GeV
           Histo(14)%SetScale= 100d0
 
-          Histo(15)%Info   = "y(top)"
+          Histo(15)%Info   = "y_top"
           Histo(15)%NBins  = 20
           Histo(15)%BinSize= 0.5d0
           Histo(15)%LowVal =-5.0d0
           Histo(15)%SetScale= 1d0
 
-          Histo(16)%Info   = "yFB(Top)"
+          Histo(16)%Info   = "yFB_Top"
           Histo(16)%NBins  = 2
           Histo(16)%BinSize= 5d0
           Histo(16)%LowVal =-5.0d0
@@ -4029,13 +4029,13 @@ ELSEIF( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58  ) THEN! set of observa
 !           Histo(16)%LowVal =-5.0d0
 !           Histo(16)%SetScale= 1d0
 
-          Histo(17)%Info   = "phi(mu-,mu+)"
+          Histo(17)%Info   = "phi(lep_plus,lep_minus)"
           Histo(17)%NBins  = 26
           Histo(17)%BinSize= 0.25d0/2d0
           Histo(17)%LowVal = 0d0
           Histo(17)%SetScale= 1d0
 
-          Histo(18)%Info   = "CosAlpha*(Z,mu-)"
+          Histo(18)%Info   = "CosAlphaStar(Z,lep_minus)"
           Histo(18)%NBins  = 50
           Histo(18)%BinSize= 2d0/50d0 
           Histo(18)%LowVal = -1d0
@@ -4053,63 +4053,71 @@ ELSEIF( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58  ) THEN! set of observa
           Histo(20)%LowVal = 0d0
           Histo(20)%SetScale= 1d0
 
-          Histo(21)%Info   = "N(jets)"
+          Histo(21)%Info   = "N_jets"
           Histo(21)%NBins  = 5
           Histo(21)%BinSize= 1d0
           Histo(21)%LowVal = 1d0
           Histo(21)%SetScale= 1d0
 
-          ! distributions 17..20 but with bin smearing and double the bin size
-          Histo(22)%Info   = "phi(mu-,mu+) smeared"
-          Histo(22)%NBins  = 26
-          Histo(22)%BinSize= 0.25d0/2d0
-          Histo(22)%LowVal = 0d0
+          Histo(22)%Info   = "CosThetaStar"
+          Histo(22)%NBins  = 50
+          Histo(22)%BinSize= 2d0/50d0 
+          Histo(22)%LowVal = -1d0
           Histo(22)%SetScale= 1d0
-          Histo(22)%BinSmearing=.true.
-          Histo(22)%SmearSigma=1d0
 
-          Histo(23)%Info   = "CosAlpha*(Z,mu-) smeared"
+          Histo(23)%Info   = "CosThetaStar_ptZ0To50"
           Histo(23)%NBins  = 50
-          Histo(23)%BinSize= 2d0/50d0
+          Histo(23)%BinSize= 2d0/50d0 
           Histo(23)%LowVal = -1d0
           Histo(23)%SetScale= 1d0
-          Histo(22)%BinSmearing=.true.
-          Histo(22)%SmearSigma=1d0
 
-          Histo(24)%Info   = "phi(Z,antit) smeared"
-          Histo(24)%NBins  = 26
-          Histo(24)%BinSize= 0.25d0/2d0
-          Histo(24)%LowVal = 0d0
+          Histo(24)%Info   = "CosThetaStar_ptZ50To100"
+          Histo(24)%NBins  = 50
+          Histo(24)%BinSize= 2d0/50d0 
+          Histo(24)%LowVal = -1d0
           Histo(24)%SetScale= 1d0
-          Histo(24)%BinSmearing=.true.
-          Histo(24)%SmearSigma=1d0
 
-          Histo(25)%Info   = "phi(t,antit) smeared"
-          Histo(25)%NBins  = 26
-          Histo(25)%BinSize= 0.25d0/2d0
-          Histo(25)%LowVal = 0d0
+          Histo(25)%Info   = "CosThetaStar_ptZ100To150"
+          Histo(25)%NBins  = 50
+          Histo(25)%BinSize= 2d0/50d0 
+          Histo(25)%LowVal = -1d0
           Histo(25)%SetScale= 1d0
-          Histo(25)%BinSmearing=.true.
-          Histo(25)%SmearSigma=1d0
-          
-          Histo(26)%Info   = "M(Z)"
-          Histo(26)%NBins  = 40
-          Histo(26)%BinSize= 2.5d0*GeV
-          Histo(26)%LowVal = 50d0*GeV
-          Histo(26)%SetScale= 100d0
-          Histo(26)%BinSmearing=.false.
 
-          Histo(27)%Info   = "<Ehat>"
-          Histo(27)%NBins  = 1
-          Histo(27)%BinSize= 10000d0*GeV
-          Histo(27)%LowVal = 0d0
-          Histo(27)%SetScale=0.01d0
+          Histo(26)%Info   = "CosThetaStar_ptZ150To200"
+          Histo(26)%NBins  = 50
+          Histo(26)%BinSize= 2d0/50d0 
+          Histo(26)%LowVal = -1d0
+          Histo(26)%SetScale= 1d0
 
-          Histo(28)%Info   = "CosThetaStar"
+          Histo(27)%Info   = "CosThetaStar_ptZ200To250"
+          Histo(27)%NBins  = 50
+          Histo(27)%BinSize= 2d0/50d0 
+          Histo(27)%LowVal = -1d0
+          Histo(27)%SetScale= 1d0
+
+          Histo(28)%Info   = "CosThetaStar_ptZ250To300"
           Histo(28)%NBins  = 50
           Histo(28)%BinSize= 2d0/50d0 
           Histo(28)%LowVal = -1d0
           Histo(28)%SetScale= 1d0
+
+          Histo(29)%Info   = "CosThetaStar_ptZ300To350"
+          Histo(29)%NBins  = 50
+          Histo(29)%BinSize= 2d0/50d0 
+          Histo(29)%LowVal = -1d0
+          Histo(29)%SetScale= 1d0
+
+          Histo(30)%Info   = "CosThetaStar_ptZ350To400"
+          Histo(30)%NBins  = 50
+          Histo(30)%BinSize= 2d0/50d0 
+          Histo(30)%LowVal = -1d0
+          Histo(30)%SetScale= 1d0
+
+          Histo(31)%Info   = "CosThetaStar_ptZ400"
+          Histo(31)%NBins  = 50
+          Histo(31)%BinSize= 2d0/50d0 
+          Histo(31)%LowVal = -1d0
+          Histo(31)%SetScale= 1d0
 
 
 !       ELSEIF( ObsSet.EQ.54 .or. ObsSet.EQ.58 ) THEN
@@ -9462,6 +9470,9 @@ real(8) :: pT_ll,HT_jet,WithinCone(1:3),RLept,Minv_Z,sqrtshat
 integer :: iLept,jLept,jJet,JetIndex(1:4),LepIndex(1:3)
 real(8) :: mT2,pA(2:4),pB(2:4),pTInvis(2:4),mA,mB,mInvis! this is for MT2 calculation
 real(8) :: pseudoEta_Z,cosTheta,gamma_boost,beta_boost,myCosThetaStar 
+real(8) :: myCosThetaStar_ptZ0To50,myCosThetaStar_ptZ50To100,myCosThetaStar_ptZ100To150
+real(8) :: myCosThetaStar_ptZ150To200,myCosThetaStar_ptZ200To250,myCosThetaStar_ptZ250To300
+real(8) :: myCosThetaStar_ptZ300To350,myCosThetaStar_ptZ350To400,myCosThetaStar_ptZ400
 
 applyPSCut = .false.
 if( Process.eq.81 ) return!  return for Z => photon
@@ -9853,7 +9864,24 @@ elseif( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58 ) then! set of observab
     gamma_boost = dsqrt(1. + (pT_Z/Minv_Z)**2*cosh(pseudoEta_Z)**2)
     beta_boost  = dsqrt(1. - 1./gamma_boost**2)
     myCosThetaStar= (-beta_boost + cosTheta) / (1. - beta_boost*cosTheta)
-
+    myCosThetaStar_ptZ0To50        = -999.
+    myCosThetaStar_ptZ50To100      = -999.
+    myCosThetaStar_ptZ100To150     = -999.
+    myCosThetaStar_ptZ150To200     = -999.
+    myCosThetaStar_ptZ200To250     = -999.
+    myCosThetaStar_ptZ250To300     = -999.
+    myCosThetaStar_ptZ300To350     = -999.
+    myCosThetaStar_ptZ350To400     = -999.
+    myCosThetaStar_ptZ400          = -999.
+    if (pT_Z.lt.  0.50)                      myCosThetaStar_ptZ0To50    = myCosThetaStar
+    if ((pT_Z.ge. 0.50).and.(pT_Z.lt.1.00))  myCosThetaStar_ptZ50To100  = myCosThetaStar
+    if ((pT_Z.ge. 1.00).and.(pT_Z.lt.1.50)) myCosThetaStar_ptZ100To150 = myCosThetaStar
+    if ((pT_Z.ge. 1.50).and.(pT_Z.lt.2.00)) myCosThetaStar_ptZ150To200 = myCosThetaStar
+    if ((pT_Z.ge. 2.00).and.(pT_Z.lt.2.50)) myCosThetaStar_ptZ200To250 = myCosThetaStar
+    if ((pT_Z.ge. 2.50).and.(pT_Z.lt.3.00)) myCosThetaStar_ptZ250To300 = myCosThetaStar
+    if ((pT_Z.ge. 3.00).and.(pT_Z.lt.3.50)) myCosThetaStar_ptZ300To350 = myCosThetaStar
+    if ((pT_Z.ge. 3.50).and.(pT_Z.lt.4.00)) myCosThetaStar_ptZ350To400 = myCosThetaStar
+    if ((pT_Z.ge. 4.00))                    myCosThetaStar_ptZ400      = myCosThetaStar
     DphiLL = dabs( Get_PHI(Mom(1:4,ferm_Z)) - Get_PHI(Mom(1:4,Aferm_Z))  )
     if( DphiLL.gt.Pi ) DphiLL=dabs(2d0*Pi-DphiLL)
 
@@ -9982,12 +10010,16 @@ elseif( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58 ) then! set of observab
     NBin(19) = WhichBin(19,DphiZt)
     NBin(20) = WhichBin(20,Dphittbar)
     NBin(21) = WhichBin(21,dble(NObsJet))
-    NBin(22) = WhichBin(22,DphiLL)
-    NBin(23) = WhichBin(23,CosTheta1)
-    NBin(24) = WhichBin(24,DphiZt)
-    NBin(25) = WhichBin(25,Dphittbar)
-    NBin(26) = WhichBin(26,Minv_Z)
-    NBin(28) = WhichBin(28,myCosThetaStar)
+    NBin(22) = WhichBin(22,myCosThetaStar)
+    NBin(23) = WhichBin(23,myCosThetaStar_ptZ0To50   )
+    NBin(24) = WhichBin(24,myCosThetaStar_ptZ50To100 )
+    NBin(25) = WhichBin(25,myCosThetaStar_ptZ100To150)
+    NBin(26) = WhichBin(26,myCosThetaStar_ptZ150To200)
+    NBin(27) = WhichBin(27,myCosThetaStar_ptZ200To250)
+    NBin(28) = WhichBin(28,myCosThetaStar_ptZ250To300)
+    NBin(29) = WhichBin(29,myCosThetaStar_ptZ300To350)
+    NBin(30) = WhichBin(30,myCosThetaStar_ptZ350To400)
+    NBin(31) = WhichBin(31,myCosThetaStar_ptZ400     )
 
 
     if( present(PObs) ) then
@@ -10013,12 +10045,16 @@ elseif( ObsSet.EQ.53 .or. ObsSet.EQ.56 .or. ObsSet.EQ.58 ) then! set of observab
       PObs(19) = DphiZt
       PObs(20) = Dphittbar
       PObs(21) = dble(NObsJet)
-      PObs(22) = DphiLL
-      PObs(23) = CosTheta1
-      PObs(24) = DphiZt
-      PObs(25) = Dphittbar
-      PObs(26) = Minv_Z
-      PObs(28) = myCosThetaStar
+      PObs(22) = myCosThetaStar 
+      PObs(23) = myCosThetaStar_ptZ0To50
+      PObs(24) = myCosThetaStar_ptZ50To100
+      PObs(25) = myCosThetaStar_ptZ100To150
+      PObs(26) = myCosThetaStar_ptZ150To200
+      PObs(27) = myCosThetaStar_ptZ200To250
+      PObs(28) = myCosThetaStar_ptZ250To300
+      PObs(29) = myCosThetaStar_ptZ300To350
+      PObs(30) = myCosThetaStar_ptZ350To400
+      PObs(31) = myCosThetaStar_ptZ400
     endif
 
 
